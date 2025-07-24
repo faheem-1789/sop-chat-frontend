@@ -91,7 +91,7 @@ function App() {
     showNotification("Uploading and processing file... This may take a moment.", "success");
 
     try {
-      const res = await axios.post(`${API_URL}/upload/`, form, {
+      const res = await axios.post(`https://sop-chat-backend.onrender.com/upload/`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       showNotification(res.data.message || "File processed successfully!", "success");
@@ -119,7 +119,7 @@ function App() {
     setLoadingSend(true);
 
     try {
-      const res = await axios.post(`${API_URL}/chat/`, { prompt: message });
+      const res = await axios.post(`https://sop-chat-backend.onrender.com/chat/`, { prompt: message });
       const assistantMsg = { role: "assistant", text: res.data.response };
       setChat((prev) => [...prev, userMsg, assistantMsg]);
     } catch (err) {
