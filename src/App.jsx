@@ -10,13 +10,13 @@ function App() {
     if (!file) return;
     const form = new FormData();
     form.append("file", file);
-    await axios.post("https://your-backend.onrender.com/upload/", form);
+    await axios.post("https://sop-chat-backend.onrender.com/upload/", form);
     alert("Uploaded & processed!");
   };
 
   const sendMessage = async () => {
     setChat([...chat, { role: "user", text: message }]);
-    const res = await axios.post("https://your-backend.onrender.com/chat/", {
+    const res = await axios.post("https://sop-chat-backend.onrender.com/chat/", {
       prompt: message,
     });
     setChat((prev) => [...prev, { role: "assistant", text: res.data.response }]);
