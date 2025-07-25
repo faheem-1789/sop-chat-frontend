@@ -5,21 +5,18 @@ import axios from "axios";
 
 // --- Helper Components ---
 
-// Icon for the upload button
 const UploadIcon = () => (
   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
   </svg>
 );
 
-// Icon for the send button
 const SendIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
   </svg>
 );
 
-// A simple notification component for feedback
 const Notification = ({ message, type, onDismiss }) => {
   if (!message) return null;
   const baseClasses = "p-4 rounded-lg mb-4 text-center text-white shadow-lg transition-opacity duration-300";
@@ -28,7 +25,7 @@ const Notification = ({ message, type, onDismiss }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onDismiss();
-    }, 5000); // Auto-dismiss after 5 seconds
+    }, 5000);
     return () => clearTimeout(timer);
   }, [message, onDismiss]);
 
@@ -55,10 +52,8 @@ function App() {
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // API endpoint - change this if your backend is hosted elsewhere
   const API_URL = "https://sop-chat-backend.onrender.com";
 
-  // Automatically scroll to the latest message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
@@ -91,19 +86,19 @@ function App() {
     showNotification("Uploading and processing file... This may take a moment.", "success");
 
     try {
-      const res = await axios.post(`https://sop-chat-backend.onrender.com/upload/`, form, {
+      const res = await axios.post(`${API_URL}/upload/`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       showNotification(res.data.message || "File processed successfully!", "success");
       setIsReadyToChat(true);
-      setChat([]); // Clear previous chat on new upload
+      setChat([]);
     } catch (err) {
       const errorMsg = err.response?.data?.detail || "Upload failed. Please check the file or try again.";
       showNotification(errorMsg);
       setIsReadyToChat(false);
     } finally {
       setLoadingUpload(false);
-      setFile(null); // Reset file input after upload
+      setFile(null);
       setFileName("");
       if(fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -114,18 +109,32 @@ function App() {
     if (!message.trim() || loadingSend) return;
     
     const userMsg = { role: "user", text: message };
+    // Add user message to chat immediately for a responsive feel
     setChat((prev) => [...prev, userMsg]);
     setMessage("");
     setLoadingSend(true);
 
+    // --- Prepare history for the backend ---
+    // The backend expects a list of tuples: [ (human_msg, ai_msg), ... ]
+    const history = chat.reduce((acc, current, index) => {
+        if (current.role === 'user' && chat[index + 1]?.role === 'assistant') {
+            acc.push([current.text, chat[index + 1].text]);
+        }
+        return acc;
+    }, []);
+
     try {
-      const res = await axios.post(`https://sop-chat-backend.onrender.com/chat/`, { prompt: message });
+      const res = await axios.post(`${API_URL}/chat/`, { 
+        prompt: message,
+        history: history // Send the formatted history
+      });
       const assistantMsg = { role: "assistant", text: res.data.response };
-      setChat((prev) => [...prev, userMsg, assistantMsg]);
+      setChat((prev) => [...prev, assistantMsg]);
     } catch (err) {
       const errorMsg = err.response?.data?.detail || "Failed to get response. Please try again.";
       const errorBubble = { role: "assistant", text: `Error: ${errorMsg}` };
-      setChat((prev) => [...prev, userMsg, errorBubble]);
+      // Replace the user's message with an error bubble in case of failure
+      setChat((prev) => [...prev.slice(0, -1), userMsg, errorBubble]);
     } finally {
       setLoadingSend(false);
     }
@@ -133,14 +142,12 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 font-sans">
-      {/* Header */}
       <header className="bg-white shadow-md p-4 z-10">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">SOP Chat Assistant</h1>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col">
         <Notification 
           message={notification.message} 
@@ -148,7 +155,6 @@ function App() {
           onDismiss={() => setNotification({ message: '', type: '' })}
         />
 
-        {/* Upload Section */}
         {!isReadyToChat && (
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">Get Started</h2>
@@ -170,10 +176,8 @@ function App() {
           </div>
         )}
 
-        {/* Chat Section */}
         {isReadyToChat && (
           <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden">
-            {/* Chat Messages */}
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
               {chat.length === 0 && (
                 <div className="text-center text-gray-500">
@@ -197,7 +201,6 @@ function App() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Message Input */}
             <div className="p-4 bg-gray-50 border-t">
               <form onSubmit={sendMessage} className="flex items-center gap-4">
                 <input
