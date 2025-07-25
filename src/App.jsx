@@ -104,11 +104,13 @@ function App() {
 
   useEffect(() => {
     const checkSopStatus = async () => {
+        console.log("Checking for existing SOP documents..."); // Debugging log
         try {
             const res = await axios.get(`${API_URL}/status`);
+            console.log("Status check response:", res.data); // See what the backend returns
             setSopExists(res.data.sop_exists);
         } catch (error) {
-            console.error("Could not check SOP status", error);
+            console.error("Could not check SOP status. This might be a backend or CORS issue.", error); // More descriptive error
             setSopExists(false);
         } finally {
             setLoadingStatus(false);
