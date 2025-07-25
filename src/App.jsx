@@ -11,6 +11,8 @@ const SourceIcon = () => <svg className="w-4 h-4 mr-1.5" fill="none" stroke="cur
 const DocumentTextIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
 const UserAvatar = () => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm">You</div>;
 const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
+const ChatIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>;
+
 
 // --- Helper Components ---
 
@@ -91,12 +93,29 @@ function App() {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [summaryText, setSummaryText] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [sopExists, setSopExists] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(true);
 
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
 
   const API_URL = "https://sop-chat-backend.onrender.com";
+
+  useEffect(() => {
+    const checkSopStatus = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/status`);
+            setSopExists(res.data.sop_exists);
+        } catch (error) {
+            console.error("Could not check SOP status", error);
+            setSopExists(false);
+        } finally {
+            setLoadingStatus(false);
+        }
+    };
+    checkSopStatus();
+  }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -145,6 +164,22 @@ function App() {
       setFile(null);
       setFileName("");
       if(fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const startChatWithExisting = async () => {
+    setLoadingUpload(true); // Reuse the same loader state
+    showNotification("Initializing chat with existing documents...", "success");
+    try {
+        await axios.post(`${API_URL}/initialize_chat`);
+        setIsReadyToChat(true);
+        setChat([]);
+    } catch (err) {
+        const errorMsg = err.response?.data?.detail || "Failed to initialize chat.";
+        showNotification(errorMsg, "error");
+        setIsReadyToChat(false);
+    } finally {
+        setLoadingUpload(false);
     }
   };
   
@@ -278,21 +313,43 @@ Summary:`;
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <img src="https://placehold.co/400x300/e0e7ff/6366f1?text=SOP+Assistant" alt="SOP Assistant illustration" className="w-80 h-60 object-cover rounded-2xl mb-8 shadow-lg" />
             <h2 className="text-3xl font-bold mb-4 text-slate-800">Welcome!</h2>
-            <p className="text-slate-500 mb-8 max-w-md">Upload an SOP file (.xlsx or .xls) to begin an intelligent conversation with your documents.</p>
-            <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg">
-                <label className="cursor-pointer bg-slate-100 text-slate-700 font-semibold py-3 px-5 rounded-lg hover:bg-slate-200 transition-colors w-full block mb-4">
-                  {fileName || "Choose a file..."}
-                  <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                </label>
-                <button
-                  className="w-full bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  onClick={uploadFile}
-                  disabled={loadingUpload || !file}
-                >
-                  <UploadIcon />
-                  {loadingUpload ? "Processing..." : "Upload & Start"}
-                </button>
-            </div>
+            
+            {loadingStatus ? (
+                <p className="text-slate-500 animate-pulse">Checking for existing documents...</p>
+            ) : (
+                <>
+                    <p className="text-slate-500 mb-8 max-w-md">Upload a new SOP file or start a session with your existing knowledge base.</p>
+                    <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg space-y-4">
+                        {sopExists && (
+                            <div>
+                                <button
+                                  className="w-full bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                  onClick={startChatWithExisting}
+                                  disabled={loadingUpload}
+                                >
+                                  <ChatIcon />
+                                  Start Chat with Existing SOPs
+                                </button>
+                                <div className="my-4 text-center text-slate-400 text-sm font-semibold">OR</div>
+                            </div>
+                        )}
+                        <div>
+                            <label className="cursor-pointer bg-slate-100 text-slate-700 font-semibold py-3 px-5 rounded-lg hover:bg-slate-200 transition-colors w-full block mb-4 text-center">
+                              {fileName || "Choose a new or updated file..."}
+                              <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                            </label>
+                            <button
+                              className="w-full bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              onClick={uploadFile}
+                              disabled={loadingUpload || !file}
+                            >
+                              <UploadIcon />
+                              {loadingUpload && !fileName ? "Initializing..." : loadingUpload && fileName ? "Processing..." : "Upload & Start"}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
           </div>
         )}
 
