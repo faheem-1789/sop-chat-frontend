@@ -234,19 +234,19 @@ const VerifyEmailPage = () => {
 
 const ProfilePage = ({ setPage }) => {
     const { user, userData, setUserData } = useAuth();
-    const [fullName, setFullName] = useState(userData?.fullName || '');
-    const [companyName, setCompanyName] = useState(userData?.companyName || '');
-    const [department, setDepartment] = useState(userData?.department || '');
-    const [contactNumber, setContactNumber] = useState(userData?.contactNumber || '');
+    const [fullName, setFullName] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [department, setDepartment] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (userData) {
-            setFullName(userData.fullName);
-            setCompanyName(userData.companyName);
-            setDepartment(userData.department);
-            setContactNumber(userData.contactNumber);
+            setFullName(userData.fullName || '');
+            setCompanyName(userData.companyName || '');
+            setDepartment(userData.department || '');
+            setContactNumber(userData.contactNumber || '');
         }
     }, [userData]);
 
@@ -270,34 +270,83 @@ const ProfilePage = ({ setPage }) => {
         <>
             <Header setPage={setPage} />
             <div className="p-8 max-w-4xl mx-auto w-full">
-                {/* ... Profile UI ... */}
+                 <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
+                    <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                        {isEditing ? 'Cancel' : 'Edit Profile'}
+                    </button>
+                </div>
+                {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
+                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                    <div className="flex items-center space-x-6 mb-8">
+                        <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
+                            <p className="text-slate-500">{userData?.email}</p>
+                        </div>
+                    </div>
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        {/* Form fields... */}
+                        {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
+                    </form>
+                </div>
+                
+                <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 className="text-xl font-bold mb-4 text-slate-800">Share Your Feedback</h3>
+                    <textarea placeholder="Tell us about your experience..." className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <button className="mt-4 px-5 py-2 bg-green-600 text-white rounded-md font-semibold">Submit Feedback</button>
+                </div>
             </div>
         </>
     );
 };
 
 const PricingPage = ({ setPage }) => {
-    // ... Pricing logic here...
+    const plans = [
+        { name: 'Basic', credits: 20, price: '1,500 PKR' },
+        { name: 'Standard', credits: 50, price: '5,000 PKR' },
+        { name: 'Premium', credits: 100, price: '9,000 PKR', popular: true },
+        { name: 'Ultra', credits: 'Unlimited', price: '25,000 PKR/mo' },
+    ];
+
     return (
         <>
             <Header setPage={setPage} />
-            {/* ... Pricing page UI ... */}
+            <div className="p-8 text-center">
+                <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
+                <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
+                <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                    {plans.map(plan => (
+                        <div key={plan.name} className={`p-6 border rounded-lg shadow-lg ${plan.popular ? 'border-indigo-500' : ''}`}>
+                            <h3 className="text-2xl font-bold">{plan.name}</h3>
+                            <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                            <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                            <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md">Purchase</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </>
     );
 };
 
 const ChatPage = ({ setPage }) => {
     const { user, userData, setUserData } = useAuth();
-    // All chat logic from the single-page version is now here
     const [file, setFile] = useState(null);
     const [fileName, setFileName] = useState("");
     const [chat, setChat] = useState([]);
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [loadingSend, setLoadingSend] = useState(false);
-    const [isReadyToChat, setIsReadyToChat] = useState(false); // Manages if a file has been processed in this session
+    const [isReadyToChat, setIsReadyToChat] = useState(false);
 
-    const API_URL = "https://sop-chat-backend.onrender.com"; // Your backend URL
+    const API_URL = "https://sop-chat-backend.onrender.com";
+
+    const chatEndRef = useRef(null);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chat]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -337,8 +386,11 @@ const ChatPage = ({ setPage }) => {
             setLoadingSend(false);
         }
     };
-
-    // ... other chat functions like uploadFile, handleFileChange etc. would go here
+    
+    // Placeholder for upload logic
+    const handleUpload = () => {
+        alert("Upload functionality to be connected to the backend.");
+    };
 
     if (userData && userData.credits <= 0) {
         setPage('pricing');
@@ -349,10 +401,18 @@ const ChatPage = ({ setPage }) => {
         <div className="flex flex-col h-full">
             <Header setPage={setPage} />
             <main className="flex-1 w-full mx-auto flex flex-col items-center">
-                {/* This is a simplified version of your previous chat UI */}
-                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4">
+                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                        {/* Chat messages map here */}
+                        {chat.map((c, i) => (
+                            <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
+                                {c.role === 'assistant' && <div>Assistant</div>}
+                                <div className={`p-4 rounded-2xl max-w-2xl ${c.role === "user" ? "bg-indigo-500 text-white" : "bg-slate-100"}`}>
+                                    {c.text}
+                                </div>
+                                {c.role === 'user' && <div>You</div>}
+                            </div>
+                        ))}
+                        <div ref={chatEndRef} />
                      </div>
                      <div className="p-4 bg-white/80 border-t">
                         <form onSubmit={handleSendMessage} className="flex items-center gap-3">
