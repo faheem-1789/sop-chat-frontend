@@ -369,50 +369,76 @@ const AdminPage = () => {
     const { user } = useApp();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filters, setFilters] = useState({ name: '', email: '', company: '', department: '' });
+
+    const fetchUsers = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            const token = await getIdToken(user);
+            const res = await axios.get("https://sop-chat-backend.onrender.com/admin/users", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUsers(res.data);
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            if (!user) return;
-            try {
-                const token = await getIdToken(user);
-                const res = await axios.get("https://sop-chat-backend.onrender.com/admin/users", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUsers(res.data);
-            } catch (error) {
-                console.error("Failed to fetch users:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchUsers();
     }, [user]);
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const filteredUsers = users.filter(u => 
+        (u.fullName || '').toLowerCase().includes(filters.name.toLowerCase()) &&
+        (u.email || '').toLowerCase().includes(filters.email.toLowerCase()) &&
+        (u.companyName || '').toLowerCase().includes(filters.company.toLowerCase()) &&
+        (u.department || '').toLowerCase().includes(filters.department.toLowerCase())
+    );
 
     return (
         <div className="flex flex-col h-full">
             <Header />
             <main className="flex-1 p-8">
                 <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <div className="grid grid-cols-4 gap-4">
+                        <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
+                    </div>
+                </div>
                 {loading ? <p>Loading users...</p> : (
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <table className="w-full text-left">
                             <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Company</th>
-                                    <th>Credits</th>
-                                    <th>Actions</th>
+                                <tr className="border-b">
+                                    <th className="p-2">Name</th>
+                                    <th className="p-2">Email</th>
+                                    <th className="p-2">Company</th>
+                                    <th className="p-2">Credits</th>
+                                    <th className="p-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map(u => (
-                                    <tr key={u.uid}>
-                                        <td>{u.fullName}</td>
-                                        <td>{u.email}</td>
-                                        <td>{u.companyName}</td>
-                                        <td>{u.credits}</td>
-                                        <td>{/* Edit/Delete Buttons */}</td>
+                                {filteredUsers.map(u => (
+                                    <tr key={u.uid} className="border-b hover:bg-slate-50">
+                                        <td className="p-2">{u.fullName}</td>
+                                        <td className="p-2">{u.email}</td>
+                                        <td className="p-2">{u.companyName}</td>
+                                        <td className="p-2">{u.credits}</td>
+                                        <td className="p-2 flex gap-2">
+                                            <button className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
+                                            <button className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
