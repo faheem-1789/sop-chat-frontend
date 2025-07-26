@@ -267,37 +267,58 @@ const ProfilePage = ({ setPage }) => {
     };
     
     return (
-        <>
+        <div className="flex flex-col h-full">
             <Header setPage={setPage} />
-            <div className="p-8 max-w-4xl mx-auto w-full">
-                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
-                    <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-                        {isEditing ? 'Cancel' : 'Edit Profile'}
-                    </button>
-                </div>
-                {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
-                <div className="bg-white p-8 rounded-2xl shadow-lg">
-                    <div className="flex items-center space-x-6 mb-8">
-                        <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
-                        <div>
-                            <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
-                            <p className="text-slate-500">{userData?.email}</p>
-                        </div>
+            <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
+                <div className="w-full max-w-4xl">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
+                        <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                            {isEditing ? 'Cancel' : 'Edit Profile'}
+                        </button>
                     </div>
-                    <form onSubmit={handleUpdate} className="space-y-4">
-                        {/* Form fields... */}
-                        {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
-                    </form>
+                    {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
+                    <div className="bg-white p-8 rounded-2xl shadow-lg">
+                        <div className="flex items-center space-x-6 mb-8">
+                            <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
+                            <div>
+                                <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
+                                <p className="text-slate-500">{userData?.email}</p>
+                            </div>
+                        </div>
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Department</label>
+                                <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Company</label>
+                                <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                            {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
+                        </form>
+                    </div>
+                    
+                    <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 className="text-xl font-bold mb-4 text-slate-800">Share Your Feedback</h3>
+                        <textarea placeholder="Tell us about your experience..." className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button className="mt-4 px-5 py-2 bg-green-600 text-white rounded-md font-semibold">Submit Feedback</button>
+                    </div>
                 </div>
-                
-                <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
-                    <h3 className="text-xl font-bold mb-4 text-slate-800">Share Your Feedback</h3>
-                    <textarea placeholder="Tell us about your experience..." className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"></textarea>
-                    <button className="mt-4 px-5 py-2 bg-green-600 text-white rounded-md font-semibold">Submit Feedback</button>
-                </div>
-            </div>
-        </>
+            </main>
+        </div>
     );
 };
 
@@ -310,23 +331,25 @@ const PricingPage = ({ setPage }) => {
     ];
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             <Header setPage={setPage} />
-            <div className="p-8 text-center">
-                <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-                <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
-                <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                    {plans.map(plan => (
-                        <div key={plan.name} className={`p-6 border rounded-lg shadow-lg ${plan.popular ? 'border-indigo-500' : ''}`}>
-                            <h3 className="text-2xl font-bold">{plan.name}</h3>
-                            <p className="text-4xl font-extrabold my-4">{plan.price}</p>
-                            <p className="text-lg font-semibold">{plan.credits} Credits</p>
-                            <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md">Purchase</button>
-                        </div>
-                    ))}
+            <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
+                    <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
+                    <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                        {plans.map(plan => (
+                            <div key={plan.name} className={`p-6 border rounded-lg shadow-lg ${plan.popular ? 'border-indigo-500' : ''}`}>
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                                <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md">Purchase</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-        </>
+            </main>
+        </div>
     );
 };
 
@@ -338,11 +361,31 @@ const ChatPage = ({ setPage }) => {
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [loadingSend, setLoadingSend] = useState(false);
-    const [isReadyToChat, setIsReadyToChat] = useState(false);
-
+    const [sopExists, setSopExists] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState(true);
+    
     const API_URL = "https://sop-chat-backend.onrender.com";
-
     const chatEndRef = useRef(null);
+
+    useEffect(() => {
+        const checkSopStatus = async () => {
+            if (!user) return;
+            setLoadingStatus(true);
+            try {
+                const token = await getIdToken(user);
+                const res = await axios.get(`${API_URL}/status`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setSopExists(res.data.sop_exists);
+            } catch (error) {
+                console.error("Could not check SOP status", error);
+                setSopExists(false);
+            } finally {
+                setLoadingStatus(false);
+            }
+        };
+        checkSopStatus();
+    }, [user]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -385,11 +428,6 @@ const ChatPage = ({ setPage }) => {
         } finally {
             setLoadingSend(false);
         }
-    };
-    
-    // Placeholder for upload logic
-    const handleUpload = () => {
-        alert("Upload functionality to be connected to the backend.");
     };
 
     if (userData && userData.credits <= 0) {
