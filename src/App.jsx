@@ -39,6 +39,9 @@ const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentCol
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
 const UserAvatar = ({ userData }) => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
 const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
+const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
+const DeleteIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
+
 
 // --- Application State Context ---
 const AppContext = createContext();
@@ -60,10 +63,9 @@ const AppProvider = ({ children }) => {
                 if (userDoc.exists()) {
                     setUserData(userDoc.data());
                 }
-                // Don't reset chat here to maintain state across refreshes
             } else {
                 setUserData(null);
-                setChat([]); // Clear chat on logout
+                setChat([]);
             }
             setLoading(false);
         });
@@ -358,6 +360,65 @@ const PricingPage = () => {
                         ))}
                     </div>
                 </div>
+            </main>
+        </div>
+    );
+};
+
+const AdminPage = () => {
+    const { user } = useApp();
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (!user) return;
+            try {
+                const token = await getIdToken(user);
+                const res = await axios.get("https://sop-chat-backend.onrender.com/admin/users", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setUsers(res.data);
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsers();
+    }, [user]);
+
+    return (
+        <div className="flex flex-col h-full">
+            <Header />
+            <main className="flex-1 p-8">
+                <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+                {loading ? <p>Loading users...</p> : (
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Company</th>
+                                    <th>Credits</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map(u => (
+                                    <tr key={u.uid}>
+                                        <td>{u.fullName}</td>
+                                        <td>{u.email}</td>
+                                        <td>{u.companyName}</td>
+                                        <td>{u.credits}</td>
+                                        <td>{/* Edit/Delete Buttons */}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </main>
         </div>
     );
