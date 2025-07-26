@@ -30,7 +30,7 @@ const firebaseConfig = {
   messagingSenderId: "672105722476",
   appId: "1:672105722476:web:1d88461fdf6631b168de49",
   measurementId: "G-NB4Y7WGDKM",
-  databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com" 
+  databaseURL: "https://console.firebase.google.com/u/0/project/sop-assistant-9dc2a/firestore/databases/-default-/data/~2Fusers" 
 };
 
 // Initialize Firebase
