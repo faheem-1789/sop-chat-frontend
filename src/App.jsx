@@ -34,6 +34,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// --- SVG Icons for a more polished look ---
+const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
+const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
+const BrainIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>;
+const SourceIcon = () => <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const DocumentTextIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const UserAvatar = () => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">You</div>;
+const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
+
 // --- Authentication Context ---
 const AuthContext = createContext();
 
@@ -366,6 +375,7 @@ const ChatPage = ({ setPage }) => {
     
     const API_URL = "https://sop-chat-backend.onrender.com";
     const chatEndRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         const checkSopStatus = async () => {
@@ -390,6 +400,38 @@ const ChatPage = ({ setPage }) => {
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chat]);
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+            setFileName(selectedFile.name);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!file || !user) return;
+        setLoadingUpload(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const token = await getIdToken(user);
+            await axios.post(`${API_URL}/upload/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setSopExists(true); // Assume success, refresh state
+            setFileName("");
+            setFile(null);
+        } catch (error) {
+            console.error("File upload failed", error);
+        } finally {
+            setLoadingUpload(false);
+        }
+    };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -441,13 +483,28 @@ const ChatPage = ({ setPage }) => {
             <main className="flex-1 w-full mx-auto flex flex-col items-center">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                        {!sopExists && !loadingStatus && (
+                            <div className="text-center p-8 bg-slate-100 rounded-lg">
+                                <h3 className="font-semibold text-lg mb-2">Welcome!</h3>
+                                <p className="text-slate-600 mb-4">To get started, please upload an SOP document.</p>
+                                <div className="flex items-center justify-center gap-2">
+                                    <label className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                      {fileName || "Choose a file..."}
+                                      <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                                    </label>
+                                    <button onClick={handleUpload} disabled={!file || loadingUpload} className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                        {loadingUpload ? "Uploading..." : "Upload"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {chat.map((c, i) => (
                             <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
-                                {c.role === 'assistant' && <div>Assistant</div>}
-                                <div className={`p-4 rounded-2xl max-w-2xl ${c.role === "user" ? "bg-indigo-500 text-white" : "bg-slate-100"}`}>
+                                {c.role === 'assistant' && <AssistantAvatar />}
+                                <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
                                     {c.text}
                                 </div>
-                                {c.role === 'user' && <div>You</div>}
+                                {c.role === 'user' && <UserAvatar />}
                             </div>
                         ))}
                         <div ref={chatEndRef} />
@@ -457,10 +514,13 @@ const ChatPage = ({ setPage }) => {
                             <input
                               value={message}
                               onChange={(e) => setMessage(e.target.value)}
-                              className="border border-slate-300 p-4 w-full rounded-full"
-                              placeholder="Ask a question..."
+                              className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
+                              placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
+                              disabled={!sopExists || loadingSend}
                             />
-                            <button type="submit" className="bg-indigo-600 text-white p-3 rounded-full">Send</button>
+                            <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50">
+                                <SendIcon />
+                            </button>
                         </form>
                          <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {userData?.credits}</p>
                      </div>
