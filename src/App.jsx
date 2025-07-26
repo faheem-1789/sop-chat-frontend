@@ -60,10 +60,10 @@ const AppProvider = ({ children }) => {
                 if (userDoc.exists()) {
                     setUserData(userDoc.data());
                 }
-                setChat([]);
-                setSopExists(false);
+                // Don't reset chat here to maintain state across refreshes
             } else {
                 setUserData(null);
+                setChat([]); // Clear chat on logout
             }
             setLoading(false);
         });
