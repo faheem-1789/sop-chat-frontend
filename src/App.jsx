@@ -6,6 +6,7 @@ import axios from "axios";
 // import { initializeApp } from "firebase/app";
 // import { getAuth, ... } from "firebase/auth";
 // import { getFirestore, ... } from "firebase/firestore";
+// import { getDatabase, ... } from "firebase/database";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { 
     getAuth, 
@@ -17,6 +18,8 @@ import {
     getIdToken
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getDatabase, ref, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
@@ -26,13 +29,16 @@ const firebaseConfig = {
   storageBucket: "sop-assistant-9dc2a.appspot.com",
   messagingSenderId: "672105722476",
   appId: "1:672105722476:web:1d88461fdf6631b168de49",
-  measurementId: "G-NB4Y7WGDKM"
+  measurementId: "G-NB4Y7WGDKM",
+  // IMPORTANT: Add your Realtime Database URL here
+  databaseURL: "https://console.firebase.google.com/u/0/project/sop-assistant-9dc2a/firestore/databases/-default-/data/~2Fusers" 
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const rtdb = getDatabase(app);
 
 // --- SVG Icons ---
 const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
@@ -63,6 +69,27 @@ const AppProvider = ({ children }) => {
                 if (userDoc.exists()) {
                     setUserData(userDoc.data());
                 }
+                
+                // --- Realtime Presence Logic ---
+                const userStatusRef = ref(rtdb, `/status/${firebaseUser.uid}`);
+                const isOfflineForDatabase = {
+                    state: 'offline',
+                    last_changed: serverTimestamp(),
+                };
+                const isOnlineForDatabase = {
+                    state: 'online',
+                    last_changed: serverTimestamp(),
+                };
+
+                onValue(ref(rtdb, '.info/connected'), (snapshot) => {
+                    if (snapshot.val() === false) {
+                        return;
+                    }
+                    onDisconnect(userStatusRef).set(isOfflineForDatabase).then(() => {
+                        set(userStatusRef, isOnlineForDatabase);
+                    });
+                });
+
             } else {
                 setUserData(null);
                 setChat([]);
@@ -421,6 +448,7 @@ const AdminPage = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b">
+                                    <th className="p-2">Status</th>
                                     <th className="p-2">Name</th>
                                     <th className="p-2">Email</th>
                                     <th className="p-2">Company</th>
@@ -431,6 +459,13 @@ const AdminPage = () => {
                             <tbody>
                                 {filteredUsers.map(u => (
                                     <tr key={u.uid} className="border-b hover:bg-slate-50">
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {u.status}
+                                            </span>
+                                        </td>
                                         <td className="p-2">{u.fullName}</td>
                                         <td className="p-2">{u.email}</td>
                                         <td className="p-2">{u.companyName}</td>
