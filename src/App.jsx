@@ -29,7 +29,6 @@ const firebaseConfig = {
   storageBucket: "sop-assistant-9dc2a.appspot.com",
   messagingSenderId: "672105722476",
   appId: "1:672105722476:web:1d88461fdf6631b168de49",
-  measurementId: "G-NB4Y7WGDKM",
   databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com" 
 };
 
@@ -69,7 +68,6 @@ const AppProvider = ({ children }) => {
                     setUserData(userDoc.data());
                 }
                 
-                // --- Realtime Presence Logic ---
                 try {
                     const userStatusRef = ref(rtdb, `/status/${firebaseUser.uid}`);
                     const isOfflineForDatabase = {
@@ -400,11 +398,13 @@ const AdminPage = () => {
     const { user } = useApp();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [filters, setFilters] = useState({ name: '', email: '', company: '', department: '' });
 
     const fetchUsers = async () => {
         if (!user) return;
         setLoading(true);
+        setError('');
         try {
             const token = await getIdToken(user);
             const res = await axios.get("https://sop-chat-backend.onrender.com/admin/users", {
@@ -413,6 +413,7 @@ const AdminPage = () => {
             setUsers(res.data);
         } catch (error) {
             console.error("Failed to fetch users:", error);
+            setError("Could not load user data. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -447,7 +448,7 @@ const AdminPage = () => {
                         <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
                     </div>
                 </div>
-                {loading ? <p>Loading users...</p> : (
+                {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <table className="w-full text-left">
                             <thead>
@@ -461,7 +462,7 @@ const AdminPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredUsers.map(u => (
+                                {filteredUsers.length > 0 ? filteredUsers.map(u => (
                                     <tr key={u.uid} className="border-b hover:bg-slate-50">
                                         <td className="p-2">
                                             <span className={`px-2 py-1 text-xs rounded-full ${
@@ -479,7 +480,11 @@ const AdminPage = () => {
                                             <button className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center p-4 text-slate-500">No users found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
