@@ -34,19 +34,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- SVG Icons for a more polished look ---
+// --- SVG Icons ---
 const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
 const UserAvatar = ({ userData }) => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
 const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
 
-// --- Authentication Context ---
-const AuthContext = createContext();
+// --- Application State Context ---
+const AppContext = createContext();
 
-const AuthProvider = ({ children }) => {
+const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState('login');
+    const [chat, setChat] = useState([]); // Chat history is now global
+    const [sopExists, setSopExists] = useState(false); // SOP status is now global
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -57,6 +60,9 @@ const AuthProvider = ({ children }) => {
                 if (userDoc.exists()) {
                     setUserData(userDoc.data());
                 }
+                // Reset chat for new user session
+                setChat([]);
+                setSopExists(false);
             } else {
                 setUserData(null);
             }
@@ -65,26 +71,25 @@ const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
-    const value = { user, userData, setUserData, loading };
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    const value = { user, userData, setUserData, loading, page, setPage, chat, setChat, sopExists, setSopExists };
+    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-const useAuth = () => {
-    return useContext(AuthContext);
+const useApp = () => {
+    return useContext(AppContext);
 };
 
 // --- Main App Component (Router) ---
 export default function App() {
     return (
-        <AuthProvider>
+        <AppProvider>
             <AppRouter />
-        </AuthProvider>
+        </AppProvider>
     );
 }
 
 const AppRouter = () => {
-    const { user, loading } = useAuth();
-    const [page, setPage] = useState('login'); // login, signup, chat, profile, pricing
+    const { user, loading, page, setPage } = useApp();
 
     useEffect(() => {
         if (!loading) {
@@ -111,9 +116,9 @@ const AppRouter = () => {
 
         switch (page) {
             case 'signup': return <SignUpPage setPage={setPage} />;
-            case 'chat': return <ChatPage setPage={setPage} />;
-            case 'profile': return <ProfilePage setPage={setPage} />;
-            case 'pricing': return <PricingPage setPage={setPage} />;
+            case 'chat': return <ChatPage />;
+            case 'profile': return <ProfilePage />;
+            case 'pricing': return <PricingPage />;
             case 'login':
             default: return <LoginPage setPage={setPage} />;
         }
@@ -238,8 +243,8 @@ const VerifyEmailPage = () => {
     );
 };
 
-const ProfilePage = ({ setPage }) => {
-    const { user, userData, setUserData } = useAuth();
+const ProfilePage = () => {
+    const { user, userData, setUserData } = useApp();
     const [fullName, setFullName] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [department, setDepartment] = useState('');
@@ -274,7 +279,7 @@ const ProfilePage = ({ setPage }) => {
     
     return (
         <div className="flex flex-col h-full">
-            <Header setPage={setPage} />
+            <Header />
             <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
                 <div className="w-full max-w-4xl">
                     <div className="flex justify-between items-center mb-6">
@@ -328,7 +333,7 @@ const ProfilePage = ({ setPage }) => {
     );
 };
 
-const PricingPage = ({ setPage }) => {
+const PricingPage = () => {
     const plans = [
         { name: 'Basic', credits: 20, price: '1,500 PKR' },
         { name: 'Standard', credits: 50, price: '5,000 PKR' },
@@ -338,7 +343,7 @@ const PricingPage = ({ setPage }) => {
 
     return (
         <div className="flex flex-col h-full">
-            <Header setPage={setPage} />
+            <Header />
             <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
@@ -359,15 +364,13 @@ const PricingPage = ({ setPage }) => {
     );
 };
 
-const ChatPage = ({ setPage }) => {
-    const { user, userData, setUserData } = useAuth();
+const ChatPage = () => {
+    const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, setPage } = useApp();
     const [file, setFile] = useState(null);
     const [fileName, setFileName] = useState("");
-    const [chat, setChat] = useState([]);
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [loadingSend, setLoadingSend] = useState(false);
-    const [sopExists, setSopExists] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
     
     const API_URL = "https://sop-chat-backend.onrender.com";
@@ -392,7 +395,7 @@ const ChatPage = ({ setPage }) => {
             }
         };
         checkSopStatus();
-    }, [user]);
+    }, [user, setSopExists]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -478,7 +481,7 @@ const ChatPage = ({ setPage }) => {
 
     return (
         <div className="flex flex-col h-full">
-            <Header setPage={setPage} />
+            <Header />
             <main className="flex-1 w-full mx-auto flex flex-col items-center">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -546,9 +549,11 @@ const ChatPage = ({ setPage }) => {
     );
 };
 
-const Header = ({ setPage }) => {
+const Header = () => {
+    const { setPage } = useApp();
     const handleLogout = async () => {
         await signOut(auth);
+        setPage('login'); // Explicitly navigate to login on logout
     };
 
     return (
