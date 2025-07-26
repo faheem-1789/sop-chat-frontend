@@ -37,10 +37,7 @@ const db = getFirestore(app);
 // --- SVG Icons for a more polished look ---
 const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
-const BrainIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>;
-const SourceIcon = () => <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-const DocumentTextIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-const UserAvatar = () => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">You</div>;
+const UserAvatar = ({ userData }) => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
 const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
 
 // --- Authentication Context ---
@@ -423,11 +420,13 @@ const ChatPage = ({ setPage }) => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setSopExists(true); // Assume success, refresh state
+            setSopExists(true);
             setFileName("");
             setFile(null);
+            setChat([{role: 'assistant', text: `Successfully processed ${fileName}. You can now ask questions about it.`}]);
         } catch (error) {
             console.error("File upload failed", error);
+            setChat([{role: 'assistant', text: "Sorry, there was an error processing your file."}]);
         } finally {
             setLoadingUpload(false);
         }
@@ -483,9 +482,11 @@ const ChatPage = ({ setPage }) => {
             <main className="flex-1 w-full mx-auto flex flex-col items-center">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                        {!sopExists && !loadingStatus && (
+                        {loadingStatus ? (
+                             <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
+                        ) : !sopExists ? (
                             <div className="text-center p-8 bg-slate-100 rounded-lg">
-                                <h3 className="font-semibold text-lg mb-2">Welcome!</h3>
+                                <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
                                 <p className="text-slate-600 mb-4">To get started, please upload an SOP document.</p>
                                 <div className="flex items-center justify-center gap-2">
                                     <label className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
@@ -497,16 +498,31 @@ const ChatPage = ({ setPage }) => {
                                     </button>
                                 </div>
                             </div>
-                        )}
+                        ) : chat.length === 0 ? (
+                             <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
+                        ) : null}
+                        
                         {chat.map((c, i) => (
                             <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
                                 {c.role === 'assistant' && <AssistantAvatar />}
                                 <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
                                     {c.text}
                                 </div>
-                                {c.role === 'user' && <UserAvatar />}
+                                {c.role === 'user' && <UserAvatar userData={userData} />}
                             </div>
                         ))}
+                         {loadingSend && (
+                            <div className="flex items-start gap-4">
+                                <AssistantAvatar />
+                                <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
+                                    <div className="flex items-center space-x-1">
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div ref={chatEndRef} />
                      </div>
                      <div className="p-4 bg-white/80 border-t">
