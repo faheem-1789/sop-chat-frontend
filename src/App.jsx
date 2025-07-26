@@ -30,7 +30,7 @@ const firebaseConfig = {
   messagingSenderId: "672105722476",
   appId: "1:672105722476:web:1d88461fdf6631b168de49",
   measurementId: "G-NB4Y7WGDKM",
-  databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com/" 
+  databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com" 
 };
 
 // Initialize Firebase
@@ -70,25 +70,29 @@ const AppProvider = ({ children }) => {
                 }
                 
                 // --- Realtime Presence Logic ---
-                const userStatusRef = ref(rtdb, `/status/${firebaseUser.uid}`);
-                const isOfflineForDatabase = {
-                    state: 'offline',
-                    last_changed: serverTimestamp(),
-                };
-                const isOnlineForDatabase = {
-                    state: 'online',
-                    last_changed: serverTimestamp(),
-                };
+                try {
+                    const userStatusRef = ref(rtdb, `/status/${firebaseUser.uid}`);
+                    const isOfflineForDatabase = {
+                        state: 'offline',
+                        last_changed: serverTimestamp(),
+                    };
+                    const isOnlineForDatabase = {
+                        state: 'online',
+                        last_changed: serverTimestamp(),
+                    };
 
-                const connectedRef = ref(rtdb, '.info/connected');
-                onValue(connectedRef, (snapshot) => {
-                    if (snapshot.val() === false) {
-                        return;
-                    }
-                    onDisconnect(userStatusRef).set(isOfflineForDatabase).then(() => {
-                        set(userStatusRef, isOnlineForDatabase);
+                    const connectedRef = ref(rtdb, '.info/connected');
+                    onValue(connectedRef, (snapshot) => {
+                        if (snapshot.val() === false) {
+                            return;
+                        }
+                        onDisconnect(userStatusRef).set(isOfflineForDatabase).then(() => {
+                            set(userStatusRef, isOnlineForDatabase);
+                        });
                     });
-                });
+                } catch (error) {
+                    console.error("Realtime Database connection failed. Please check your databaseURL in the firebaseConfig.", error);
+                }
 
             } else {
                 setUserData(null);
