@@ -38,7 +38,15 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
 
-// --- SVG Icons ---
+// --- SVG Icons & Logo ---
+const Logo = () => (
+    <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="128" height="128" rx="24" fill="#4338CA"/>
+        <path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/>
+        <path d="M56 48H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M56 60H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/>
+    </svg>
+);
 const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
 const UserAvatar = ({ userData }) => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
@@ -318,7 +326,7 @@ const ProfilePage = () => {
             setSopExists(false);
             setChat([]);
             setShowConfirm(false);
-            setPage('chat'); // Navigate back to chat which will now show the upload screen
+            setPage('chat');
         } catch (error) {
             console.error("Failed to clear memory:", error);
             setMessage("Error clearing memory. Please try again.");
@@ -339,7 +347,36 @@ const ProfilePage = () => {
                     </div>
                     {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
                     <div className="bg-white p-8 rounded-2xl shadow-lg">
-                        {/* ... Profile form ... */}
+                        <div className="flex items-center space-x-6 mb-8">
+                            <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
+                            <div>
+                                <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
+                                <p className="text-slate-500">{userData?.email}</p>
+                            </div>
+                        </div>
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Department</label>
+                                <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Company</label>
+                                <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-slate-50" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                            </div>
+                            {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
+                        </form>
                     </div>
                     
                     <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
