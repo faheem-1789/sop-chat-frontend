@@ -692,13 +692,14 @@ const Header = () => {
     return (
         <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-10 sticky top-0">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
                 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="128" height="128" rx="24" fill="#4338CA"/>
                         <path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/>
                         <path d="M56 48H72" stroke="#4338CA" stroke-width="6" stroke-linecap="round"/>
                         <path d="M56 60H72" stroke="#4338CA" stroke-width="6" stroke-linecap="round"/>
                     </svg>
+                 <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
+
                 <nav className="flex items-center space-x-6">
                     {userData?.role === 'admin' && (
                         <button onClick={() => setPage('admin')} className="font-semibold text-red-600 hover:text-red-700">Admin</button>
