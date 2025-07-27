@@ -615,8 +615,8 @@ const ChatPage = () => {
     return (
         <div className="flex flex-col h-full">
             <Header />
-            <main className="flex-1 w-full mx-auto flex flex-col items-center">
-                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg">
+            <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
+                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                         {loadingStatus ? (
                              <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
