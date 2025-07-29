@@ -69,7 +69,30 @@ const AppProvider = ({ children }) => {
                     setUserData(userDoc.data());
                 }
                 
-                // Presence logic moved to a separate effect to avoid blocking render
+                try {
+                    const userStatusRef = ref(rtdb, `/status/${firebaseUser.uid}`);
+                    const isOfflineForDatabase = {
+                        state: 'offline',
+                        last_changed: dbServerTimestamp(),
+                    };
+                    const isOnlineForDatabase = {
+                        state: 'online',
+                        last_changed: dbServerTimestamp(),
+                    };
+
+                    const connectedRef = ref(rtdb, '.info/connected');
+                    onValue(connectedRef, (snapshot) => {
+                        if (snapshot.val() === false) {
+                            return;
+                        }
+                        onDisconnect(userStatusRef).set(isOfflineForDatabase).then(() => {
+                            set(userStatusRef, isOnlineForDatabase);
+                        });
+                    });
+                } catch (error) {
+                    console.error("Realtime Database connection failed. Please check your databaseURL in the firebaseConfig.", error);
+                }
+
             } else {
                 setUserData(null);
                 setChat([]);
