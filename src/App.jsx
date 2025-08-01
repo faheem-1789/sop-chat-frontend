@@ -489,15 +489,41 @@ const AdminPage = () => {
             <Header />
             <main className="flex-1 p-8">
                 <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
-                {/* ... (Filter UI is the same) */}
+                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <div className="grid grid-cols-4 gap-4">
+                        <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
+                    </div>
+                </div>
                 {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <table className="w-full text-left">
-                            {/* ... (Table header is the same) */}
+                            <thead>
+                                <tr className="border-b">
+                                    <th className="p-2">Status</th>
+                                    <th className="p-2">Name</th>
+                                    <th className="p-2">Email</th>
+                                    <th className="p-2">Company</th>
+                                    <th className="p-2">Credits</th>
+                                    <th className="p-2">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 {filteredUsers.length > 0 ? filteredUsers.map(u => (
                                     <tr key={u.uid} className="border-b hover:bg-slate-50">
-                                        {/* ... (Table data cells are the same) */}
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {u.status}
+                                            </span>
+                                        </td>
+                                        <td className="p-2">{u.fullName}</td>
+                                        <td className="p-2">{u.email}</td>
+                                        <td className="p-2">{u.companyName}</td>
+                                        <td className="p-2">{u.credits}</td>
                                         <td className="p-2 flex gap-2">
                                             <button onClick={() => handleEdit(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
                                             <button onClick={() => handleDelete(u.uid)} className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
