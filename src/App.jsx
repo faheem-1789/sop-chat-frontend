@@ -724,29 +724,33 @@ const ChatPage = () => {
         if (files.length === 0 || !user) return;
         setLoadingUpload(true);
         const wasInitialUpload = !sopExists;
+        const totalFiles = files.length;
+        const uploadedFiles = [];
 
         try {
             const token = await getIdToken(user);
-            await Promise.all(files.map(file => {
+            // Use a for...of loop for sequential uploads
+            for (const file of files) {
                 const formData = new FormData();
                 formData.append('file', file);
-                return axios.post(`${API_URL}/upload/`, formData, {
+                await axios.post(`${API_URL}/upload/`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
                 });
-            }));
+                uploadedFiles.push(file.name);
+            }
             
             setSopExists(true);
             setFiles([]);
-            setToast({ show: true, message: `${files.length} file(s) uploaded successfully!`, type: 'success' });
+            setToast({ show: true, message: `${totalFiles} file(s) uploaded successfully!`, type: 'success' });
 
             if(wasInitialUpload) {
-                const allFileNames = files.map(f => f.name).join(', ');
+                const allFileNames = uploadedFiles.join(', ');
                 setChat([{role: 'assistant', text: `Successfully processed ${allFileNames}. You can now ask questions about them.`}]);
             }
 
         } catch (error) {
             console.error("File upload failed", error);
-            setToast({ show: true, message: 'An error occurred during upload.', type: 'error' });
+            setToast({ show: true, message: `An error occurred during upload: ${error.message}`, type: 'error' });
         } finally {
             setLoadingUpload(false);
         }
