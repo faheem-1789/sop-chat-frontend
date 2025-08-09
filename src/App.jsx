@@ -36,7 +36,7 @@ const db = getFirestore(app);
 const rtdb = getDatabase(app);
 
 // --- SVG Icons ---
-const UploadIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
+const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
 const UserAvatar = ({ userData }) => <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
 const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
@@ -297,6 +297,8 @@ const ProfilePage = () => {
         if (!user) return;
         try {
             const token = await getIdToken(user);
+            // NOTE: The endpoint `/clear_memory` was not in the provided `main.py`. 
+            // This call will fail unless you implement that endpoint in your backend.
             await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -366,7 +368,7 @@ const ProfilePage = () => {
                 </div>
             </main>
             {showConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl">
                         <h3 className="text-lg font-bold">Are you sure?</h3>
                         <p className="my-4">This will delete all your data permanently.</p>
@@ -397,12 +399,12 @@ const PricingPage = () => {
                     <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
                     <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
                     <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                        {plans.map(plan => (
+                        {plans.map((plan, index) => (
                             <motion.div 
                                 key={plan.name}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: plans.indexOf(plan) * 0.1 }}
+                                transition={{ delay: index * 0.1 }}
                                 className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
                             >
                                 <h3 className="text-2xl font-bold">{plan.name}</h3>
@@ -542,7 +544,7 @@ const AdminPage = () => {
                     </div>
                 </div>
                 {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
-                    <div className="bg-white p-6 rounded-lg shadow-md">
+                    <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b">
@@ -584,7 +586,7 @@ const AdminPage = () => {
                 )}
             </main>
             {editingUser && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Edit User: {editingUser.email}</h3>
                         <form onSubmit={handleUpdateUser} className="space-y-4">
@@ -601,7 +603,7 @@ const AdminPage = () => {
                 </div>
             )}
             {showCreateModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Create New User</h3>
                         <form onSubmit={handleCreateUser} className="space-y-4">
@@ -745,6 +747,15 @@ const ChatPage = () => {
     return (
         <div className="flex flex-col h-screen">
             <Header />
+            {/* THIS IS THE FIX: The file input is moved here so it's always in the DOM for the ref to work */}
+            <input 
+                type="file" 
+                accept=".xlsx,.xls" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                multiple 
+            />
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -755,9 +766,8 @@ const ChatPage = () => {
                                 <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
                                 <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
                                 <div className="flex items-center justify-center gap-2">
-                                    <label className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                    <label onClick={() => fileInputRef.current.click()} className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
                                       {fileNames.length > 0 ? `${fileNames.length} file(s) selected` : "Choose files..."}
-                                      <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
                                     </label>
                                     <button onClick={handleUpload} disabled={files.length === 0 || loadingUpload} className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
                                         {loadingUpload ? "Uploading..." : "Upload"}
