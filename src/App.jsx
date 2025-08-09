@@ -46,6 +46,7 @@ const Logo = () => <svg width="40" height="40" viewBox="0 0 128 128" fill="none"
 const AddIcon = () => <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
 const FileIcon = () => <svg className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
 const CloseIcon = () => <svg className="w-4 h-4 text-slate-400 hover:text-red-500 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
+const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
 
 
 // --- Application State Context ---
@@ -672,6 +673,7 @@ const ChatPage = () => {
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [loadingSend, setLoadingSend] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
+    const [isUploadingMore, setIsUploadingMore] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const API_URL = "https://sop-chat-backend.onrender.com";
     const chatEndRef = useRef(null);
@@ -711,7 +713,11 @@ const ChatPage = () => {
 
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
-        if (selectedFiles.length > 0) {
+        if (selectedFiles.length === 0) return;
+
+        if (sopExists) {
+            handleUpload(selectedFiles, true);
+        } else {
             setFiles(prev => [...prev, ...selectedFiles]);
         }
     };
@@ -720,31 +726,31 @@ const ChatPage = () => {
         setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
     };
 
-    const handleUpload = async () => {
-        if (files.length === 0 || !user) return;
-        setLoadingUpload(true);
+    const handleUpload = async (filesToUpload, isMoreUpload = false) => {
+        if (filesToUpload.length === 0 || !user) return;
+
+        const loadingSetter = isMoreUpload ? setIsUploadingMore : setLoadingUpload;
+        loadingSetter(true);
+        
         const wasInitialUpload = !sopExists;
-        const totalFiles = files.length;
-        const uploadedFiles = [];
 
         try {
             const token = await getIdToken(user);
-            // Use a for...of loop for sequential uploads
-            for (const file of files) {
+            for (const file of filesToUpload) {
                 const formData = new FormData();
                 formData.append('file', file);
                 await axios.post(`${API_URL}/upload/`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
                 });
-                uploadedFiles.push(file.name);
             }
             
             setSopExists(true);
-            setFiles([]);
-            setToast({ show: true, message: `${totalFiles} file(s) uploaded successfully!`, type: 'success' });
+            if (!isMoreUpload) setFiles([]);
+            
+            setToast({ show: true, message: `${filesToUpload.length} file(s) uploaded successfully!`, type: 'success' });
 
             if(wasInitialUpload) {
-                const allFileNames = uploadedFiles.join(', ');
+                const allFileNames = filesToUpload.map(f => f.name).join(', ');
                 setChat([{role: 'assistant', text: `Successfully processed ${allFileNames}. You can now ask questions about them.`}]);
             }
 
@@ -752,7 +758,10 @@ const ChatPage = () => {
             console.error("File upload failed", error);
             setToast({ show: true, message: `An error occurred during upload: ${error.message}`, type: 'error' });
         } finally {
-            setLoadingUpload(false);
+            loadingSetter(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
@@ -831,7 +840,7 @@ const ChatPage = () => {
                                                     <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
                                                 </div>
                                             ))}
-                                            <button onClick={handleUpload} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                            <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
                                                 Upload {files.length} File(s)
                                             </button>
                                         </div>
@@ -876,8 +885,8 @@ const ChatPage = () => {
                      <div className="p-4 bg-white/80 border-t">
                         <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                             {sopExists && (
-                                <button type="button" title="Upload More Files" onClick={() => fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors">
-                                    <UploadIcon />
+                                <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
+                                    {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
                                 </button>
                             )}
                             <input
