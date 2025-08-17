@@ -2,11 +2,6 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-// In a real project, you would install these via npm:
-// import { initializeApp } from "firebase/app";
-// import { getAuth, ... } from "firebase/auth";
-// import { getFirestore, ... } from "firebase/firestore";
-// import { getDatabase, ... } from "firebase/database";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { 
     getAuth, 
@@ -19,6 +14,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as dbServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import ReactMarkdown from 'react-markdown';
+import { motion } from 'framer-motion';
 
 
 // --- Firebase Configuration ---
@@ -46,6 +43,10 @@ const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500
 const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
 const DeleteIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
 const Logo = () => <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="128" height="128" rx="24" fill="#4338CA"/><path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/><path d="M56 48H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/><path d="M56 60H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/></svg>;
+const AddIcon = () => <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
+const FileIcon = () => <svg className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
+const CloseIcon = () => <svg className="w-4 h-4 text-slate-400 hover:text-red-500 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
+const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
 
 
 // --- Application State Context ---
@@ -131,7 +132,7 @@ const AppRouter = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-slate-50 font-sans">
+        <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-gray-100 font-sans">
             {renderPage()}
         </div>
     );
@@ -160,20 +161,24 @@ const LoginPage = ({ setPage }) => {
 
     return (
         <div className="flex items-center justify-center h-screen bg-slate-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+            <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
+            >
                 <h2 className="text-3xl font-bold text-center text-slate-800">Welcome Back!</h2>
                 {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
                 <form onSubmit={handleLogin} className="space-y-4">
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500" />
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500" />
-                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-semibold disabled:bg-indigo-400">
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-semibold disabled:bg-indigo-400 transform transition-transform hover:scale-105">
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
                 <p className="text-center text-sm text-slate-600">
                     Don't have an account? <button onClick={() => setPage('signup')} className="font-semibold text-indigo-600 hover:underline">Sign Up</button>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 };
@@ -201,7 +206,7 @@ const SignUpPage = ({ setPage }) => {
                 email,
                 companyName,
                 department,
-                version: 'basic', // Default to basic version
+                credits: 10,
                 createdAt: serverTimestamp(),
             });
         } catch (err) {
@@ -213,7 +218,11 @@ const SignUpPage = ({ setPage }) => {
 
     return (
         <div className="flex items-center justify-center h-screen bg-slate-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+             <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
+            >
                 <h2 className="text-3xl font-bold text-center text-slate-800">Create an Account</h2>
                 {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
                 <form onSubmit={handleSignUp} className="space-y-4">
@@ -222,14 +231,14 @@ const SignUpPage = ({ setPage }) => {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (min. 6 characters)" required className="w-full px-4 py-3 border rounded-md" />
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name" className="w-full px-4 py-3 border rounded-md" />
                     <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Department" className="w-full px-4 py-3 border rounded-md" />
-                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-semibold disabled:bg-indigo-400">
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-semibold disabled:bg-indigo-400 transform transition-transform hover:scale-105">
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
                 </form>
                 <p className="text-center text-sm text-slate-600">
                     Already have an account? <button onClick={() => setPage('login')} className="font-semibold text-indigo-600 hover:underline">Login</button>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 };
@@ -237,13 +246,17 @@ const SignUpPage = ({ setPage }) => {
 const VerifyEmailPage = () => {
     return (
         <div className="flex flex-col items-center justify-center h-screen text-center p-4 bg-slate-100">
-            <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg">
+            <motion.div 
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                className="bg-white p-10 rounded-2xl shadow-lg max-w-lg"
+            >
                 <h2 className="text-3xl font-bold mb-4 text-slate-800">Verify Your Email</h2>
-                <p className="text-slate-600 mb-6">A verification link has been sent to **{auth.currentUser?.email}**. Please check your inbox (and spam folder) and click the link to activate your account.</p>
+                <p className="text-slate-600 mb-6">A verification link has been sent to <strong>{auth.currentUser?.email}</strong>. Please check your inbox (and spam folder) and click the link to activate your account.</p>
                 <button onClick={() => signOut(auth)} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-semibold">
                     Go to Login
                 </button>
-            </div>
+            </motion.div>
         </div>
     );
 };
@@ -287,6 +300,8 @@ const ProfilePage = () => {
         if (!user) return;
         try {
             const token = await getIdToken(user);
+            // NOTE: The endpoint `/clear_memory` was not in the provided `main.py`. 
+            // This call will fail unless you implement that endpoint in your backend.
             await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -356,7 +371,7 @@ const ProfilePage = () => {
                 </div>
             </main>
             {showConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl">
                         <h3 className="text-lg font-bold">Are you sure?</h3>
                         <p className="my-4">This will delete all your data permanently.</p>
@@ -387,15 +402,24 @@ const PricingPage = () => {
                     <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
                     <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
                     <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                        {plans.map(plan => (
-                            <div key={plan.name} className={`p-6 border rounded-lg shadow-lg ${plan.popular ? 'border-indigo-500' : ''}`}>
+                        {plans.map((plan, index) => (
+                            <motion.div 
+                                key={plan.name}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
+                            >
                                 <h3 className="text-2xl font-bold">{plan.name}</h3>
                                 <p className="text-4xl font-extrabold my-4">{plan.price}</p>
                                 <p className="text-lg font-semibold">{plan.credits} Credits</p>
-                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md">Purchase</button>
-                            </div>
+                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transform transition-transform hover:scale-105">Purchase</button>
+                            </motion.div>
                         ))}
                     </div>
+                    <p className="mt-12 text-lg text-slate-700">
+                        For payment details and methods, please contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                    </p>
                 </div>
             </main>
         </div>
@@ -409,6 +433,8 @@ const AdminPage = () => {
     const [error, setError] = useState('');
     const [filters, setFilters] = useState({ name: '', email: '', company: '', department: '' });
     const [editingUser, setEditingUser] = useState(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newUser, setNewUser] = useState({ email: '', password: '', fullName: '', credits: 10 });
 
     const fetchUsers = async () => {
         if (!user) return;
@@ -444,7 +470,7 @@ const AdminPage = () => {
                 await axios.delete(`https://sop-chat-backend.onrender.com/admin/users/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                fetchUsers(); // Refresh the user list
+                fetchUsers();
             } catch (error) {
                 console.error("Failed to delete user:", error);
                 alert("Failed to delete user.");
@@ -470,10 +496,26 @@ const AdminPage = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingUser(null);
-            fetchUsers(); // Refresh the user list
+            fetchUsers();
         } catch (error) {
             console.error("Failed to update user:", error);
             alert("Failed to update user.");
+        }
+    };
+    
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        try {
+            const token = await getIdToken(user);
+            await axios.post(`https://sop-chat-backend.onrender.com/admin/users`, newUser, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setShowCreateModal(false);
+            setNewUser({ email: '', password: '', fullName: '', credits: 10 });
+            fetchUsers();
+        } catch (error) {
+            console.error("Failed to create user:", error);
+            alert(`Failed to create user: ${error.response?.data?.detail || error.message}`);
         }
     };
 
@@ -488,7 +530,12 @@ const AdminPage = () => {
         <div className="flex flex-col h-full">
             <Header />
             <main className="flex-1 p-8">
-                <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold">Admin Dashboard</h2>
+                    <button onClick={() => setShowCreateModal(true)} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700">
+                        <AddIcon /> Create User
+                    </button>
+                </div>
                 <div className="bg-white p-4 rounded-lg shadow-md mb-6">
                     <div className="grid grid-cols-4 gap-4">
                         <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
@@ -498,7 +545,7 @@ const AdminPage = () => {
                     </div>
                 </div>
                 {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
-                    <div className="bg-white p-6 rounded-lg shadow-md">
+                    <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b">
@@ -514,9 +561,7 @@ const AdminPage = () => {
                                 {filteredUsers.length > 0 ? filteredUsers.map(u => (
                                     <tr key={u.uid} className="border-b hover:bg-slate-50">
                                         <td className="p-2">
-                                            <span className={`px-2 py-1 text-xs rounded-full ${
-                                                u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'
-                                            }`}>
+                                            <span className={`px-2 py-1 text-xs rounded-full ${u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
                                                 {u.status}
                                             </span>
                                         </td>
@@ -540,7 +585,7 @@ const AdminPage = () => {
                 )}
             </main>
             {editingUser && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Edit User: {editingUser.email}</h3>
                         <form onSubmit={handleUpdateUser} className="space-y-4">
@@ -556,23 +601,93 @@ const AdminPage = () => {
                     </div>
                 </div>
             )}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+                        <h3 className="text-lg font-bold mb-4">Create New User</h3>
+                        <form onSubmit={handleCreateUser} className="space-y-4">
+                             <input type="email" placeholder="Email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full p-2 border rounded" required />
+                             <input type="password" placeholder="Password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full p-2 border rounded" required />
+                             <input type="text" placeholder="Full Name" value={newUser.fullName} onChange={e => setNewUser({...newUser, fullName: e.target.value})} className="w-full p-2 border rounded" required />
+                             <input type="number" placeholder="Credits" value={newUser.credits} onChange={e => setNewUser({...newUser, credits: parseInt(e.target.value, 10)})} className="w-full p-2 border rounded" required />
+                            <div className="flex justify-end gap-4">
+                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-md">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md">Create User</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
+    );
+};
+
+const Header = () => {
+    const { setPage, userData } = useApp();
+    const handleLogout = async () => {
+        await signOut(auth);
+        setPage('login');
+    };
+
+    return (
+        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-10 sticky top-0">
+            <div className="max-w-6xl mx-auto flex justify-between items-center">
+                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('chat')}>
+                    <Logo />
+                    <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
+                </div>
+                <nav className="flex items-center space-x-6">
+                    {userData?.role === 'admin' && (
+                        <button onClick={() => setPage('admin')} className="font-semibold text-red-600 hover:text-red-700 transition-colors">Admin</button>
+                    )}
+                    <button onClick={() => setPage('chat')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Chat</button>
+                    <button onClick={() => setPage('profile')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Profile</button>
+                    <button onClick={() => setPage('pricing')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Pricing</button>
+                    <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold hover:bg-red-600 transform transition-transform hover:scale-105">Logout</button>
+                </nav>
+            </div>
+        </header>
+    );
+};
+
+const Toast = ({ message, type, onDismiss }) => {
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    return (
+        <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className={`fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white ${bgColor} z-50`}
+        >
+            {message}
+            <button onClick={onDismiss} className="ml-4 font-bold">X</button>
+        </motion.div>
     );
 };
 
 const ChatPage = () => {
     const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, setPage } = useApp();
     const isAdmin = userData?.role === 'admin';
-    const [file, setFile] = useState(null);
-    const [fileName, setFileName] = useState("");
+    const [files, setFiles] = useState([]);
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [loadingSend, setLoadingSend] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
-    
+    const [isUploadingMore, setIsUploadingMore] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const API_URL = "https://sop-chat-backend.onrender.com";
     const chatEndRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        if (toast.show) {
+            const timer = setTimeout(() => {
+                setToast(prev => ({ ...prev, show: false }));
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast.show]);
+
 
     useEffect(() => {
         const checkSopStatus = async () => {
@@ -580,9 +695,7 @@ const ChatPage = () => {
             setLoadingStatus(true);
             try {
                 const token = await getIdToken(user);
-                const res = await axios.get(`${API_URL}/status`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await axios.get(`${API_URL}/status`, { headers: { Authorization: `Bearer ${token}` } });
                 setSopExists(res.data.sop_exists);
             } catch (error) {
                 console.error("Could not check SOP status", error);
@@ -599,36 +712,56 @@ const ChatPage = () => {
     }, [chat]);
 
     const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            setFileName(selectedFile.name);
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length === 0) return;
+
+        if (sopExists) {
+            handleUpload(selectedFiles, true);
+        } else {
+            setFiles(prev => [...prev, ...selectedFiles]);
         }
     };
+    
+    const handleRemoveFile = (indexToRemove) => {
+        setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+    };
 
-    const handleUpload = async () => {
-        if (!file || !user) return;
-        setLoadingUpload(true);
-        const formData = new FormData();
-        formData.append('file', file);
+    const handleUpload = async (filesToUpload, isMoreUpload = false) => {
+        if (filesToUpload.length === 0 || !user) return;
+
+        const loadingSetter = isMoreUpload ? setIsUploadingMore : setLoadingUpload;
+        loadingSetter(true);
+        
+        const wasInitialUpload = !sopExists;
 
         try {
             const token = await getIdToken(user);
-            await axios.post(`${API_URL}/upload/`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            for (const file of filesToUpload) {
+                const formData = new FormData();
+                formData.append('file', file);
+                await axios.post(`${API_URL}/upload/`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+                });
+            }
+            
             setSopExists(true);
-            setFileName("");
-            setFile(null);
-            setChat([{role: 'assistant', text: `Successfully processed ${fileName}. You can now ask questions about it.`}]);
+            if (!isMoreUpload) setFiles([]);
+            
+            setToast({ show: true, message: `${filesToUpload.length} file(s) uploaded successfully!`, type: 'success' });
+
+            if(wasInitialUpload) {
+                const allFileNames = filesToUpload.map(f => f.name).join(', ');
+                setChat([{role: 'assistant', text: `Successfully processed ${allFileNames}. You can now ask questions about them.`}]);
+            }
+
         } catch (error) {
             console.error("File upload failed", error);
-            setChat([{role: 'assistant', text: "Sorry, there was an error processing your file."}]);
+            setToast({ show: true, message: `An error occurred during upload: ${error.message}`, type: 'error' });
         } finally {
-            setLoadingUpload(false);
+            loadingSetter(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
@@ -651,11 +784,7 @@ const ChatPage = () => {
                 return acc;
             }, []);
 
-            const res = await axios.post(`${API_URL}/chat/`, 
-                { prompt: currentMessage, history },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
+            const res = await axios.post(`${API_URL}/chat/`, { prompt: currentMessage, history }, { headers: { Authorization: `Bearer ${token}` } });
             const assistantMsg = { role: "assistant", text: res.data.response };
             setChat(prev => [...prev, assistantMsg]);
 
@@ -681,23 +810,41 @@ const ChatPage = () => {
     return (
         <div className="flex flex-col h-screen">
             <Header />
+            {toast.show && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(prev => ({...prev, show: false}))} />}
+            <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                         {loadingStatus ? (
                              <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
                         ) : !sopExists ? (
-                            <div className="text-center p-8 bg-slate-100 rounded-lg">
+                            <div className="relative text-center p-8 bg-slate-100 rounded-lg">
+                                {loadingUpload && (
+                                    <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
+                                        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="mt-2 text-slate-600">Uploading...</p>
+                                    </div>
+                                )}
                                 <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
-                                <p className="text-slate-600 mb-4">To get started, please upload an SOP document.</p>
-                                <div className="flex items-center justify-center gap-2">
-                                    <label className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
-                                      {fileName || "Choose a file..."}
-                                      <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                                    </label>
-                                    <button onClick={handleUpload} disabled={!file || loadingUpload} className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                                        {loadingUpload ? "Uploading..." : "Upload"}
+                                <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
+                                <div className="max-w-md mx-auto">
+                                    <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                      Choose files...
                                     </button>
+                                    {files.length > 0 && (
+                                        <div className="mt-4 space-y-2 text-left">
+                                            {files.map((file, index) => (
+                                                <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
+                                                    <FileIcon />
+                                                    <span className="flex-grow truncate">{file.name}</span>
+                                                    <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
+                                                </div>
+                                            ))}
+                                            <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                                Upload {files.length} File(s)
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : chat.length === 0 ? (
@@ -705,13 +852,21 @@ const ChatPage = () => {
                         ) : null}
                         
                         {chat.map((c, i) => (
-                            <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
+                            <motion.div 
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}
+                            >
                                 {c.role === 'assistant' && <AssistantAvatar />}
                                 <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
-                                    {c.text}
+                                    <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2">
+                                        {c.text}
+                                    </ReactMarkdown>
                                 </div>
                                 {c.role === 'user' && <UserAvatar userData={userData} />}
-                            </div>
+                            </motion.div>
                         ))}
                          {loadingSend && (
                             <div className="flex items-start gap-4">
@@ -729,6 +884,11 @@ const ChatPage = () => {
                      </div>
                      <div className="p-4 bg-white/80 border-t">
                         <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                            {sopExists && (
+                                <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
+                                    {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
+                                </button>
+                            )}
                             <input
                               value={message}
                               onChange={(e) => setMessage(e.target.value)}
@@ -736,7 +896,7 @@ const ChatPage = () => {
                               placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
                               disabled={!sopExists || loadingSend}
                             />
-                            <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50">
+                            <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 transform transition-transform hover:scale-110">
                                 <SendIcon />
                             </button>
                         </form>
@@ -745,33 +905,5 @@ const ChatPage = () => {
                 </div>
             </main>
         </div>
-    );
-};
-
-const Header = () => {
-    const { setPage, userData } = useApp();
-    const handleLogout = async () => {
-        await signOut(auth);
-        setPage('login');
-    };
-
-    return (
-        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-10 sticky top-0">
-            <div className="max-w-6xl mx-auto flex justify-between items-center">
-                 <div className="flex items-center gap-2">
-                    <Logo />
-                    <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
-                </div>
-                <nav className="flex items-center space-x-6">
-                    {userData?.role === 'admin' && (
-                        <button onClick={() => setPage('admin')} className="font-semibold text-red-600 hover:text-red-700">Admin</button>
-                    )}
-                    <button onClick={() => setPage('chat')} className="font-semibold text-slate-600 hover:text-indigo-600">Chat</button>
-                    <button onClick={() => setPage('profile')} className="font-semibold text-slate-600 hover:text-indigo-600">Profile</button>
-                    <button onClick={() => setPage('pricing')} className="font-semibold text-slate-600 hover:text-indigo-600">Pricing</button>
-                    <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold">Logout</button>
-                </nav>
-            </div>
-        </header>
     );
 };
