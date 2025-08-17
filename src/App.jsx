@@ -103,8 +103,7 @@ const AppRouter = () => {
             if (user) {
                 if (!user.emailVerified) {
                     setPage('verify-email');
-                } else if (page === 'login' || page === 'signup' || page === 'verify-email') {
-                    // If user is logged in and on an auth page, redirect to chat
+                } else if (page === 'login' || page === 'signup' || page === 'verify-email' || page === 'home') {
                     setPage('chat');
                 }
             }
@@ -117,10 +116,8 @@ const AppRouter = () => {
     }
 
     const renderPage = () => {
-        // Always show header and footer for public pages
-        const publicPages = ['home', 'about', 'contact', 'privacy', 'terms', 'blog', 'login', 'signup'];
-        const isPublicPage = publicPages.includes(page);
-        const isAuthPage = ['login', 'signup'].includes(page);
+        const isPublicPage = ['home', 'about', 'contact', 'privacy', 'terms', 'blog', 'faq'].includes(page);
+        const isAuthPage = ['login', 'signup', 'verify-email'].includes(page);
 
         const pageComponent = () => {
             switch (page) {
@@ -130,6 +127,7 @@ const AppRouter = () => {
                 case 'privacy': return <PrivacyPolicyPage />;
                 case 'terms': return <TermsOfServicePage />;
                 case 'blog': return <BlogPage />;
+                case 'faq': return <FAQPage />;
                 case 'login': return <LoginPage />;
                 case 'signup': return <SignUpPage />;
                 case 'verify-email': return <VerifyEmailPage />;
@@ -143,11 +141,11 @@ const AppRouter = () => {
 
         return (
              <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
-                {isPublicPage && !isAuthPage && <Header />}
+                {user ? <LoggedInHeader /> : <Header />}
                 <main className="flex-grow">
                     {pageComponent()}
                 </main>
-                {isPublicPage && !isAuthPage && <Footer />}
+                {!user && <Footer />}
             </div>
         );
     };
@@ -182,44 +180,230 @@ const HomePage = () => {
     );
 };
 
-// --- Placeholder Pages ---
+// --- Static & Blog Pages ---
 const GenericPage = ({ title, children }) => (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-6">{title}</h1>
-        <div className="prose prose-lg text-slate-600">
-            {children}
-        </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <h1 className="text-3xl font-bold text-slate-800 mb-8 border-b pb-4">{title}</h1>
+            <div className="prose prose-lg max-w-none text-slate-700">
+                {children}
+            </div>
+        </motion.div>
     </div>
 );
 
-const AboutPage = () => <GenericPage title="About Us"><p>Welcome to SOP Assistant. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours and improve operational efficiency.</p></GenericPage>;
-const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
-const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p>Your privacy is important to us. This privacy statement explains the personal data SOP Assistant processes, how we process it, and for what purposes. [Your detailed Privacy Policy content goes here...]</p></GenericPage>;
-const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p>Please read these terms of service carefully before using Our Service. [Your detailed Terms of Service content goes here...]</p></GenericPage>;
+const AboutPage = () => <GenericPage title="About Us"><p>Welcome to SOP Assistant. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
+const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
+
+const PrivacyPolicyPage = () => (
+    <GenericPage title="Privacy Policy">
+        <p><strong>Last Updated: August 18, 2025</strong></p>
+        <p>Your privacy is important to us. This policy explains what information we collect, how we use it, and your rights in relation to it.</p>
+        
+        <h3>1. Information We Collect</h3>
+        <ul>
+            <li><strong>Account Information:</strong> When you sign up, we collect your full name, email address, company name, and department.</li>
+            <li><strong>Uploaded Documents:</strong> We process the Excel files you upload to create a searchable knowledge base. These files are stored securely and are only accessible to your authenticated account.</li>
+            <li><strong>Usage Data:</strong> We may collect data about how you interact with our service, such as features used and time spent on the platform, to help us improve our product.</li>
+        </ul>
+
+        <h3>2. How We Use Your Information</h3>
+        <ul>
+            <li>To provide, maintain, and improve our services.</li>
+            <li>To process your documents and enable the chat functionality.</li>
+            <li>To communicate with you, including sending verification emails and responding to support requests.</li>
+            <li>To manage your account and subscription.</li>
+        </ul>
+
+        <h3>3. Data Security</h3>
+        <p>We use industry-standard security measures, including Firebase's built-in security features, to protect your data from unauthorized access. However, no method of transmission over the Internet is 100% secure.</p>
+        
+        <h3>4. Third-Party Services</h3>
+        <p>We use Firebase (a Google service) for authentication and database management. Their privacy policy can be found on the Google website.</p>
+
+        <h3>5. Your Rights</h3>
+        <p>You have the right to access, update, or delete your personal information at any time through your profile page or by contacting us directly.</p>
+        <p><em>Disclaimer: This is a template and not legal advice. You should consult with a legal professional to ensure your Privacy Policy is compliant with all applicable laws.</em></p>
+    </GenericPage>
+);
+
+const TermsOfServicePage = () => (
+    <GenericPage title="Terms of Service">
+        <p><strong>Last Updated: August 18, 2025</strong></p>
+        <p>By using SOP Assistant ("Service"), you agree to be bound by these Terms of Service.</p>
+
+        <h3>1. Accounts</h3>
+        <p>You are responsible for safeguarding your account and for any activities or actions under your password. You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.</p>
+
+        <h3>2. User Content</h3>
+        <p>You retain ownership of any intellectual property rights that you hold in the content you upload to the Service. We do not claim ownership of your content. Our access to this content is limited to what is necessary to provide the Service to you.</p>
+
+        <h3>3. Acceptable Use</h3>
+        <p>You agree not to use the Service for any unlawful purpose or to upload any content that is malicious, defamatory, or violates any third-party rights.</p>
+
+        <h3>4. Termination</h3>
+        <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+
+        <h3>5. Limitation of Liability</h3>
+        <p>In no event shall SOP Assistant, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+        <p><em>Disclaimer: This is a template and not legal advice. You should consult with a legal professional to tailor these Terms of Service to your specific needs.</em></p>
+    </GenericPage>
+);
+
+const FAQPage = () => (
+    <GenericPage title="Frequently Asked Questions">
+        <div className="space-y-6">
+            <div>
+                <h3 className="font-semibold text-slate-800">What type of files can I upload?</h3>
+                <p>Currently, our service is optimized for Microsoft Excel files (.xlsx, .xls). We are working on expanding compatibility to include other document types like .pdf and .docx in the future.</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-slate-800">Is my data secure?</h3>
+                <p>Absolutely. We use Firebase for authentication and secure data storage. Your uploaded documents are processed and stored in a way that is only accessible by your authenticated account. We do not share your data with any third parties.</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-slate-800">How does the AI work?</h3>
+                <p>Our AI uses a technology called Natural Language Processing (NLP) and vector embeddings. It reads the content of your documents, converts it into a numerical format that captures its meaning, and stores it in a searchable index. When you ask a question, the AI finds the most relevant pieces of information from your documents to construct an answer.</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-slate-800">What is a "credit" and how are they used?</h3>
+                <p>For users on our Basic plan, one credit is consumed for each question you ask the AI assistant. You receive a set of complimentary credits upon signing up, and you can purchase more from the Pricing page. Our Pro plan offers unlimited credits.</p>
+            </div>
+             <div>
+                <h3 className="font-semibold text-slate-800">Can I use this for documents other than SOPs?</h3>
+                <p>Yes. While the assistant is designed with SOPs in mind, it can effectively process any Excel document that contains structured textual information, such as training manuals, product catalogs, contact lists, or internal knowledge bases.</p>
+            </div>
+             <div>
+                <h3 className="font-semibold text-slate-800">Do you offer enterprise plans?</h3>
+                <p>Yes, we do. For businesses with large teams, extensive documentation, or specific security and integration needs, we offer custom enterprise plans. Please reach out to us via the Contact page to discuss your requirements.</p>
+            </div>
+        </div>
+    </GenericPage>
+);
+
+const blogPostsData = [
+    { 
+        slug: "analyze-sops-with-ai",
+        title: "How to Analyze SOPs Easily with AI", 
+        excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds...",
+        content: `<p>Standard Operating Procedures (SOPs) are the backbone of any organized company, but they often end up as dense, lengthy documents that are difficult to navigate. Finding a specific piece of information can feel like searching for a needle in a haystack. This is where AI changes the game.</p><p>Our SOP Assistant uses advanced Natural Language Processing (NLP) to read and understand the content of your Excel-based SOPs. Instead of manually scanning rows and columns, you can simply ask a question in plain language.</p><h3>How It Works:</h3><ol><li><strong>Upload:</strong> You upload your Excel files containing your procedures.</li><li><strong>Process:</strong> Our AI creates a secure, indexed knowledge base from your documents.</li><li><strong>Query:</strong> You ask questions like, "What is the procedure for handling a customer refund?" or "Who is on the primary contact list for Route 5?"</li><li><strong>Answer:</strong> The assistant instantly retrieves and presents the relevant information, saving you valuable time and reducing the chance of human error.</li></ol><p>By transforming your static documents into an interactive knowledge base, you empower your team to find answers immediately, ensuring compliance and boosting productivity.</p>`
+    },
+    { 
+        slug: "ai-reads-excel",
+        title: "Can AI Really Read and Understand Excel Files?", 
+        excerpt: "We dive into the technology that allows our assistant to parse spreadsheets and provide accurate answers...",
+        content: `<p>It sounds like science fiction, but it's a reality. The ability for AI to read and comprehend structured data in spreadsheets is a significant technological leap. But how does it actually work?</p><p>The core technology involves a process called 'embedding'. When you upload an Excel file, our system doesn't just store the file; it reads the content cell by cell, row by row. It identifies relationships between data points—like which names belong to which department or which steps are part of a specific procedure.</p><h3>The Key Steps:</h3><ul><li><strong>Data Extraction:</strong> The text and numerical data are extracted from the spreadsheet while preserving the structure (columns and rows).</li><li><strong>Vector Embeddings:</strong> This extracted information is converted into a numerical representation called a vector. This allows the AI to understand the semantic meaning and context of the words, not just the words themselves.</li><li><strong>Indexed Storage:</strong> These vectors are stored in a specialized database (a vector store) that allows for incredibly fast and context-aware searching.</li></ul><p>When you ask a question, your question is also converted into a vector. The AI then finds the most similar vectors in its database from your documents and uses that information to construct a precise, relevant answer.</p>`
+    },
+    { 
+        slug: "improve-efficiency",
+        title: "5 Ways to Improve Your Team's Efficiency with SOP Assistant", 
+        excerpt: "Learn practical tips and tricks to get the most out of our platform and boost your team's productivity...",
+        content: `<p>An accessible knowledge base is a productive one. Here are five ways SOP Assistant can directly impact your team's efficiency:</p><ol><li><strong>Instant Onboarding:</strong> New hires can get up to speed faster by asking the assistant questions instead of constantly interrupting senior team members.</li><li><strong>Reduced Errors:</strong> When procedures are easy to find, they are more likely to be followed correctly, leading to fewer operational mistakes.</li><li><strong>Consistent Customer Service:</strong> Your support team can provide standardized, accurate answers to customer queries by quickly referencing the official procedures.</li><li><strong>Faster Decision-Making:</strong> Managers can quickly pull up data and procedural guidelines to make informed decisions without delay.</li><li><strong>Centralized Knowledge:</strong> Eliminate the problem of outdated or conflicting information. The SOP Assistant becomes the single source of truth for all your operational procedures.</li></ol>`
+    },
+    {
+        slug: "anatomy-of-sop",
+        title: "The Anatomy of a Perfect SOP Document",
+        excerpt: "Learn the key components that make an SOP effective, clear, and easy for AI to understand.",
+        content: `<p>A well-structured SOP is not just beneficial for your team; it's crucial for getting the best results from our AI. Here’s a breakdown of what makes an SOP document perfect for both humans and machines:</p><h3>Key Components:</h3><ul><li><strong>Clear Titles:</strong> Use descriptive titles for columns (e.g., "Procedure Name," "Step Number," "Description," "Responsible Department").</li><li><strong>Atomic Steps:</strong> Each row should represent a single, clear action or piece of information. Avoid combining multiple steps into one cell.</li><li><strong>Consistent Formatting:</strong> Maintain a consistent structure throughout your Excel file. If you have multiple sheets, ensure they follow a similar layout.</li><li><strong>Simple Language:</strong> Use clear, unambiguous language. Avoid jargon where possible or include a glossary sheet.</li><li><strong>Hierarchical Structure:</strong> Use columns to create a logical flow, such as 'Main Process', 'Sub-Process', 'Step Detail'. This helps the AI understand the relationship between different pieces of information.</li></ul><p>By following these guidelines, you ensure that the AI can accurately parse and index your procedures, leading to more precise and relevant answers.</p>`
+    },
+    {
+        slug: "common-sop-mistakes",
+        title: "Common Mistakes to Avoid When Writing SOPs",
+        excerpt: "Avoid these pitfalls to ensure your standard operating procedures are effective and easy to follow.",
+        content: `<p>Even the best-intentioned SOPs can fail if they fall into common traps. Here are some mistakes to avoid:</p><ul><li><strong>Being Too Vague:</strong> Phrases like "handle appropriately" are unhelpful. Be specific about the actions required.</li><li><strong>Being Too Complex:</strong> Overly long sentences and technical jargon can confuse readers. Keep it simple and direct.</li><li><strong>Not Including Visuals:</strong> While our AI focuses on text, for human users, diagrams and flowcharts can be invaluable. Consider linking to them in a 'Reference' column.</li><li><strong>Forgetting the 'Why':</strong> Briefly explaining the purpose behind a procedure can increase buy-in and help employees make better decisions.</li><li><strong>Lack of Regular Reviews:</strong> Processes change. SOPs should be living documents, reviewed and updated on a regular schedule (e.g., annually or quarterly).</li></ul>`
+    },
+    {
+        slug: "integrating-ai-workflow",
+        title: "Integrating AI into Your Daily Business Workflow",
+        excerpt: "Tips on how to seamlessly introduce AI tools like SOP Assistant into your team's day-to-day operations.",
+        content: `<p>Introducing a new tool can be challenging. Here's how to make the transition to an AI-powered workflow smooth:</p><ol><li><strong>Start Small:</strong> Begin with one department or one set of critical SOPs. Demonstrate the value and gather feedback before a company-wide rollout.</li><li><strong>Appoint a Champion:</strong> Designate a tech-savvy team member to be the go-to expert for the new tool.</li><li><strong>Provide Training:</strong> Hold a brief training session to show your team how to ask effective questions and interpret the AI's answers.</li><li><strong>Highlight the Benefits:</strong> Emphasize how the tool saves time and reduces frustration, positioning it as a helper, not a replacement.</li><li><strong>Integrate into Onboarding:</strong> Make the SOP Assistant a core part of your new hire training process from day one.</li></ol>`
+    },
+    {
+        slug: "ai-for-quality-control",
+        title: "AI for Quality Control: Ensuring SOP Compliance",
+        excerpt: "Explore how an instant-access knowledge base helps maintain high standards and compliance.",
+        content: `<p>Quality control relies on strict adherence to standards. When team members have to guess or search for procedures, the risk of non-compliance increases. An AI assistant acts as an ever-present quality control supervisor.</p><p>By providing immediate access to the correct procedure, you minimize the chance of deviation. Team members on a factory floor, in a lab, or handling customer service can quickly verify a step or check a specification on the spot. This leads to higher quality outcomes, fewer product recalls, and better regulatory compliance.</p>`
+    },
+    {
+        slug: "future-of-document-management",
+        title: "The Future of Document Management is Conversational",
+        excerpt: "Why searching through folders is becoming obsolete and conversational interfaces are taking over.",
+        content: `<p>For decades, document management has been about folders, file names, and keyword searches. This system is fundamentally flawed because it requires the user to know *what* to search for and *where* it might be located. The future is conversational.</p><p>A conversational interface, like the one used by SOP Assistant, allows users to interact with their data naturally. Instead of guessing keywords, they can ask complex questions. This approach is faster, more intuitive, and far more powerful, unlocking the true value hidden within your documents.</p>`
+    },
+    {
+        slug: "case-study-logistics",
+        title: "Case Study: How a Logistics Company Cut Query Time by 90%",
+        excerpt: "A real-world example of how SOP Assistant transformed operations for a busy logistics firm.",
+        content: `<p>A mid-sized logistics company was struggling with operational delays. Their dispatchers and warehouse staff spent up to 20 minutes per query searching through multiple complex spreadsheets to find route details, handling procedures for specific goods, and emergency contacts.</p><p>After implementing SOP Assistant and uploading their operational manuals, the average query time dropped to under 2 minutes. Dispatchers could simply ask, "What are the handling instructions for hazardous material on Route 12?" and get an instant, accurate answer. This simple change resulted in faster dispatch times, fewer errors, and a significant boost in overall efficiency.</p>`
+    },
+    {
+        slug: "roi-on-ai",
+        title: "Measuring ROI on AI Implementation in Your Business",
+        excerpt: "How to quantify the benefits of tools like SOP Assistant.",
+        content: `<p>Investing in AI can seem abstract. Here's how to measure its return on investment (ROI):</p><ul><li><strong>Time Saved:</strong> Calculate the average time employees spend searching for information. Multiply this by their hourly rate to find the cost of manual searches. Compare this to the near-instant answers from the AI.</li><li><strong>Error Reduction:</strong> Track the rate of procedural errors before and after implementation. Assign a cost to each error (e.g., cost of a returned shipment) to quantify the savings.</li><li><strong>Onboarding Speed:</strong> Measure the time it takes for a new hire to become fully productive. A reduction in this time is a direct cost saving.</li></ul>`
+    },
+    {
+        slug: "data-security-ai",
+        title: "Data Security in the Age of AI: Protecting Your SOPs",
+        excerpt: "Understand the security measures that keep your sensitive operational data safe.",
+        content: `<p>Uploading your internal documents to a cloud service requires trust. At SOP Assistant, security is our top priority. We leverage the robust, enterprise-grade security of Google's Firebase platform. This includes:</p><ul><li><strong>Secure Authentication:</strong> Only verified users from your organization can access your knowledge base.</li><li><strong>Data Encryption:</strong> Your data is encrypted both in transit and at rest.</li><li><strong>Isolated Environments:</strong> Your data is logically separated from other customers' data, ensuring there is no cross-contamination.</li></ul>`
+    },
+    {
+        slug: "beyond-vlookup",
+        title: "Beyond VLOOKUP: AI as Your New Excel Power Tool",
+        excerpt: "Excel is powerful, but AI takes data interaction to a whole new level.",
+        content: `<p>Many businesses run on Excel, relying on functions like VLOOKUP and INDEX/MATCH to connect data. While powerful, these functions require expertise and rigid data structures. AI offers a more flexible and intuitive way to query your data.</p><p>Instead of building complex formulas, you can simply ask the question you want answered. The AI understands the context and relationships within your data, acting as a super-powered VLOOKUP that works with natural language, saving you from the headache of formula debugging.</p>`
+    },
+    {
+        slug: "sop-for-startups",
+        title: "From Chaos to Clarity: How SOPs Transform Startups",
+        excerpt: "Why even early-stage startups need to prioritize Standard Operating Procedures.",
+        content: `<p>It's a common myth that SOPs are only for large, bureaucratic corporations. In reality, they are a startup's best friend. Documenting processes early, even simple ones, provides a foundation for scalable growth. It ensures that as you hire new team members, they can get up to speed quickly and perform tasks consistently, freeing up the founders to focus on strategy and growth instead of repetitive training.</p>`
+    },
+    {
+        slug: "ai-team-training",
+        title: "How to Train Your Team on New, AI-Powered Tools",
+        excerpt: "A step-by-step guide to ensuring your team embraces and effectively uses new technology.",
+        content: `<p>Successful adoption of new tech is all about the people. Start by clearly communicating the 'why'—how this tool will make their jobs easier. Hold a hands-on workshop where everyone can try asking questions relevant to their roles. Create a shared document of 'power user' tips and encourage team members to share their successes. Fostering a supportive environment is key to overcoming resistance and unlocking the full potential of your new AI assistant.</p>`
+    },
+    {
+        slug: "top-industries-ai-sops",
+        title: "Top 5 Industries Benefiting from AI-Powered SOPs",
+        excerpt: "See which sectors are gaining the biggest competitive advantage from conversational AI.",
+        content: `<p>While any business with procedures can benefit, some industries see a massive impact:</p><ol><li><strong>Logistics & Supply Chain:</strong> For managing complex shipping, receiving, and inventory procedures.</li><li><strong>Manufacturing:</strong> For quality control, machine operation, and safety protocols.</li><li><strong>Healthcare:</strong> For administrative tasks, billing codes, and patient processing workflows (non-PHI).</li><li><strong>Franchises:</strong> For ensuring brand consistency and operational uniformity across all locations.</li><li><strong>Customer Support:</strong> For providing quick, standardized answers to common customer issues.</li></ol>`
+    }
+];
 
 const BlogPage = () => {
-    const blogPosts = [
-        { title: "How to Analyze SOPs Easily with AI", excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds..." },
-        { title: "Can AI Really Read and Understand Excel Files?", excerpt: "We dive into the technology that allows our assistant to parse spreadsheets and provide accurate answers..." },
-        { title: "5 Ways to Improve Your Team's Efficiency with SOP Assistant", excerpt: "Learn practical tips and tricks to get the most out of our platform and boost your team's productivity..." },
-    ];
+    const [selectedPost, setSelectedPost] = useState(null);
+
+    const postToShow = selectedPost ? blogPostsData.find(p => p.slug === selectedPost) : null;
+
     return (
-        <GenericPage title="Our Blog">
-            <div className="space-y-8">
-                {blogPosts.map(post => (
-                    <div key={post.title} className="p-6 border rounded-lg hover:shadow-lg transition-shadow">
-                        <h3 className="text-xl font-semibold text-slate-800">{post.title}</h3>
-                        <p className="mt-2 text-slate-600">{post.excerpt}</p>
-                        <a href="#" className="text-indigo-600 font-semibold mt-4 inline-block">Read More &rarr;</a>
-                    </div>
-                ))}
-            </div>
+        <GenericPage title={postToShow ? postToShow.title : "Our Blog"}>
+            {postToShow ? (
+                <div>
+                    <button onClick={() => setSelectedPost(null)} className="text-indigo-600 font-semibold mb-6">&larr; Back to Blog List</button>
+                    <div dangerouslySetInnerHTML={{ __html: postToShow.content }} />
+                </div>
+            ) : (
+                <div className="space-y-8">
+                    {blogPostsData.map(post => (
+                        <div key={post.slug} className="p-6 border rounded-lg hover:shadow-lg transition-shadow">
+                            <h3 className="text-xl font-semibold text-slate-800">{post.title}</h3>
+                            <p className="mt-2 text-slate-600">{post.excerpt}</p>
+                            <button onClick={() => setSelectedPost(post.slug)} className="text-indigo-600 font-semibold mt-4 inline-block">Read More &rarr;</button>
+                        </div>
+                    ))}
+                </div>
+            )}
         </GenericPage>
     );
 };
 
 
-const LoginPage = ({ setPage }) => {
+const LoginPage = () => {
+    const { setPage } = useApp();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -231,7 +415,6 @@ const LoginPage = ({ setPage }) => {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // The AppRouter's useEffect will handle redirection
         } catch (err) {
             setError(err.message.replace('Firebase: ', ''));
         } finally {
@@ -266,7 +449,8 @@ const LoginPage = ({ setPage }) => {
     );
 };
 
-const SignUpPage = ({ setPage }) => {
+const SignUpPage = () => {
+    const { setPage } = useApp();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
@@ -293,7 +477,6 @@ const SignUpPage = ({ setPage }) => {
                 version: 'basic',
                 createdAt: serverTimestamp(),
             });
-            // The AppRouter's useEffect will handle redirection
         } catch (err) {
             setError(err.message.replace('Firebase: ', ''));
         } finally {
@@ -350,18 +533,10 @@ const VerifyEmailPage = () => {
 };
 
 // --- Logged-in Pages (Profile, Pricing, Admin, Chat) ---
-// These pages will now be wrapped by a header specific to the logged-in experience
-const LoggedInLayout = ({ children }) => (
-    <div className="flex flex-col h-screen">
-        <LoggedInHeader />
-        {children}
-    </div>
-);
-
-const ProfilePage = () => <LoggedInLayout><ProfilePageContent /></LoggedInLayout>;
-const PricingPage = () => <LoggedInLayout><PricingPageContent /></LoggedInLayout>;
-const AdminPage = () => <LoggedInLayout><AdminPageContent /></LoggedInLayout>;
-const ChatPage = () => <LoggedInLayout><ChatPageContent /></LoggedInLayout>;
+const ProfilePage = () => <ProfilePageContent />;
+const PricingPage = () => <PricingPageContent />;
+const AdminPage = () => <AdminPageContent />;
+const ChatPage = () => <ChatPageContent />;
 
 
 const ProfilePageContent = () => {
@@ -771,6 +946,7 @@ const Header = () => {
                     <button onClick={() => setPage('home')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</button>
                     <button onClick={() => setPage('about')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">About</button>
                     <button onClick={() => setPage('blog')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Blog</button>
+                    <button onClick={() => setPage('faq')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">FAQ</button>
                     <button onClick={() => setPage('contact')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Contact</button>
                 </nav>
                 <div className="flex items-center gap-4">
@@ -1015,107 +1191,102 @@ const ChatPageContent = () => {
     }
 
     return (
-        <>
-            {toast.show && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(prev => ({...prev, show: false}))} />}
-            <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
-            
-            <div className="flex flex-1 overflow-hidden bg-slate-100">
-                {isBasicVersion && <LeftAdPanel />}
-                <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
-                    <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
-                           <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                                {isBasicVersion && <TopAdBanner />}
-                                {loadingStatus ? (
-                                     <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
-                                ) : !sopExists ? (
-                                    <div className="relative text-center p-8 bg-slate-100 rounded-lg">
-                                        {loadingUpload && (
-                                            <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
-                                                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="mt-2 text-slate-600">Uploading...</p>
+        <div className="flex flex-1 overflow-hidden bg-slate-100">
+            {isBasicVersion && <LeftAdPanel />}
+            <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
+                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
+                       <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                            {isBasicVersion && <TopAdBanner />}
+                            {loadingStatus ? (
+                                 <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
+                            ) : !sopExists ? (
+                                <div className="relative text-center p-8 bg-slate-100 rounded-lg">
+                                    {loadingUpload && (
+                                        <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
+                                            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="mt-2 text-slate-600">Uploading...</p>
+                                        </div>
+                                    )}
+                                    <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
+                                    <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
+                                    <div className="max-w-md mx-auto">
+                                        <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                          Choose files...
+                                        </button>
+                                        {files.length > 0 && (
+                                            <div className="mt-4 space-y-2 text-left">
+                                                {files.map((file, index) => (
+                                                    <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
+                                                        <FileIcon />
+                                                        <span className="flex-grow truncate">{file.name}</span>
+                                                        <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
+                                                    </div>
+                                                ))}
+                                                <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                                    Upload {files.length} File(s)
+                                                </button>
                                             </div>
                                         )}
-                                        <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
-                                        <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
-                                        <div className="max-w-md mx-auto">
-                                            <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
-                                              Choose files...
-                                            </button>
-                                            {files.length > 0 && (
-                                                <div className="mt-4 space-y-2 text-left">
-                                                    {files.map((file, index) => (
-                                                        <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
-                                                            <FileIcon />
-                                                            <span className="flex-grow truncate">{file.name}</span>
-                                                            <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
-                                                        </div>
-                                                    ))}
-                                                    <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                                                        Upload {files.length} File(s)
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
-                                ) : chat.length === 0 ? (
-                                     <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
-                                ) : null}
+                                </div>
+                            ) : chat.length === 0 ? (
+                                 <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
+                            ) : null}
 
-                                {chat.map((c, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}
-                                    >
-                                        {c.role === 'assistant' && <AssistantAvatar />}
-                                        <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
-                                            <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2">
-                                                {c.text}
-                                            </ReactMarkdown>
-                                        </div>
-                                        {c.role === 'user' && <UserAvatar userData={userData} />}
-                                    </motion.div>
-                                ))}
-                                 {loadingSend && (
-                                    <div className="flex items-start gap-4">
-                                        <AssistantAvatar />
-                                        <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
-                                            <div className="flex items-center space-x-1">
-                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
-                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
-                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
-                                            </div>
+                            {chat.map((c, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}
+                                >
+                                    {c.role === 'assistant' && <AssistantAvatar />}
+                                    <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
+                                        <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2">
+                                            {c.text}
+                                        </ReactMarkdown>
+                                    </div>
+                                    {c.role === 'user' && <UserAvatar userData={userData} />}
+                                </motion.div>
+                            ))}
+                             {loadingSend && (
+                                <div className="flex items-start gap-4">
+                                    <AssistantAvatar />
+                                    <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
+                                        <div className="flex items-center space-x-1">
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
                                         </div>
                                     </div>
-                                )}
-                                <div ref={chatEndRef} />
-                             </div>
-                           <div className="p-4 bg-white/80 border-t">
-                                <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                                    {sopExists && (
-                                        <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
-                                            {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
-                                        </button>
-                                    )}
-                                    <input
-                                      value={message}
-                                      onChange={(e) => setMessage(e.target.value)}
-                                      className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
-                                      placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
-                                      disabled={!sopExists || loadingSend}
-                                    />
-                                    <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 transform transition-transform hover:scale-110">
-                                        <SendIcon />
+                                </div>
+                            )}
+                            <div ref={chatEndRef} />
+                         </div>
+                       <div className="p-4 bg-white/80 border-t">
+                            <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                                {sopExists && (
+                                    <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
+                                        {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
                                     </button>
-                                </form>
-                                 <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {isAdmin ? 'Unlimited' : userData?.credits}</p>
-                             </div>
-                    </div>
-                </main>
-                {isBasicVersion && <RightAdPanel />}
-            </div>
-        </>
+                                )}
+                                <input
+                                  value={message}
+                                  onChange={(e) => setMessage(e.target.value)}
+                                  className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
+                                  placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
+                                  disabled={!sopExists || loadingSend}
+                                />
+                                <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 transform transition-transform hover:scale-110">
+                                    <SendIcon />
+                                </button>
+                            </form>
+                             <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {isAdmin ? 'Unlimited' : userData?.credits}</p>
+                         </div>
+                </div>
+            </main>
+            {isBasicVersion && <RightAdPanel />}
+        </div>
     );
 };
