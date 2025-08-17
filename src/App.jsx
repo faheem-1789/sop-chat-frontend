@@ -3,11 +3,11 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged, 
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
     signOut,
     sendEmailVerification,
     getIdToken
@@ -20,13 +20,13 @@ import { motion } from 'framer-motion';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
-  apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
-  authDomain: "sop-assistant-9dc2a.firebaseapp.com",
-  projectId: "sop-assistant-9dc2a",
-  storageBucket: "sop-assistant-9dc2a.appspot.com",
-  messagingSenderId: "672105722476",
-  appId: "1:672105722476:web:1d88461fdf6631b168de49",
-  databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com" 
+    apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
+    authDomain: "sop-assistant-9dc2a.firebaseapp.com",
+    projectId: "sop-assistant-9dc2a",
+    storageBucket: "sop-assistant-9dc2a.appspot.com",
+    messagingSenderId: "672105722476",
+    appId: "1:672105722476:web:1d88461fdf6631b168de49",
+    databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase
@@ -161,7 +161,7 @@ const LoginPage = ({ setPage }) => {
 
     return (
         <div className="flex items-center justify-center h-screen bg-slate-100">
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
@@ -199,7 +199,7 @@ const SignUpPage = ({ setPage }) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await sendEmailVerification(userCredential.user);
-            
+
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 uid: userCredential.user.uid,
                 fullName,
@@ -207,6 +207,7 @@ const SignUpPage = ({ setPage }) => {
                 companyName,
                 department,
                 credits: 10,
+                version: 'basic', // Default to basic version
                 createdAt: serverTimestamp(),
             });
         } catch (err) {
@@ -218,7 +219,7 @@ const SignUpPage = ({ setPage }) => {
 
     return (
         <div className="flex items-center justify-center h-screen bg-slate-100">
-             <motion.div 
+             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
@@ -246,7 +247,7 @@ const SignUpPage = ({ setPage }) => {
 const VerifyEmailPage = () => {
     return (
         <div className="flex flex-col items-center justify-center h-screen text-center p-4 bg-slate-100">
-            <motion.div 
+            <motion.div
                  initial={{ opacity: 0, scale: 0.9 }}
                  animate={{ opacity: 1, scale: 1 }}
                 className="bg-white p-10 rounded-2xl shadow-lg max-w-lg"
@@ -295,13 +296,12 @@ const ProfilePage = () => {
             setMessage('Error updating profile.');
         }
     };
-    
+
     const handleClearMemory = async () => {
         if (!user) return;
         try {
             const token = await getIdToken(user);
-            // NOTE: The endpoint `/clear_memory` was not in the provided `main.py`. 
-            // This call will fail unless you implement that endpoint in your backend.
+            // This endpoint needs to be implemented in main.py if you wish to use it.
             await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -311,7 +311,7 @@ const ProfilePage = () => {
             setPage('chat');
         } catch (error) {
             console.error("Failed to clear memory:", error);
-            setMessage("Error clearing memory. Please try again.");
+            setMessage("Error clearing memory. The backend endpoint might be missing.");
             setShowConfirm(false);
         }
     };
@@ -360,7 +360,7 @@ const ProfilePage = () => {
                             {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
                         </form>
                     </div>
-                    
+
                     <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
                         <h3 className="text-xl font-bold mb-4 text-slate-800">Danger Zone</h3>
                         <div className="border-t pt-4">
@@ -387,7 +387,7 @@ const ProfilePage = () => {
 };
 
 const PricingPage = () => {
-    const plans = [
+    const creditPlans = [
         { name: 'Basic', credits: 20, price: '1,500 PKR' },
         { name: 'Standard', credits: 50, price: '5,000 PKR' },
         { name: 'Premium', credits: 100, price: '9,000 PKR', popular: true },
@@ -398,33 +398,62 @@ const PricingPage = () => {
         <div className="flex flex-col h-full">
             <Header />
             <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-                    <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
-                    <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                        {plans.map((plan, index) => (
-                            <motion.div 
-                                key={plan.name}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
-                            >
-                                <h3 className="text-2xl font-bold">{plan.name}</h3>
-                                <p className="text-4xl font-extrabold my-4">{plan.price}</p>
-                                <p className="text-lg font-semibold">{plan.credits} Credits</p>
-                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transform transition-transform hover:scale-105">Purchase</button>
-                            </motion.div>
-                        ))}
+                <div className="w-full max-w-6xl text-center">
+
+                    {/* Pro Version Section */}
+                    <div className="mb-16">
+                         <h2 className="text-3xl font-bold mb-2">Upgrade to Pro</h2>
+                         <p className="text-gray-600 mb-8">Enjoy an ad-free experience with a one-time payment.</p>
+                         <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="max-w-md mx-auto p-8 border-2 border-indigo-500 rounded-2xl shadow-2xl bg-white text-center"
+                         >
+                             <h3 className="text-2xl font-bold">Pro Version</h3>
+                             <p className="text-5xl font-extrabold my-4">40,000 PKR</p>
+                             <p className="text-lg font-semibold text-slate-600">One-Time Payment</p>
+                             <ul className="text-left my-6 space-y-2">
+                                <li>✅ Ad-Free Interface</li>
+                                <li>✅ Priority Support</li>
+                                <li>✅ All Features Included</li>
+                             </ul>
+                             <p className="mt-6 text-sm text-slate-700">
+                                To purchase, please email your registered account ID to:<br/>
+                                <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                             </p>
+                         </motion.div>
                     </div>
-                    <p className="mt-12 text-lg text-slate-700">
-                        For payment details and methods, please contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
-                    </p>
+
+                    {/* Credit Purchase Section */}
+                     <div>
+                        <h2 className="text-3xl font-bold mb-2">Purchase Credits (for Basic Users)</h2>
+                        <p className="text-gray-600 mb-8">Keep the ads and top up your credits to continue the conversation.</p>
+                        <div className="grid md:grid-cols-4 gap-8">
+                            {creditPlans.map((plan, index) => (
+                                <motion.div
+                                    key={plan.name}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
+                                >
+                                    <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                    <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                                    <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                                    <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transform transition-transform hover:scale-105">Purchase</button>
+                                </motion.div>
+                            ))}
+                        </div>
+                         <p className="mt-12 text-lg text-slate-700">
+                            For payment details, contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                        </p>
+                    </div>
                 </div>
             </main>
         </div>
     );
 };
+
 
 const AdminPage = () => {
     const { user } = useApp();
@@ -481,7 +510,7 @@ const AdminPage = () => {
     const handleEdit = (user) => {
         setEditingUser({...user});
     };
-    
+
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         if (!editingUser) return;
@@ -492,6 +521,7 @@ const AdminPage = () => {
                 companyName: editingUser.companyName,
                 department: editingUser.department,
                 credits: parseInt(editingUser.credits, 10),
+                version: editingUser.version, // Send version update
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -502,7 +532,7 @@ const AdminPage = () => {
             alert("Failed to update user.");
         }
     };
-    
+
     const handleCreateUser = async (e) => {
         e.preventDefault();
         try {
@@ -519,7 +549,7 @@ const AdminPage = () => {
         }
     };
 
-    const filteredUsers = users.filter(u => 
+    const filteredUsers = users.filter(u =>
         (u.fullName || '').toLowerCase().includes(filters.name.toLowerCase()) &&
         (u.email || '').toLowerCase().includes(filters.email.toLowerCase()) &&
         (u.companyName || '').toLowerCase().includes(filters.company.toLowerCase()) &&
@@ -553,6 +583,7 @@ const AdminPage = () => {
                                     <th className="p-2">Name</th>
                                     <th className="p-2">Email</th>
                                     <th className="p-2">Company</th>
+                                    <th className="p-2">Version</th>
                                     <th className="p-2">Credits</th>
                                     <th className="p-2">Actions</th>
                                 </tr>
@@ -568,6 +599,11 @@ const AdminPage = () => {
                                         <td className="p-2">{u.fullName}</td>
                                         <td className="p-2">{u.email}</td>
                                         <td className="p-2">{u.companyName}</td>
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${u.version === 'pro' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                {u.version?.charAt(0).toUpperCase() + u.version?.slice(1)}
+                                            </span>
+                                        </td>
                                         <td className="p-2">{u.credits}</td>
                                         <td className="p-2 flex gap-2">
                                             <button onClick={() => handleEdit(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
@@ -576,7 +612,7 @@ const AdminPage = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="6" className="text-center p-4 text-slate-500">No users found.</td>
+                                        <td colSpan="7" className="text-center p-4 text-slate-500">No users found.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -589,10 +625,21 @@ const AdminPage = () => {
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Edit User: {editingUser.email}</h3>
                         <form onSubmit={handleUpdateUser} className="space-y-4">
-                             <input value={editingUser.fullName} onChange={e => setEditingUser({...editingUser, fullName: e.target.value})} className="w-full p-2 border rounded" />
-                             <input value={editingUser.companyName} onChange={e => setEditingUser({...editingUser, companyName: e.target.value})} className="w-full p-2 border rounded" />
-                             <input value={editingUser.department} onChange={e => setEditingUser({...editingUser, department: e.target.value})} className="w-full p-2 border rounded" />
-                             <input type="number" value={editingUser.credits} onChange={e => setEditingUser({...editingUser, credits: e.target.value})} className="w-full p-2 border rounded" />
+                             <input placeholder="Full Name" value={editingUser.fullName} onChange={e => setEditingUser({...editingUser, fullName: e.target.value})} className="w-full p-2 border rounded" />
+                             <input placeholder="Company Name" value={editingUser.companyName} onChange={e => setEditingUser({...editingUser, companyName: e.target.value})} className="w-full p-2 border rounded" />
+                             <input placeholder="Department" value={editingUser.department} onChange={e => setEditingUser({...editingUser, department: e.target.value})} className="w-full p-2 border rounded" />
+                             <input type="number" placeholder="Credits" value={editingUser.credits} onChange={e => setEditingUser({...editingUser, credits: e.target.value})} className="w-full p-2 border rounded" />
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700">Version</label>
+                                <select
+                                    value={editingUser.version}
+                                    onChange={e => setEditingUser({...editingUser, version: e.target.value})}
+                                    className="w-full p-2 border rounded mt-1"
+                                >
+                                    <option value="basic">Basic</option>
+                                    <option value="pro">Pro</option>
+                                </select>
+                            </div>
                             <div className="flex justify-end gap-4">
                                 <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-md">Cancel</button>
                                 <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md">Save Changes</button>
@@ -631,7 +678,7 @@ const Header = () => {
 
     return (
         <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-10 sticky top-0">
-            <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
                  <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('chat')}>
                     <Logo />
                     <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
@@ -665,9 +712,39 @@ const Toast = ({ message, type, onDismiss }) => {
     );
 };
 
+// --- Ad Components (Placeholders) ---
+const AdPlaceholder = ({ className = '' }) => (
+    // Replace this div with your Google AdSense code snippet
+    <div className={`bg-gray-200 border border-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full ${className}`}>
+        Ad Placeholder
+    </div>
+);
+
+const LeftAdPanel = () => (
+    <aside className="w-48 bg-slate-50 border-r border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
+        <div className="flex-1"><AdPlaceholder /></div>
+        <div className="flex-1"><AdPlaceholder /></div>
+    </aside>
+);
+
+const RightAdPanel = () => (
+    <aside className="w-48 bg-slate-50 border-l border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
+         <div className="flex-1"><AdPlaceholder /></div>
+         <div className="flex-1"><AdPlaceholder /></div>
+    </aside>
+);
+
+const TopAdBanner = () => (
+     <div className="w-full h-24 mb-4 flex-shrink-0">
+        <AdPlaceholder className="h-full"/>
+     </div>
+);
+
+
 const ChatPage = () => {
     const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, setPage } = useApp();
     const isAdmin = userData?.role === 'admin';
+    const isBasicVersion = userData?.version === 'basic'; // Check user version
     const [files, setFiles] = useState([]);
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
@@ -721,7 +798,7 @@ const ChatPage = () => {
             setFiles(prev => [...prev, ...selectedFiles]);
         }
     };
-    
+
     const handleRemoveFile = (indexToRemove) => {
         setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
     };
@@ -731,7 +808,7 @@ const ChatPage = () => {
 
         const loadingSetter = isMoreUpload ? setIsUploadingMore : setLoadingUpload;
         loadingSetter(true);
-        
+
         const wasInitialUpload = !sopExists;
 
         try {
@@ -743,10 +820,10 @@ const ChatPage = () => {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
                 });
             }
-            
+
             setSopExists(true);
             if (!isMoreUpload) setFiles([]);
-            
+
             setToast({ show: true, message: `${filesToUpload.length} file(s) uploaded successfully!`, type: 'success' });
 
             if(wasInitialUpload) {
@@ -812,98 +889,104 @@ const ChatPage = () => {
             <Header />
             {toast.show && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(prev => ({...prev, show: false}))} />}
             <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
-            <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
-                <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
-                     <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                        {loadingStatus ? (
-                             <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
-                        ) : !sopExists ? (
-                            <div className="relative text-center p-8 bg-slate-100 rounded-lg">
-                                {loadingUpload && (
-                                    <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
-                                        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <p className="mt-2 text-slate-600">Uploading...</p>
+            
+            <div className="flex flex-1 overflow-hidden">
+                {isBasicVersion && <LeftAdPanel />}
+                <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
+                    <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
+                           <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                                {isBasicVersion && <TopAdBanner />}
+                                {loadingStatus ? (
+                                     <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
+                                ) : !sopExists ? (
+                                    <div className="relative text-center p-8 bg-slate-100 rounded-lg">
+                                        {loadingUpload && (
+                                            <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
+                                                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                                <p className="mt-2 text-slate-600">Uploading...</p>
+                                            </div>
+                                        )}
+                                        <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
+                                        <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
+                                        <div className="max-w-md mx-auto">
+                                            <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                              Choose files...
+                                            </button>
+                                            {files.length > 0 && (
+                                                <div className="mt-4 space-y-2 text-left">
+                                                    {files.map((file, index) => (
+                                                        <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
+                                                            <FileIcon />
+                                                            <span className="flex-grow truncate">{file.name}</span>
+                                                            <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                                        Upload {files.length} File(s)
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : chat.length === 0 ? (
+                                     <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
+                                ) : null}
+
+                                {chat.map((c, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}
+                                    >
+                                        {c.role === 'assistant' && <AssistantAvatar />}
+                                        <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
+                                            <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2">
+                                                {c.text}
+                                            </ReactMarkdown>
+                                        </div>
+                                        {c.role === 'user' && <UserAvatar userData={userData} />}
+                                    </motion.div>
+                                ))}
+                                 {loadingSend && (
+                                    <div className="flex items-start gap-4">
+                                        <AssistantAvatar />
+                                        <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
+                                            <div className="flex items-center space-x-1">
+                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
+                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
+                                                <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
-                                <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
-                                <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
-                                <div className="max-w-md mx-auto">
-                                    <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
-                                      Choose files...
-                                    </button>
-                                    {files.length > 0 && (
-                                        <div className="mt-4 space-y-2 text-left">
-                                            {files.map((file, index) => (
-                                                <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
-                                                    <FileIcon />
-                                                    <span className="flex-grow truncate">{file.name}</span>
-                                                    <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
-                                                </div>
-                                            ))}
-                                            <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                                                Upload {files.length} File(s)
-                                            </button>
-                                        </div>
+                                <div ref={chatEndRef} />
+                             </div>
+                           <div className="p-4 bg-white/80 border-t">
+                                <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                                    {sopExists && (
+                                        <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
+                                            {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
+                                        </button>
                                     )}
-                                </div>
-                            </div>
-                        ) : chat.length === 0 ? (
-                             <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
-                        ) : null}
-                        
-                        {chat.map((c, i) => (
-                            <motion.div 
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}
-                            >
-                                {c.role === 'assistant' && <AssistantAvatar />}
-                                <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
-                                    <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2">
-                                        {c.text}
-                                    </ReactMarkdown>
-                                </div>
-                                {c.role === 'user' && <UserAvatar userData={userData} />}
-                            </motion.div>
-                        ))}
-                         {loadingSend && (
-                            <div className="flex items-start gap-4">
-                                <AssistantAvatar />
-                                <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
-                                    <div className="flex items-center space-x-1">
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        <div ref={chatEndRef} />
-                     </div>
-                     <div className="p-4 bg-white/80 border-t">
-                        <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                            {sopExists && (
-                                <button type="button" title="Upload More Files" onClick={() => !isUploadingMore && fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200 transition-colors disabled:opacity-50" disabled={isUploadingMore}>
-                                    {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
-                                </button>
-                            )}
-                            <input
-                              value={message}
-                              onChange={(e) => setMessage(e.target.value)}
-                              className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
-                              placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
-                              disabled={!sopExists || loadingSend}
-                            />
-                            <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 transform transition-transform hover:scale-110">
-                                <SendIcon />
-                            </button>
-                        </form>
-                         <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {isAdmin ? 'Unlimited' : userData?.credits}</p>
-                     </div>
-                </div>
-            </main>
+                                    <input
+                                      value={message}
+                                      onChange={(e) => setMessage(e.target.value)}
+                                      className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
+                                      placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
+                                      disabled={!sopExists || loadingSend}
+                                    />
+                                    <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 transform transition-transform hover:scale-110">
+                                        <SendIcon />
+                                    </button>
+                                </form>
+                                 <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {isAdmin ? 'Unlimited' : userData?.credits}</p>
+                             </div>
+                    </div>
+                </main>
+                {isBasicVersion && <RightAdPanel />}
+            </div>
         </div>
     );
 };
