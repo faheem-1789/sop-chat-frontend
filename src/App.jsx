@@ -15,7 +15,7 @@ import {
 import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as dbServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 import ReactMarkdown from 'react-markdown';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 // --- Firebase Configuration ---
@@ -56,7 +56,7 @@ const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState('login');
+    const [page, setPage] = useState('home'); // Default page is now 'home'
     const [chat, setChat] = useState([]);
     const [sopExists, setSopExists] = useState(false);
 
@@ -101,44 +101,123 @@ const AppRouter = () => {
     useEffect(() => {
         if (!loading) {
             if (user) {
-                if (user.emailVerified) {
-                    if (['login', 'signup', 'verify-email'].includes(page)) setPage('chat');
-                } else {
-                    if (page !== 'verify-email') setPage('verify-email');
+                if (!user.emailVerified) {
+                    setPage('verify-email');
+                } else if (page === 'login' || page === 'signup' || page === 'verify-email') {
+                    // If user is logged in and on an auth page, redirect to chat
+                    setPage('chat');
                 }
-            } else {
-                if (page !== 'signup' && page !== 'login') setPage('login');
             }
         }
     }, [user, loading, page, setPage]);
+
 
     if (loading) {
         return <div className="flex items-center justify-center h-screen bg-slate-100"><div className="animate-pulse">Loading Application...</div></div>;
     }
 
     const renderPage = () => {
-        if (user && !user.emailVerified) {
-             return <VerifyEmailPage />;
-        }
+        // Always show header and footer for public pages
+        const publicPages = ['home', 'about', 'contact', 'privacy', 'terms', 'blog', 'login', 'signup'];
+        const isPublicPage = publicPages.includes(page);
+        const isAuthPage = ['login', 'signup'].includes(page);
 
-        switch (page) {
-            case 'signup': return <SignUpPage setPage={setPage} />;
-            case 'chat': return <ChatPage />;
-            case 'profile': return <ProfilePage />;
-            case 'pricing': return <PricingPage />;
-            case 'admin': return userData?.role === 'admin' ? <AdminPage /> : <ChatPage />;
-            default: return <LoginPage setPage={setPage} />;
-        }
+        const pageComponent = () => {
+            switch (page) {
+                case 'home': return <HomePage />;
+                case 'about': return <AboutPage />;
+                case 'contact': return <ContactPage />;
+                case 'privacy': return <PrivacyPolicyPage />;
+                case 'terms': return <TermsOfServicePage />;
+                case 'blog': return <BlogPage />;
+                case 'login': return <LoginPage />;
+                case 'signup': return <SignUpPage />;
+                case 'verify-email': return <VerifyEmailPage />;
+                case 'chat': return <ChatPage />;
+                case 'profile': return <ProfilePage />;
+                case 'pricing': return <PricingPage />;
+                case 'admin': return userData?.role === 'admin' ? <AdminPage /> : <ChatPage />;
+                default: return <HomePage />;
+            }
+        };
+
+        return (
+             <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
+                {isPublicPage && !isAuthPage && <Header />}
+                <main className="flex-grow">
+                    {pageComponent()}
+                </main>
+                {isPublicPage && !isAuthPage && <Footer />}
+            </div>
+        );
     };
 
+    return <AnimatePresence mode="wait">{renderPage()}</AnimatePresence>;
+};
+
+
+// --- Page Components ---
+
+const HomePage = () => {
+    const { setPage } = useApp();
     return (
-        <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-gray-100 font-sans">
-            {renderPage()}
+        <div className="text-center py-20 px-4 sm:px-6 lg:px-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight">
+                    Unlock Insights from Your SOPs Instantly
+                </h1>
+                <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600">
+                    Our AI-powered assistant reads and understands your Standard Operating Procedures from Excel files, providing you with immediate, accurate answers to your most complex questions.
+                </p>
+                <div className="mt-8 flex justify-center gap-4">
+                    <button onClick={() => setPage('signup')} className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                        Get Started for Free
+                    </button>
+                    <button onClick={() => setPage('login')} className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                        Login
+                    </button>
+                </div>
+            </motion.div>
         </div>
     );
 };
 
-// --- Page Components ---
+// --- Placeholder Pages ---
+const GenericPage = ({ title, children }) => (
+    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-slate-800 mb-6">{title}</h1>
+        <div className="prose prose-lg text-slate-600">
+            {children}
+        </div>
+    </div>
+);
+
+const AboutPage = () => <GenericPage title="About Us"><p>Welcome to SOP Assistant. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours and improve operational efficiency.</p></GenericPage>;
+const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
+const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p>Your privacy is important to us. This privacy statement explains the personal data SOP Assistant processes, how we process it, and for what purposes. [Your detailed Privacy Policy content goes here...]</p></GenericPage>;
+const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p>Please read these terms of service carefully before using Our Service. [Your detailed Terms of Service content goes here...]</p></GenericPage>;
+
+const BlogPage = () => {
+    const blogPosts = [
+        { title: "How to Analyze SOPs Easily with AI", excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds..." },
+        { title: "Can AI Really Read and Understand Excel Files?", excerpt: "We dive into the technology that allows our assistant to parse spreadsheets and provide accurate answers..." },
+        { title: "5 Ways to Improve Your Team's Efficiency with SOP Assistant", excerpt: "Learn practical tips and tricks to get the most out of our platform and boost your team's productivity..." },
+    ];
+    return (
+        <GenericPage title="Our Blog">
+            <div className="space-y-8">
+                {blogPosts.map(post => (
+                    <div key={post.title} className="p-6 border rounded-lg hover:shadow-lg transition-shadow">
+                        <h3 className="text-xl font-semibold text-slate-800">{post.title}</h3>
+                        <p className="mt-2 text-slate-600">{post.excerpt}</p>
+                        <a href="#" className="text-indigo-600 font-semibold mt-4 inline-block">Read More &rarr;</a>
+                    </div>
+                ))}
+            </div>
+        </GenericPage>
+    );
+};
+
 
 const LoginPage = ({ setPage }) => {
     const [email, setEmail] = useState('');
@@ -152,6 +231,7 @@ const LoginPage = ({ setPage }) => {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            // The AppRouter's useEffect will handle redirection
         } catch (err) {
             setError(err.message.replace('Firebase: ', ''));
         } finally {
@@ -160,13 +240,16 @@ const LoginPage = ({ setPage }) => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-slate-100">
+        <div className="flex items-center justify-center min-h-screen bg-slate-100">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
             >
-                <h2 className="text-3xl font-bold text-center text-slate-800">Welcome Back!</h2>
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Welcome Back!</h2>
+                </div>
                 {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
                 <form onSubmit={handleLogin} className="space-y-4">
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500" />
@@ -207,9 +290,10 @@ const SignUpPage = ({ setPage }) => {
                 companyName,
                 department,
                 credits: 10,
-                version: 'basic', // Default to basic version
+                version: 'basic',
                 createdAt: serverTimestamp(),
             });
+            // The AppRouter's useEffect will handle redirection
         } catch (err) {
             setError(err.message.replace('Firebase: ', ''));
         } finally {
@@ -218,13 +302,16 @@ const SignUpPage = ({ setPage }) => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-slate-100">
+        <div className="flex items-center justify-center min-h-screen bg-slate-100">
              <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg"
             >
-                <h2 className="text-3xl font-bold text-center text-slate-800">Create an Account</h2>
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Create an Account</h2>
+                </div>
                 {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
                 <form onSubmit={handleSignUp} className="space-y-4">
                     <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" required className="w-full px-4 py-3 border rounded-md" />
@@ -262,7 +349,22 @@ const VerifyEmailPage = () => {
     );
 };
 
-const ProfilePage = () => {
+// --- Logged-in Pages (Profile, Pricing, Admin, Chat) ---
+// These pages will now be wrapped by a header specific to the logged-in experience
+const LoggedInLayout = ({ children }) => (
+    <div className="flex flex-col h-screen">
+        <LoggedInHeader />
+        {children}
+    </div>
+);
+
+const ProfilePage = () => <LoggedInLayout><ProfilePageContent /></LoggedInLayout>;
+const PricingPage = () => <LoggedInLayout><PricingPageContent /></LoggedInLayout>;
+const AdminPage = () => <LoggedInLayout><AdminPageContent /></LoggedInLayout>;
+const ChatPage = () => <LoggedInLayout><ChatPageContent /></LoggedInLayout>;
+
+
+const ProfilePageContent = () => {
     const { user, userData, setUserData, setSopExists, setChat, setPage } = useApp();
     const [fullName, setFullName] = useState('');
     const [companyName, setCompanyName] = useState('');
@@ -301,7 +403,6 @@ const ProfilePage = () => {
         if (!user) return;
         try {
             const token = await getIdToken(user);
-            // This endpoint needs to be implemented in main.py if you wish to use it.
             await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -317,59 +418,56 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex flex-col h-full">
-            <Header />
-            <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
-                <div className="w-full max-w-4xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
-                        <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-                            {isEditing ? 'Cancel' : 'Edit Profile'}
-                        </button>
-                    </div>
-                    {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
-                    <div className="bg-white p-8 rounded-2xl shadow-lg">
-                        <div className="flex items-center space-x-6 mb-8">
-                            <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
-                            <div>
-                                <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
-                                <p className="text-slate-500">{userData?.email}</p>
-                            </div>
+        <main className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+            <div className="w-full max-w-4xl">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
+                    <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                        {isEditing ? 'Cancel' : 'Edit Profile'}
+                    </button>
+                </div>
+                {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
+                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                    <div className="flex items-center space-x-6 mb-8">
+                        <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
+                            <p className="text-slate-500">{userData?.email}</p>
                         </div>
-                        <form onSubmit={handleUpdate} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
-                                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Department</label>
-                                <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Company</label>
-                                <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-slate-50" />
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
-                                <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
-                            </div>
-                            {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
-                        </form>
                     </div>
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Department</label>
+                            <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Company</label>
+                            <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-slate-50" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                            <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                        {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
+                    </form>
+                </div>
 
-                    <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
-                        <h3 className="text-xl font-bold mb-4 text-slate-800">Danger Zone</h3>
-                        <div className="border-t pt-4">
-                            <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md font-semibold">Clear All SOP Data</button>
-                            <p className="text-sm text-slate-500 mt-2">This will permanently delete all uploaded documents and learned knowledge for your account. This action cannot be undone.</p>
-                        </div>
+                <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 className="text-xl font-bold mb-4 text-slate-800">Danger Zone</h3>
+                    <div className="border-t pt-4">
+                        <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md font-semibold">Clear All SOP Data</button>
+                        <p className="text-sm text-slate-500 mt-2">This will permanently delete all uploaded documents and learned knowledge for your account. This action cannot be undone.</p>
                     </div>
                 </div>
-            </main>
+            </div>
             {showConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl">
@@ -382,11 +480,11 @@ const ProfilePage = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </main>
     );
 };
 
-const PricingPage = () => {
+const PricingPageContent = () => {
     const creditPlans = [
         { name: 'Basic', credits: 20, price: '1,500 PKR' },
         { name: 'Standard', credits: 50, price: '5,000 PKR' },
@@ -395,67 +493,60 @@ const PricingPage = () => {
     ];
 
     return (
-        <div className="flex flex-col h-full">
-            <Header />
-            <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
-                <div className="w-full max-w-6xl text-center">
-
-                    {/* Pro Version Section */}
-                    <div className="mb-16">
-                         <h2 className="text-3xl font-bold mb-2">Upgrade to Pro</h2>
-                         <p className="text-gray-600 mb-8">Enjoy an ad-free experience with a one-time payment.</p>
-                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="max-w-md mx-auto p-8 border-2 border-indigo-500 rounded-2xl shadow-2xl bg-white text-center"
-                         >
-                             <h3 className="text-2xl font-bold">Pro Version</h3>
-                             <p className="text-5xl font-extrabold my-4">40,000 PKR</p>
-                             <p className="text-lg font-semibold text-slate-600">One-Time Payment</p>
-                             <ul className="text-left my-6 space-y-2">
-                                <li>✅ Ad-Free Interface</li>
-                                <li>✅ Priority Support</li>
-                                <li>✅ All Features Included</li>
-                             </ul>
-                             <p className="mt-6 text-sm text-slate-700">
-                                To purchase, please email your registered account ID to:<br/>
-                                <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
-                             </p>
-                         </motion.div>
-                    </div>
-
-                    {/* Credit Purchase Section */}
-                     <div>
-                        <h2 className="text-3xl font-bold mb-2">Purchase Credits (for Basic Users)</h2>
-                        <p className="text-gray-600 mb-8">Keep the ads and top up your credits to continue the conversation.</p>
-                        <div className="grid md:grid-cols-4 gap-8">
-                            {creditPlans.map((plan, index) => (
-                                <motion.div
-                                    key={plan.name}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
-                                >
-                                    <h3 className="text-2xl font-bold">{plan.name}</h3>
-                                    <p className="text-4xl font-extrabold my-4">{plan.price}</p>
-                                    <p className="text-lg font-semibold">{plan.credits} Credits</p>
-                                    <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transform transition-transform hover:scale-105">Purchase</button>
-                                </motion.div>
-                            ))}
-                        </div>
-                         <p className="mt-12 text-lg text-slate-700">
-                            For payment details, contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
-                        </p>
-                    </div>
+        <main className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+            <div className="w-full max-w-6xl text-center">
+                <div className="mb-16">
+                     <h2 className="text-3xl font-bold mb-2">Upgrade to Pro</h2>
+                     <p className="text-gray-600 mb-8">Enjoy an ad-free experience with a one-time payment.</p>
+                     <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-md mx-auto p-8 border-2 border-indigo-500 rounded-2xl shadow-2xl bg-white text-center"
+                     >
+                         <h3 className="text-2xl font-bold">Pro Version</h3>
+                         <p className="text-5xl font-extrabold my-4">40,000 PKR</p>
+                         <p className="text-lg font-semibold text-slate-600">One-Time Payment</p>
+                         <ul className="text-left my-6 space-y-2">
+                            <li>✅ Ad-Free Interface</li>
+                            <li>✅ Priority Support</li>
+                            <li>✅ All Features Included</li>
+                         </ul>
+                         <p className="mt-6 text-sm text-slate-700">
+                            To purchase, please email your registered account ID to:<br/>
+                            <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                         </p>
+                     </motion.div>
                 </div>
-            </main>
-        </div>
+                 <div>
+                    <h2 className="text-3xl font-bold mb-2">Purchase Credits (for Basic Users)</h2>
+                    <p className="text-gray-600 mb-8">Keep the ads and top up your credits to continue the conversation.</p>
+                    <div className="grid md:grid-cols-4 gap-8">
+                        {creditPlans.map((plan, index) => (
+                            <motion.div
+                                key={plan.name}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}
+                            >
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                                <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transform transition-transform hover:scale-105">Purchase</button>
+                            </motion.div>
+                        ))}
+                    </div>
+                     <p className="mt-12 text-lg text-slate-700">
+                        For payment details, contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                    </p>
+                </div>
+            </div>
+        </main>
     );
 };
 
 
-const AdminPage = () => {
+const AdminPageContent = () => {
     const { user } = useApp();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -521,7 +612,7 @@ const AdminPage = () => {
                 companyName: editingUser.companyName,
                 department: editingUser.department,
                 credits: parseInt(editingUser.credits, 10),
-                version: editingUser.version, // Send version update
+                version: editingUser.version,
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -557,69 +648,66 @@ const AdminPage = () => {
     );
 
     return (
-        <div className="flex flex-col h-full">
-            <Header />
-            <main className="flex-1 p-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold">Admin Dashboard</h2>
-                    <button onClick={() => setShowCreateModal(true)} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700">
-                        <AddIcon /> Create User
-                    </button>
+        <main className="flex-1 p-8 bg-slate-100">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-bold">Admin Dashboard</h2>
+                <button onClick={() => setShowCreateModal(true)} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700">
+                    <AddIcon /> Create User
+                </button>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                <div className="grid grid-cols-4 gap-4">
+                    <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
+                    <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
+                    <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
+                    <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-                    <div className="grid grid-cols-4 gap-4">
-                        <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
-                        <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
-                        <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
-                        <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
-                    </div>
-                </div>
-                {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
-                    <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b">
-                                    <th className="p-2">Status</th>
-                                    <th className="p-2">Name</th>
-                                    <th className="p-2">Email</th>
-                                    <th className="p-2">Company</th>
-                                    <th className="p-2">Version</th>
-                                    <th className="p-2">Credits</th>
-                                    <th className="p-2">Actions</th>
+            </div>
+            {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
+                <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b">
+                                <th className="p-2">Status</th>
+                                <th className="p-2">Name</th>
+                                <th className="p-2">Email</th>
+                                <th className="p-2">Company</th>
+                                <th className="p-2">Version</th>
+                                <th className="p-2">Credits</th>
+                                <th className="p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.length > 0 ? filteredUsers.map(u => (
+                                <tr key={u.uid} className="border-b hover:bg-slate-50">
+                                    <td className="p-2">
+                                        <span className={`px-2 py-1 text-xs rounded-full ${u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
+                                            {u.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-2">{u.fullName}</td>
+                                    <td className="p-2">{u.email}</td>
+                                    <td className="p-2">{u.companyName}</td>
+                                    <td className="p-2">
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${u.version === 'pro' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
+                                            {u.version?.charAt(0).toUpperCase() + u.version?.slice(1)}
+                                        </span>
+                                    </td>
+                                    <td className="p-2">{u.credits}</td>
+                                    <td className="p-2 flex gap-2">
+                                        <button onClick={() => handleEdit(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
+                                        <button onClick={() => handleDelete(u.uid)} className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {filteredUsers.length > 0 ? filteredUsers.map(u => (
-                                    <tr key={u.uid} className="border-b hover:bg-slate-50">
-                                        <td className="p-2">
-                                            <span className={`px-2 py-1 text-xs rounded-full ${u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
-                                                {u.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-2">{u.fullName}</td>
-                                        <td className="p-2">{u.email}</td>
-                                        <td className="p-2">{u.companyName}</td>
-                                        <td className="p-2">
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${u.version === 'pro' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                {u.version?.charAt(0).toUpperCase() + u.version?.slice(1)}
-                                            </span>
-                                        </td>
-                                        <td className="p-2">{u.credits}</td>
-                                        <td className="p-2 flex gap-2">
-                                            <button onClick={() => handleEdit(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
-                                            <button onClick={() => handleDelete(u.uid)} className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center p-4 text-slate-500">No users found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </main>
+                            )) : (
+                                <tr>
+                                    <td colSpan="7" className="text-center p-4 text-slate-500">No users found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
             {editingUser && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -665,15 +753,40 @@ const AdminPage = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </main>
     );
 };
 
+// --- Headers & Footers ---
 const Header = () => {
+    const { setPage } = useApp();
+    return (
+        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('home')}>
+                    <Logo />
+                    <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
+                </div>
+                <nav className="hidden md:flex items-center space-x-6">
+                    <button onClick={() => setPage('home')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</button>
+                    <button onClick={() => setPage('about')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">About</button>
+                    <button onClick={() => setPage('blog')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Blog</button>
+                    <button onClick={() => setPage('contact')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Contact</button>
+                </nav>
+                <div className="flex items-center gap-4">
+                     <button onClick={() => setPage('login')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Login</button>
+                     <button onClick={() => setPage('signup')} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold hover:bg-indigo-700">Sign Up</button>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+const LoggedInHeader = () => {
     const { setPage, userData } = useApp();
     const handleLogout = async () => {
         await signOut(auth);
-        setPage('login');
+        setPage('home'); // Redirect to home on logout
     };
 
     return (
@@ -697,6 +810,24 @@ const Header = () => {
     );
 };
 
+const Footer = () => {
+    const { setPage } = useApp();
+    return (
+        <footer className="bg-white border-t">
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
+                <p>&copy; {new Date().getFullYear()} SOP Assistant. All rights reserved.</p>
+                <nav className="flex gap-6 mt-4 md:mt-0">
+                    <button onClick={() => setPage('about')} className="hover:text-indigo-600">About</button>
+                    <button onClick={() => setPage('contact')} className="hover:text-indigo-600">Contact</button>
+                    <button onClick={() => setPage('privacy')} className="hover:text-indigo-600">Privacy Policy</button>
+                    <button onClick={() => setPage('terms')} className="hover:text-indigo-600">Terms of Service</button>
+                </nav>
+            </div>
+        </footer>
+    );
+};
+
+
 const Toast = ({ message, type, onDismiss }) => {
     const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
     return (
@@ -714,7 +845,6 @@ const Toast = ({ message, type, onDismiss }) => {
 
 // --- Ad Components (Placeholders) ---
 const AdPlaceholder = ({ className = '' }) => (
-    // Replace this div with your Google AdSense code snippet
     <div className={`bg-gray-200 border border-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full ${className}`}>
         Ad Placeholder
     </div>
@@ -741,10 +871,10 @@ const TopAdBanner = () => (
 );
 
 
-const ChatPage = () => {
+const ChatPageContent = () => {
     const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, setPage } = useApp();
     const isAdmin = userData?.role === 'admin';
-    const isBasicVersion = userData?.version === 'basic'; // Check user version
+    const isBasicVersion = userData?.version === 'basic';
     const [files, setFiles] = useState([]);
     const [message, setMessage] = useState("");
     const [loadingUpload, setLoadingUpload] = useState(false);
@@ -885,15 +1015,14 @@ const ChatPage = () => {
     }
 
     return (
-        <div className="flex flex-col h-screen">
-            <Header />
+        <>
             {toast.show && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(prev => ({...prev, show: false}))} />}
             <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
             
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden bg-slate-100">
                 {isBasicVersion && <LeftAdPanel />}
                 <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
-                    <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
+                    <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
                            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                                 {isBasicVersion && <TopAdBanner />}
                                 {loadingStatus ? (
@@ -987,6 +1116,6 @@ const ChatPage = () => {
                 </main>
                 {isBasicVersion && <RightAdPanel />}
             </div>
-        </div>
+        </>
     );
 };
