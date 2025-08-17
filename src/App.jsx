@@ -56,7 +56,7 @@ const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState('home'); // Default page is now 'home'
+    const [page, setPage] = useState('home');
     const [chat, setChat] = useState([]);
     const [sopExists, setSopExists] = useState(false);
 
@@ -101,10 +101,19 @@ const AppRouter = () => {
     useEffect(() => {
         if (!loading) {
             if (user) {
+                // If user is logged in...
                 if (!user.emailVerified) {
+                    // And email is not verified, force to verification page
                     setPage('verify-email');
-                } else if (page === 'login' || page === 'signup' || page === 'verify-email' || page === 'home') {
+                } else if (['login', 'signup', 'verify-email'].includes(page)) {
+                    // And they are on an auth page, redirect to the main app (chat)
                     setPage('chat');
+                }
+            } else {
+                // If user is not logged in and tries to access a private app page, redirect to login
+                const appPages = ['chat', 'profile', 'pricing', 'admin'];
+                if (appPages.includes(page)) {
+                    setPage('login');
                 }
             }
         }
@@ -116,9 +125,6 @@ const AppRouter = () => {
     }
 
     const renderPage = () => {
-        const isPublicPage = ['home', 'about', 'contact', 'privacy', 'terms', 'blog', 'faq'].includes(page);
-        const isAuthPage = ['login', 'signup', 'verify-email'].includes(page);
-
         const pageComponent = () => {
             switch (page) {
                 case 'home': return <HomePage />;
@@ -131,10 +137,10 @@ const AppRouter = () => {
                 case 'login': return <LoginPage />;
                 case 'signup': return <SignUpPage />;
                 case 'verify-email': return <VerifyEmailPage />;
-                case 'chat': return <ChatPage />;
-                case 'profile': return <ProfilePage />;
-                case 'pricing': return <PricingPage />;
-                case 'admin': return userData?.role === 'admin' ? <AdminPage /> : <ChatPage />;
+                case 'chat': return user ? <ChatPage /> : <LoginPage />;
+                case 'profile': return user ? <ProfilePage /> : <LoginPage />;
+                case 'pricing': return user ? <PricingPage /> : <LoginPage />;
+                case 'admin': return user && userData?.role === 'admin' ? <AdminPage /> : <ChatPage />;
                 default: return <HomePage />;
             }
         };
@@ -142,7 +148,7 @@ const AppRouter = () => {
         return (
              <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
                 {user ? <LoggedInHeader /> : <Header />}
-                <main className="flex-grow">
+                <main className="flex-grow flex flex-col">
                     {pageComponent()}
                 </main>
                 {!user && <Footer />}
@@ -593,7 +599,7 @@ const ProfilePageContent = () => {
     };
 
     return (
-        <main className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
             <div className="w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
@@ -655,7 +661,7 @@ const ProfilePageContent = () => {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 };
 
@@ -668,7 +674,7 @@ const PricingPageContent = () => {
     ];
 
     return (
-        <main className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
             <div className="w-full max-w-6xl text-center">
                 <div className="mb-16">
                      <h2 className="text-3xl font-bold mb-2">Upgrade to Pro</h2>
@@ -716,7 +722,7 @@ const PricingPageContent = () => {
                     </p>
                 </div>
             </div>
-        </main>
+        </div>
     );
 };
 
@@ -823,7 +829,7 @@ const AdminPageContent = () => {
     );
 
     return (
-        <main className="flex-1 p-8 bg-slate-100">
+        <div className="flex-1 p-8 bg-slate-100">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold">Admin Dashboard</h2>
                 <button onClick={() => setShowCreateModal(true)} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700">
@@ -928,7 +934,7 @@ const AdminPageContent = () => {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 };
 
@@ -962,17 +968,20 @@ const LoggedInHeader = () => {
     const { setPage, userData } = useApp();
     const handleLogout = async () => {
         await signOut(auth);
-        setPage('home'); // Redirect to home on logout
+        setPage('home');
     };
 
     return (
-        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-10 sticky top-0">
+        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-40 sticky top-0">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                  <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('chat')}>
                     <Logo />
                     <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
                 </div>
                 <nav className="flex items-center space-x-6">
+                    <button onClick={() => setPage('home')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</button>
+                    <button onClick={() => setPage('blog')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Blog</button>
+                    <div className="h-6 w-px bg-slate-200"></div>
                     {userData?.role === 'admin' && (
                         <button onClick={() => setPage('admin')} className="font-semibold text-red-600 hover:text-red-700 transition-colors">Admin</button>
                     )}
