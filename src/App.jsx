@@ -249,13 +249,14 @@ const VerifyEmailPage = () => {
 };
 
 const ProfilePage = () => {
-    const { user, userData, setUserData } = useApp();
+    const { user, userData, setUserData, setSopExists, setChat, setPage } = useApp();
     const [fullName, setFullName] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [department, setDepartment] = useState('');
     const [contactNumber, setContactNumber] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState('');
+    const [showConfirm, setShowConfirm] = useState(false);
 
     useEffect(() => {
         if (userData) {
@@ -282,6 +283,24 @@ const ProfilePage = () => {
         }
     };
     
+    const handleClearMemory = async () => {
+        if (!user) return;
+        try {
+            const token = await getIdToken(user);
+            await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSopExists(false);
+            setChat([]);
+            setShowConfirm(false);
+            setPage('chat');
+        } catch (error) {
+            console.error("Failed to clear memory:", error);
+            setMessage("Error clearing memory. Please try again.");
+            setShowConfirm(false);
+        }
+    };
+
     return (
         <div className="flex flex-col h-full">
             <Header />
@@ -300,11 +319,6 @@ const ProfilePage = () => {
                             <div>
                                 <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
                                 <p className="text-slate-500">{userData?.email}</p>
-                                <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
-                                    userData?.version === 'pro' ? 'bg-yellow-100 text-yellow-800' : 'bg-slate-100 text-slate-600'
-                                }`}>
-                                    {userData?.version === 'pro' ? 'Pro Version' : 'Basic Version'}
-                                </span>
                             </div>
                         </div>
                         <form onSubmit={handleUpdate} className="space-y-4">
@@ -331,31 +345,56 @@ const ProfilePage = () => {
                             {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md font-semibold">Save Changes</button>}
                         </form>
                     </div>
+                    
+                    <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 className="text-xl font-bold mb-4 text-slate-800">Danger Zone</h3>
+                        <div className="border-t pt-4">
+                            <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md font-semibold">Clear All SOP Data</button>
+                            <p className="text-sm text-slate-500 mt-2">This will permanently delete all uploaded documents and learned knowledge for your account. This action cannot be undone.</p>
+                        </div>
+                    </div>
                 </div>
             </main>
+            {showConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-lg shadow-xl">
+                        <h3 className="text-lg font-bold">Are you sure?</h3>
+                        <p className="my-4">This will delete all your data permanently.</p>
+                        <div className="flex justify-end gap-4">
+                            <button onClick={() => setShowConfirm(false)} className="px-4 py-2 rounded-md">Cancel</button>
+                            <button onClick={handleClearMemory} className="px-4 py-2 bg-red-600 text-white rounded-md">Yes, Clear Data</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 const PricingPage = () => {
+    const plans = [
+        { name: 'Basic', credits: 20, price: '1,500 PKR' },
+        { name: 'Standard', credits: 50, price: '5,000 PKR' },
+        { name: 'Premium', credits: 100, price: '9,000 PKR', popular: true },
+        { name: 'Ultra', credits: 'Unlimited', price: '25,000 PKR/mo' },
+    ];
+
     return (
         <div className="flex flex-col h-full">
             <Header />
             <main className="flex-1 w-full mx-auto flex flex-col items-center p-8">
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold mb-4">Upgrade to Pro</h2>
-                    <p className="text-gray-600 mb-8 max-w-2xl">Remove ads and unlock the full potential of your SOP Assistant with a one-time payment.</p>
-                    <div className="p-8 border rounded-lg shadow-lg bg-white max-w-sm mx-auto">
-                        <h3 className="text-2xl font-bold">Pro Version</h3>
-                        <p className="text-5xl font-extrabold my-4">40,000 PKR</p>
-                        <p className="text-lg font-semibold mb-4">One-Time Payment</p>
-                        <ul className="text-left space-y-2 mb-6">
-                            <li>✅ No Advertisements</li>
-                            <li>✅ Unlimited Document Uploads</li>
-                            <li>✅ Unlimited Questions</li>
-                            <li>✅ Priority Support</li>
-                        </ul>
-                        <button className="mt-6 w-full py-3 bg-indigo-600 text-white rounded-md font-semibold">Upgrade Now</button>
+                    <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
+                    <p className="text-gray-600 mb-8">Purchase credits to continue the conversation.</p>
+                    <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                        {plans.map(plan => (
+                            <div key={plan.name} className={`p-6 border rounded-lg shadow-lg ${plan.popular ? 'border-indigo-500' : ''}`}>
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                                <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md">Purchase</button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </main>
@@ -368,6 +407,7 @@ const AdminPage = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [filters, setFilters] = useState({ name: '', email: '', company: '', department: '' });
     const [editingUser, setEditingUser] = useState(null);
 
     const fetchUsers = async () => {
@@ -392,6 +432,30 @@ const AdminPage = () => {
         fetchUsers();
     }, [user]);
 
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleDelete = async (userId) => {
+        if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            try {
+                const token = await getIdToken(user);
+                await axios.delete(`https://sop-chat-backend.onrender.com/admin/users/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                fetchUsers(); // Refresh the user list
+            } catch (error) {
+                console.error("Failed to delete user:", error);
+                alert("Failed to delete user.");
+            }
+        }
+    };
+
+    const handleEdit = (user) => {
+        setEditingUser({...user});
+    };
+    
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         if (!editingUser) return;
@@ -401,45 +465,75 @@ const AdminPage = () => {
                 fullName: editingUser.fullName,
                 companyName: editingUser.companyName,
                 department: editingUser.department,
-                version: editingUser.version,
+                credits: parseInt(editingUser.credits, 10),
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingUser(null);
-            fetchUsers();
+            fetchUsers(); // Refresh the user list
         } catch (error) {
             console.error("Failed to update user:", error);
             alert("Failed to update user.");
         }
     };
 
+    const filteredUsers = users.filter(u => 
+        (u.fullName || '').toLowerCase().includes(filters.name.toLowerCase()) &&
+        (u.email || '').toLowerCase().includes(filters.email.toLowerCase()) &&
+        (u.companyName || '').toLowerCase().includes(filters.company.toLowerCase()) &&
+        (u.department || '').toLowerCase().includes(filters.department.toLowerCase())
+    );
+
     return (
         <div className="flex flex-col h-full">
             <Header />
             <main className="flex-1 p-8">
                 <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <div className="grid grid-cols-4 gap-4">
+                        <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
+                        <input type="text" name="department" value={filters.department} onChange={handleFilterChange} placeholder="Filter by Department..." className="px-3 py-2 border rounded-md" />
+                    </div>
+                </div>
                 {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b">
+                                    <th className="p-2">Status</th>
                                     <th className="p-2">Name</th>
                                     <th className="p-2">Email</th>
-                                    <th className="p-2">Version</th>
+                                    <th className="p-2">Company</th>
+                                    <th className="p-2">Credits</th>
                                     <th className="p-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map(u => (
+                                {filteredUsers.length > 0 ? filteredUsers.map(u => (
                                     <tr key={u.uid} className="border-b hover:bg-slate-50">
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                u.status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {u.status}
+                                            </span>
+                                        </td>
                                         <td className="p-2">{u.fullName}</td>
                                         <td className="p-2">{u.email}</td>
-                                        <td className="p-2">{u.version}</td>
-                                        <td className="p-2">
-                                            <button onClick={() => setEditingUser(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
+                                        <td className="p-2">{u.companyName}</td>
+                                        <td className="p-2">{u.credits}</td>
+                                        <td className="p-2 flex gap-2">
+                                            <button onClick={() => handleEdit(u)} className="p-1 text-blue-600 hover:text-blue-800"><EditIcon /></button>
+                                            <button onClick={() => handleDelete(u.uid)} className="p-1 text-red-600 hover:text-red-800"><DeleteIcon /></button>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center p-4 text-slate-500">No users found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -450,10 +544,10 @@ const AdminPage = () => {
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Edit User: {editingUser.email}</h3>
                         <form onSubmit={handleUpdateUser} className="space-y-4">
-                             <select value={editingUser.version} onChange={e => setEditingUser({...editingUser, version: e.target.value})} className="w-full p-2 border rounded">
-                                 <option value="basic">Basic</option>
-                                 <option value="pro">Pro</option>
-                             </select>
+                             <input value={editingUser.fullName} onChange={e => setEditingUser({...editingUser, fullName: e.target.value})} className="w-full p-2 border rounded" />
+                             <input value={editingUser.companyName} onChange={e => setEditingUser({...editingUser, companyName: e.target.value})} className="w-full p-2 border rounded" />
+                             <input value={editingUser.department} onChange={e => setEditingUser({...editingUser, department: e.target.value})} className="w-full p-2 border rounded" />
+                             <input type="number" value={editingUser.credits} onChange={e => setEditingUser({...editingUser, credits: e.target.value})} className="w-full p-2 border rounded" />
                             <div className="flex justify-end gap-4">
                                 <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-md">Cancel</button>
                                 <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md">Save Changes</button>
@@ -467,8 +561,122 @@ const AdminPage = () => {
 };
 
 const ChatPage = () => {
-    const { user, userData } = useApp();
-    const isPro = userData?.version === 'pro';
+    const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, setPage } = useApp();
+    const isAdmin = userData?.role === 'admin';
+    const [file, setFile] = useState(null);
+    const [fileName, setFileName] = useState("");
+    const [message, setMessage] = useState("");
+    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [loadingSend, setLoadingSend] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState(true);
+    
+    const API_URL = "https://sop-chat-backend.onrender.com";
+    const chatEndRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        const checkSopStatus = async () => {
+            if (!user) return;
+            setLoadingStatus(true);
+            try {
+                const token = await getIdToken(user);
+                const res = await axios.get(`${API_URL}/status`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setSopExists(res.data.sop_exists);
+            } catch (error) {
+                console.error("Could not check SOP status", error);
+                setSopExists(false);
+            } finally {
+                setLoadingStatus(false);
+            }
+        };
+        checkSopStatus();
+    }, [user, setSopExists]);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chat]);
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+            setFileName(selectedFile.name);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!file || !user) return;
+        setLoadingUpload(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const token = await getIdToken(user);
+            await axios.post(`${API_URL}/upload/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setSopExists(true);
+            setFileName("");
+            setFile(null);
+            setChat([{role: 'assistant', text: `Successfully processed ${fileName}. You can now ask questions about it.`}]);
+        } catch (error) {
+            console.error("File upload failed", error);
+            setChat([{role: 'assistant', text: "Sorry, there was an error processing your file."}]);
+        } finally {
+            setLoadingUpload(false);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!message.trim() || !user) return;
+
+        const userMsg = { role: "user", text: message };
+        setChat(prev => [...prev, userMsg]);
+        const currentMessage = message;
+        setMessage('');
+        setLoadingSend(true);
+
+        try {
+            const token = await getIdToken(user);
+            const history = chat.reduce((acc, curr, i) => {
+                if (curr.role === 'user' && chat[i + 1]?.role === 'assistant') {
+                    acc.push([curr.text, chat[i + 1].text]);
+                }
+                return acc;
+            }, []);
+
+            const res = await axios.post(`${API_URL}/chat/`, 
+                { prompt: currentMessage, history },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const assistantMsg = { role: "assistant", text: res.data.response };
+            setChat(prev => [...prev, assistantMsg]);
+
+            if (!isAdmin) {
+                const newCredits = (userData.credits || 0) - 1;
+                await updateDoc(doc(db, "users", user.uid), { credits: newCredits });
+                setUserData(prev => ({...prev, credits: newCredits}));
+            }
+
+        } catch (err) {
+            const errorMsg = err.response?.data?.detail || "Failed to get response.";
+            setChat(prev => [...prev, { role: 'assistant', text: `Error: ${errorMsg}` }]);
+        } finally {
+            setLoadingSend(false);
+        }
+    };
+
+    if (!isAdmin && userData && userData.credits <= 0) {
+        setPage('pricing');
+        return null;
+    }
 
     return (
         <div className="flex flex-col h-screen">
@@ -476,15 +684,63 @@ const ChatPage = () => {
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl mt-4 rounded-t-2xl shadow-lg overflow-hidden">
                      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                        {/* ... Chat messages and upload UI ... */}
+                        {loadingStatus ? (
+                             <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
+                        ) : !sopExists ? (
+                            <div className="text-center p-8 bg-slate-100 rounded-lg">
+                                <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
+                                <p className="text-slate-600 mb-4">To get started, please upload an SOP document.</p>
+                                <div className="flex items-center justify-center gap-2">
+                                    <label className="cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                      {fileName || "Choose a file..."}
+                                      <input type="file" accept=".xlsx,.xls" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                                    </label>
+                                    <button onClick={handleUpload} disabled={!file || loadingUpload} className="bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                        {loadingUpload ? "Uploading..." : "Upload"}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : chat.length === 0 ? (
+                             <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
+                        ) : null}
+                        
+                        {chat.map((c, i) => (
+                            <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
+                                {c.role === 'assistant' && <AssistantAvatar />}
+                                <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
+                                    {c.text}
+                                </div>
+                                {c.role === 'user' && <UserAvatar userData={userData} />}
+                            </div>
+                        ))}
+                         {loadingSend && (
+                            <div className="flex items-start gap-4">
+                                <AssistantAvatar />
+                                <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
+                                    <div className="flex items-center space-x-1">
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-0"></span>
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
+                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={chatEndRef} />
                      </div>
-                     {!isPro && (
-                         <div className="p-2 bg-yellow-100 text-center text-sm text-yellow-800">
-                             This is an ad placeholder. Upgrade to Pro to remove ads.
-                         </div>
-                     )}
                      <div className="p-4 bg-white/80 border-t">
-                        {/* ... Chat input form ... */}
+                        <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                            <input
+                              value={message}
+                              onChange={(e) => setMessage(e.target.value)}
+                              className="border border-slate-300 p-4 w-full rounded-full focus:ring-2 focus:ring-indigo-500"
+                              placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
+                              disabled={!sopExists || loadingSend}
+                            />
+                            <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50">
+                                <SendIcon />
+                            </button>
+                        </form>
+                         <p className="text-right mt-2 text-sm font-semibold text-indigo-600">Credits Remaining: {isAdmin ? 'Unlimited' : userData?.credits}</p>
                      </div>
                 </div>
             </main>
