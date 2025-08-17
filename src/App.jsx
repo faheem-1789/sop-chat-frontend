@@ -45,7 +45,8 @@ const DeleteIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentCol
 const Logo = () => <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="128" height="128" rx="24" fill="#4338CA"/><path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/><path d="M56 48H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/><path d="M56 60H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/></svg>;
 const AddIcon = () => <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
 const FileIcon = () => <svg className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
-const CloseIcon = () => <svg className="w-4 h-4 text-slate-400 hover:text-red-500 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
+const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
+const MenuIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>;
 const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
 
 
@@ -101,16 +102,12 @@ const AppRouter = () => {
     useEffect(() => {
         if (!loading) {
             if (user) {
-                // If user is logged in...
                 if (!user.emailVerified) {
-                    // And email is not verified, force to verification page
                     setPage('verify-email');
                 } else if (['login', 'signup', 'verify-email'].includes(page)) {
-                    // And they are on an auth page, redirect to the main app (chat)
                     setPage('chat');
                 }
             } else {
-                // If user is not logged in and tries to access a private app page, redirect to login
                 const appPages = ['chat', 'profile', 'pricing', 'admin'];
                 if (appPages.includes(page)) {
                     setPage('login');
@@ -168,12 +165,12 @@ const HomePage = () => {
         <div className="text-center py-20 px-4 sm:px-6 lg:px-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight">
-                    Unlock Insights from Your SOPs Instantly
+                    Unlock Insights from Your Documents Instantly
                 </h1>
                 <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600">
-                    Our AI-powered assistant reads and understands your Standard Operating Procedures from Excel files, providing you with immediate, accurate answers to your most complex questions.
+                    Our AI-powered assistant reads and understands your business documents—PDFs, PowerPoints, Excel files, and more—providing immediate, accurate answers to your most complex questions.
                 </p>
-                <div className="mt-8 flex justify-center gap-4">
+                <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                     <button onClick={() => setPage('signup')} className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
                         Get Started for Free
                     </button>
@@ -209,7 +206,7 @@ const PrivacyPolicyPage = () => (
         <h3>1. Information We Collect</h3>
         <ul>
             <li><strong>Account Information:</strong> When you sign up, we collect your full name, email address, company name, and department.</li>
-            <li><strong>Uploaded Documents:</strong> We process the Excel files you upload to create a searchable knowledge base. These files are stored securely and are only accessible to your authenticated account.</li>
+            <li><strong>Uploaded Documents:</strong> We process the files you upload (including PDFs, PPTs, and Excel files) to create a searchable knowledge base. These files are stored securely and are only accessible to your authenticated account.</li>
             <li><strong>Usage Data:</strong> We may collect data about how you interact with our service, such as features used and time spent on the platform, to help us improve our product.</li>
         </ul>
 
@@ -261,7 +258,7 @@ const FAQPage = () => (
         <div className="space-y-6">
             <div>
                 <h3 className="font-semibold text-slate-800">What type of files can I upload?</h3>
-                <p>Currently, our service is optimized for Microsoft Excel files (.xlsx, .xls). We are working on expanding compatibility to include other document types like .pdf and .docx in the future.</p>
+                <p>Our service is optimized for a variety of document types, including Microsoft Excel (.xlsx, .xls), PDF (.pdf), and PowerPoint (.pptx). We are constantly working to expand compatibility to include even more formats.</p>
             </div>
             <div>
                 <h3 className="font-semibold text-slate-800">Is my data secure?</h3>
@@ -277,7 +274,7 @@ const FAQPage = () => (
             </div>
              <div>
                 <h3 className="font-semibold text-slate-800">Can I use this for documents other than SOPs?</h3>
-                <p>Yes. While the assistant is designed with SOPs in mind, it can effectively process any Excel document that contains structured textual information, such as training manuals, product catalogs, contact lists, or internal knowledge bases.</p>
+                <p>Yes. While the assistant is designed with SOPs in mind, it can effectively process any document that contains structured textual information, such as training manuals, product catalogs, legal contracts, research papers, or internal knowledge bases.</p>
             </div>
              <div>
                 <h3 className="font-semibold text-slate-800">Do you offer enterprise plans?</h3>
@@ -837,7 +834,7 @@ const AdminPageContent = () => {
                 </button>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <input type="text" name="name" value={filters.name} onChange={handleFilterChange} placeholder="Filter by Name..." className="px-3 py-2 border rounded-md" />
                     <input type="text" name="email" value={filters.email} onChange={handleFilterChange} placeholder="Filter by Email..." className="px-3 py-2 border rounded-md" />
                     <input type="text" name="company" value={filters.company} onChange={handleFilterChange} placeholder="Filter by Company..." className="px-3 py-2 border rounded-md" />
@@ -941,6 +938,14 @@ const AdminPageContent = () => {
 // --- Headers & Footers ---
 const Header = () => {
     const { setPage } = useApp();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const NavLink = ({ page, children }) => (
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2">
+            {children}
+        </button>
+    );
+
     return (
         <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 sticky top-0 z-40">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -949,27 +954,61 @@ const Header = () => {
                     <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
                 </div>
                 <nav className="hidden md:flex items-center space-x-6">
-                    <button onClick={() => setPage('home')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</button>
-                    <button onClick={() => setPage('about')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">About</button>
-                    <button onClick={() => setPage('blog')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Blog</button>
-                    <button onClick={() => setPage('faq')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">FAQ</button>
-                    <button onClick={() => setPage('contact')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Contact</button>
+                    <NavLink page="home">Home</NavLink>
+                    <NavLink page="about">About</NavLink>
+                    <NavLink page="blog">Blog</NavLink>
+                    <NavLink page="faq">FAQ</NavLink>
+                    <NavLink page="contact">Contact</NavLink>
                 </nav>
-                <div className="flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-4">
                      <button onClick={() => setPage('login')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Login</button>
                      <button onClick={() => setPage('signup')} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold hover:bg-indigo-700">Sign Up</button>
                 </div>
+                <div className="md:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <MenuIcon />
+                    </button>
+                </div>
             </div>
+            {/* Mobile Menu */}
+            <AnimatePresence>
+            {isMenuOpen && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="md:hidden mt-4 p-4 bg-white rounded-lg shadow-lg"
+                >
+                    <nav className="flex flex-col space-y-2">
+                        <NavLink page="home">Home</NavLink>
+                        <NavLink page="about">About</NavLink>
+                        <NavLink page="blog">Blog</NavLink>
+                        <NavLink page="faq">FAQ</NavLink>
+                        <NavLink page="contact">Contact</NavLink>
+                        <div className="border-t my-2"></div>
+                        <button onClick={() => { setPage('login'); setIsMenuOpen(false); }} className="w-full text-left font-semibold text-slate-600 hover:text-indigo-600 py-2">Login</button>
+                        <button onClick={() => { setPage('signup'); setIsMenuOpen(false); }} className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold hover:bg-indigo-700">Sign Up</button>
+                    </nav>
+                </motion.div>
+            )}
+            </AnimatePresence>
         </header>
     );
 };
 
 const LoggedInHeader = () => {
     const { setPage, userData } = useApp();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const handleLogout = async () => {
         await signOut(auth);
         setPage('home');
     };
+    
+    const NavLink = ({ page, children, className = '' }) => (
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className={`font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2 ${className}`}>
+            {children}
+        </button>
+    );
 
     return (
         <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-40 sticky top-0">
@@ -978,19 +1017,50 @@ const LoggedInHeader = () => {
                     <Logo />
                     <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
                 </div>
-                <nav className="flex items-center space-x-6">
-                    <button onClick={() => setPage('home')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</button>
-                    <button onClick={() => setPage('blog')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Blog</button>
+                <nav className="hidden md:flex items-center space-x-6">
+                    <NavLink page="home">Home</NavLink>
+                    <NavLink page="blog">Blog</NavLink>
                     <div className="h-6 w-px bg-slate-200"></div>
                     {userData?.role === 'admin' && (
-                        <button onClick={() => setPage('admin')} className="font-semibold text-red-600 hover:text-red-700 transition-colors">Admin</button>
+                        <NavLink page="admin" className="!text-red-600 hover:!text-red-700">Admin</NavLink>
                     )}
-                    <button onClick={() => setPage('chat')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Chat</button>
-                    <button onClick={() => setPage('profile')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Profile</button>
-                    <button onClick={() => setPage('pricing')} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Pricing</button>
+                    <NavLink page="chat">Chat</NavLink>
+                    <NavLink page="profile">Profile</NavLink>
+                    <NavLink page="pricing">Pricing</NavLink>
                     <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold hover:bg-red-600 transform transition-transform hover:scale-105">Logout</button>
                 </nav>
+                 <div className="md:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <MenuIcon />
+                    </button>
+                </div>
             </div>
+             {/* Mobile Menu */}
+            <AnimatePresence>
+            {isMenuOpen && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="md:hidden mt-4 p-4 bg-white rounded-lg shadow-lg"
+                >
+                    <nav className="flex flex-col space-y-2">
+                        <NavLink page="chat">Chat</NavLink>
+                        <NavLink page="profile">Profile</NavLink>
+                        <NavLink page="pricing">Pricing</NavLink>
+                        {userData?.role === 'admin' && (
+                           <NavLink page="admin" className="!text-red-600 hover:!text-red-700">Admin</NavLink>
+                        )}
+                        <div className="border-t my-2"></div>
+                        <NavLink page="home">Home</NavLink>
+                        <NavLink page="blog">Blog</NavLink>
+                        <NavLink page="faq">FAQ</NavLink>
+                        <div className="border-t my-2"></div>
+                        <button onClick={handleLogout} className="w-full mt-2 px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold hover:bg-red-600">Logout</button>
+                    </nav>
+                </motion.div>
+            )}
+            </AnimatePresence>
         </header>
     );
 };
@@ -1001,7 +1071,7 @@ const Footer = () => {
         <footer className="bg-white border-t">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
                 <p>&copy; {new Date().getFullYear()} SOP Assistant. All rights reserved.</p>
-                <nav className="flex gap-6 mt-4 md:mt-0">
+                <nav className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-0">
                     <button onClick={() => setPage('about')} className="hover:text-indigo-600">About</button>
                     <button onClick={() => setPage('contact')} className="hover:text-indigo-600">Contact</button>
                     <button onClick={() => setPage('privacy')} className="hover:text-indigo-600">Privacy Policy</button>
@@ -1217,7 +1287,7 @@ const ChatPageContent = () => {
                                         </div>
                                     )}
                                     <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
-                                    <p className="text-slate-600 mb-4">To get started, please upload one or more SOP documents.</p>
+                                    <p className="text-slate-600 mb-4">To get started, please upload one or more documents.</p>
                                     <div className="max-w-md mx-auto">
                                         <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
                                           Choose files...
@@ -1280,6 +1350,14 @@ const ChatPageContent = () => {
                                         {isUploadingMore ? <SpinnerIcon /> : <UploadIcon />}
                                     </button>
                                 )}
+                                <input
+                                  type="file"
+                                  ref={fileInputRef}
+                                  onChange={handleFileChange}
+                                  className="hidden"
+                                  multiple
+                                  accept=".pdf,.pptx,.docx,.xlsx,.xls"
+                                />
                                 <input
                                   value={message}
                                   onChange={(e) => setMessage(e.target.value)}
