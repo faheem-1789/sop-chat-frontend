@@ -168,7 +168,7 @@ const HomePage = () => {
                     Unlock Insights from Your Documents Instantly
                 </h1>
                 <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600">
-                    Our AI-powered assistant reads and understands your business documents—PDFs, PowerPoints, Excel files, and more—providing immediate, accurate answers to your most complex questions.
+                    FileSense reads and understands your business documents—PDFs, PowerPoints, Excel files, and more—providing immediate, accurate answers to your most complex questions.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                     <button onClick={() => setPage('signup')} className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
@@ -195,7 +195,7 @@ const GenericPage = ({ title, children }) => (
     </div>
 );
 
-const AboutPage = () => <GenericPage title="About Us"><p>Welcome to SOP Assistant. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
+const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
 const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
 
 const PrivacyPolicyPage = () => (
@@ -233,7 +233,7 @@ const PrivacyPolicyPage = () => (
 const TermsOfServicePage = () => (
     <GenericPage title="Terms of Service">
         <p><strong>Last Updated: August 18, 2025</strong></p>
-        <p>By using SOP Assistant ("Service"), you agree to be bound by these Terms of Service.</p>
+        <p>By using FileSense ("Service"), you agree to be bound by these Terms of Service.</p>
 
         <h3>1. Accounts</h3>
         <p>You are responsible for safeguarding your account and for any activities or actions under your password. You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.</p>
@@ -248,7 +248,7 @@ const TermsOfServicePage = () => (
         <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
 
         <h3>5. Limitation of Liability</h3>
-        <p>In no event shall SOP Assistant, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+        <p>In no event shall FileSense, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
         <p><em>Disclaimer: This is a template and not legal advice. You should consult with a legal professional to tailor these Terms of Service to your specific needs.</em></p>
     </GenericPage>
 );
@@ -287,43 +287,43 @@ const FAQPage = () => (
 const blogPostsData = [
     { 
         slug: "analyze-sops-with-ai",
-        title: "How to Analyze SOPs Easily with AI", 
+        title: "How to Analyze Documents Easily with AI", 
         excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds...",
-        content: `<p>Standard Operating Procedures (SOPs) are the backbone of any organized company, but they often end up as dense, lengthy documents that are difficult to navigate. Finding a specific piece of information can feel like searching for a needle in a haystack. This is where AI changes the game.</p><p>Our SOP Assistant uses advanced Natural Language Processing (NLP) to read and understand the content of your Excel-based SOPs. Instead of manually scanning rows and columns, you can simply ask a question in plain language.</p><h3>How It Works:</h3><ol><li><strong>Upload:</strong> You upload your Excel files containing your procedures.</li><li><strong>Process:</strong> Our AI creates a secure, indexed knowledge base from your documents.</li><li><strong>Query:</strong> You ask questions like, "What is the procedure for handling a customer refund?" or "Who is on the primary contact list for Route 5?"</li><li><strong>Answer:</strong> The assistant instantly retrieves and presents the relevant information, saving you valuable time and reducing the chance of human error.</li></ol><p>By transforming your static documents into an interactive knowledge base, you empower your team to find answers immediately, ensuring compliance and boosting productivity.</p>`
+        content: `<p>Business documents are the backbone of any organized company, but they often end up as dense, lengthy files that are difficult to navigate. Finding a specific piece of information can feel like searching for a needle in a haystack. This is where AI changes the game.</p><p>FileSense uses advanced Natural Language Processing (NLP) to read and understand the content of your documents. Instead of manually scanning pages or spreadsheets, you can simply ask a question in plain language.</p><h3>How It Works:</h3><ol><li><strong>Upload:</strong> You upload your files (PDFs, Excel, PowerPoints).</li><li><strong>Process:</strong> Our AI creates a secure, indexed knowledge base from your documents.</li><li><strong>Query:</strong> You ask questions like, "What is the procedure for handling a customer refund?" or "Who is on the primary contact list for Route 5?"</li><li><strong>Answer:</strong> The assistant instantly retrieves and presents the relevant information, saving you valuable time and reducing the chance of human error.</li></ol><p>By transforming your static documents into an interactive knowledge base, you empower your team to find answers immediately, ensuring compliance and boosting productivity.</p>`
     },
     { 
         slug: "ai-reads-excel",
-        title: "Can AI Really Read and Understand Excel Files?", 
-        excerpt: "We dive into the technology that allows our assistant to parse spreadsheets and provide accurate answers...",
-        content: `<p>It sounds like science fiction, but it's a reality. The ability for AI to read and comprehend structured data in spreadsheets is a significant technological leap. But how does it actually work?</p><p>The core technology involves a process called 'embedding'. When you upload an Excel file, our system doesn't just store the file; it reads the content cell by cell, row by row. It identifies relationships between data points—like which names belong to which department or which steps are part of a specific procedure.</p><h3>The Key Steps:</h3><ul><li><strong>Data Extraction:</strong> The text and numerical data are extracted from the spreadsheet while preserving the structure (columns and rows).</li><li><strong>Vector Embeddings:</strong> This extracted information is converted into a numerical representation called a vector. This allows the AI to understand the semantic meaning and context of the words, not just the words themselves.</li><li><strong>Indexed Storage:</strong> These vectors are stored in a specialized database (a vector store) that allows for incredibly fast and context-aware searching.</li></ul><p>When you ask a question, your question is also converted into a vector. The AI then finds the most similar vectors in its database from your documents and uses that information to construct a precise, relevant answer.</p>`
+        title: "Can AI Really Read and Understand Your Documents?", 
+        excerpt: "We dive into the technology that allows our assistant to parse spreadsheets, PDFs, and more to provide accurate answers...",
+        content: `<p>It sounds like science fiction, but it's a reality. The ability for AI to read and comprehend structured and unstructured data is a significant technological leap. But how does it actually work?</p><p>The core technology involves a process called 'embedding'. When you upload a file, our system doesn't just store it; it reads the content. It identifies relationships between data points—like which names belong to which department or which steps are part of a specific procedure.</p><h3>The Key Steps:</h3><ul><li><strong>Data Extraction:</strong> The text, tables, and other data are extracted from the document while preserving the structure where possible.</li><li><strong>Vector Embeddings:</strong> This extracted information is converted into a numerical representation called a vector. This allows the AI to understand the semantic meaning and context of the words, not just the words themselves.</li><li><strong>Indexed Storage:</strong> These vectors are stored in a specialized database (a vector store) that allows for incredibly fast and context-aware searching.</li></ul><p>When you ask a question, your question is also converted into a vector. The AI then finds the most similar vectors in its database from your documents and uses that information to construct a precise, relevant answer.</p>`
     },
     { 
         slug: "improve-efficiency",
-        title: "5 Ways to Improve Your Team's Efficiency with SOP Assistant", 
+        title: "5 Ways to Improve Your Team's Efficiency with FileSense", 
         excerpt: "Learn practical tips and tricks to get the most out of our platform and boost your team's productivity...",
-        content: `<p>An accessible knowledge base is a productive one. Here are five ways SOP Assistant can directly impact your team's efficiency:</p><ol><li><strong>Instant Onboarding:</strong> New hires can get up to speed faster by asking the assistant questions instead of constantly interrupting senior team members.</li><li><strong>Reduced Errors:</strong> When procedures are easy to find, they are more likely to be followed correctly, leading to fewer operational mistakes.</li><li><strong>Consistent Customer Service:</strong> Your support team can provide standardized, accurate answers to customer queries by quickly referencing the official procedures.</li><li><strong>Faster Decision-Making:</strong> Managers can quickly pull up data and procedural guidelines to make informed decisions without delay.</li><li><strong>Centralized Knowledge:</strong> Eliminate the problem of outdated or conflicting information. The SOP Assistant becomes the single source of truth for all your operational procedures.</li></ol>`
+        content: `<p>An accessible knowledge base is a productive one. Here are five ways FileSense can directly impact your team's efficiency:</p><ol><li><strong>Instant Onboarding:</strong> New hires can get up to speed faster by asking the assistant questions instead of constantly interrupting senior team members.</li><li><strong>Reduced Errors:</strong> When procedures are easy to find, they are more likely to be followed correctly, leading to fewer operational mistakes.</li><li><strong>Consistent Customer Service:</strong> Your support team can provide standardized, accurate answers to customer queries by quickly referencing the official procedures.</li><li><strong>Faster Decision-Making:</strong> Managers can quickly pull up data and procedural guidelines to make informed decisions without delay.</li><li><strong>Centralized Knowledge:</strong> Eliminate the problem of outdated or conflicting information. FileSense becomes the single source of truth for all your operational procedures.</li></ol>`
     },
     {
         slug: "anatomy-of-sop",
-        title: "The Anatomy of a Perfect SOP Document",
-        excerpt: "Learn the key components that make an SOP effective, clear, and easy for AI to understand.",
-        content: `<p>A well-structured SOP is not just beneficial for your team; it's crucial for getting the best results from our AI. Here’s a breakdown of what makes an SOP document perfect for both humans and machines:</p><h3>Key Components:</h3><ul><li><strong>Clear Titles:</strong> Use descriptive titles for columns (e.g., "Procedure Name," "Step Number," "Description," "Responsible Department").</li><li><strong>Atomic Steps:</strong> Each row should represent a single, clear action or piece of information. Avoid combining multiple steps into one cell.</li><li><strong>Consistent Formatting:</strong> Maintain a consistent structure throughout your Excel file. If you have multiple sheets, ensure they follow a similar layout.</li><li><strong>Simple Language:</strong> Use clear, unambiguous language. Avoid jargon where possible or include a glossary sheet.</li><li><strong>Hierarchical Structure:</strong> Use columns to create a logical flow, such as 'Main Process', 'Sub-Process', 'Step Detail'. This helps the AI understand the relationship between different pieces of information.</li></ul><p>By following these guidelines, you ensure that the AI can accurately parse and index your procedures, leading to more precise and relevant answers.</p>`
+        title: "The Anatomy of a Perfect Document for AI",
+        excerpt: "Learn the key components that make a document effective, clear, and easy for AI to understand.",
+        content: `<p>A well-structured document is not just beneficial for your team; it's crucial for getting the best results from our AI. Here’s a breakdown of what makes a document perfect for both humans and machines:</p><h3>Key Components:</h3><ul><li><strong>Clear Headings:</strong> Use descriptive headings and subheadings to structure your document.</li><li><strong>Atomic Paragraphs:</strong> Each paragraph should focus on a single, clear topic or piece of information.</li><li><strong>Consistent Formatting:</strong> Maintain a consistent structure throughout your document.</li><li><strong>Simple Language:</strong> Use clear, unambiguous language. Avoid jargon where possible or include a glossary.</li></ul><p>By following these guidelines, you ensure that the AI can accurately parse and index your procedures, leading to more precise and relevant answers.</p>`
     },
     {
         slug: "common-sop-mistakes",
-        title: "Common Mistakes to Avoid When Writing SOPs",
-        excerpt: "Avoid these pitfalls to ensure your standard operating procedures are effective and easy to follow.",
-        content: `<p>Even the best-intentioned SOPs can fail if they fall into common traps. Here are some mistakes to avoid:</p><ul><li><strong>Being Too Vague:</strong> Phrases like "handle appropriately" are unhelpful. Be specific about the actions required.</li><li><strong>Being Too Complex:</strong> Overly long sentences and technical jargon can confuse readers. Keep it simple and direct.</li><li><strong>Not Including Visuals:</strong> While our AI focuses on text, for human users, diagrams and flowcharts can be invaluable. Consider linking to them in a 'Reference' column.</li><li><strong>Forgetting the 'Why':</strong> Briefly explaining the purpose behind a procedure can increase buy-in and help employees make better decisions.</li><li><strong>Lack of Regular Reviews:</strong> Processes change. SOPs should be living documents, reviewed and updated on a regular schedule (e.g., annually or quarterly).</li></ul>`
+        title: "Common Mistakes to Avoid When Writing Business Documents",
+        excerpt: "Avoid these pitfalls to ensure your procedures and manuals are effective and easy to follow.",
+        content: `<p>Even the best-intentioned documents can fail if they fall into common traps. Here are some mistakes to avoid:</p><ul><li><strong>Being Too Vague:</strong> Phrases like "handle appropriately" are unhelpful. Be specific about the actions required.</li><li><strong>Being Too Complex:</strong> Overly long sentences and technical jargon can confuse readers. Keep it simple and direct.</li><li><strong>Forgetting the 'Why':</strong> Briefly explaining the purpose behind a procedure can increase buy-in and help employees make better decisions.</li><li><strong>Lack of Regular Reviews:</strong> Processes change. Documents should be living things, reviewed and updated on a regular schedule (e.g., annually or quarterly).</li></ul>`
     },
     {
         slug: "integrating-ai-workflow",
         title: "Integrating AI into Your Daily Business Workflow",
-        excerpt: "Tips on how to seamlessly introduce AI tools like SOP Assistant into your team's day-to-day operations.",
-        content: `<p>Introducing a new tool can be challenging. Here's how to make the transition to an AI-powered workflow smooth:</p><ol><li><strong>Start Small:</strong> Begin with one department or one set of critical SOPs. Demonstrate the value and gather feedback before a company-wide rollout.</li><li><strong>Appoint a Champion:</strong> Designate a tech-savvy team member to be the go-to expert for the new tool.</li><li><strong>Provide Training:</strong> Hold a brief training session to show your team how to ask effective questions and interpret the AI's answers.</li><li><strong>Highlight the Benefits:</strong> Emphasize how the tool saves time and reduces frustration, positioning it as a helper, not a replacement.</li><li><strong>Integrate into Onboarding:</strong> Make the SOP Assistant a core part of your new hire training process from day one.</li></ol>`
+        excerpt: "Tips on how to seamlessly introduce AI tools like FileSense into your team's day-to-day operations.",
+        content: `<p>Introducing a new tool can be challenging. Here's how to make the transition to an AI-powered workflow smooth:</p><ol><li><strong>Start Small:</strong> Begin with one department or one set of critical documents. Demonstrate the value and gather feedback before a company-wide rollout.</li><li><strong>Appoint a Champion:</strong> Designate a tech-savvy team member to be the go-to expert for the new tool.</li><li><strong>Provide Training:</strong> Hold a brief training session to show your team how to ask effective questions and interpret the AI's answers.</li><li><strong>Highlight the Benefits:</strong> Emphasize how the tool saves time and reduces frustration, positioning it as a helper, not a replacement.</li><li><strong>Integrate into Onboarding:</strong> Make FileSense a core part of your new hire training process from day one.</li></ol>`
     },
     {
         slug: "ai-for-quality-control",
-        title: "AI for Quality Control: Ensuring SOP Compliance",
+        title: "AI for Quality Control: Ensuring Procedural Compliance",
         excerpt: "Explore how an instant-access knowledge base helps maintain high standards and compliance.",
         content: `<p>Quality control relies on strict adherence to standards. When team members have to guess or search for procedures, the risk of non-compliance increases. An AI assistant acts as an ever-present quality control supervisor.</p><p>By providing immediate access to the correct procedure, you minimize the chance of deviation. Team members on a factory floor, in a lab, or handling customer service can quickly verify a step or check a specification on the spot. This leads to higher quality outcomes, fewer product recalls, and better regulatory compliance.</p>`
     },
@@ -331,36 +331,36 @@ const blogPostsData = [
         slug: "future-of-document-management",
         title: "The Future of Document Management is Conversational",
         excerpt: "Why searching through folders is becoming obsolete and conversational interfaces are taking over.",
-        content: `<p>For decades, document management has been about folders, file names, and keyword searches. This system is fundamentally flawed because it requires the user to know *what* to search for and *where* it might be located. The future is conversational.</p><p>A conversational interface, like the one used by SOP Assistant, allows users to interact with their data naturally. Instead of guessing keywords, they can ask complex questions. This approach is faster, more intuitive, and far more powerful, unlocking the true value hidden within your documents.</p>`
+        content: `<p>For decades, document management has been about folders, file names, and keyword searches. This system is fundamentally flawed because it requires the user to know *what* to search for and *where* it might be located. The future is conversational.</p><p>A conversational interface, like the one used by FileSense, allows users to interact with their data naturally. Instead of guessing keywords, they can ask complex questions. This approach is faster, more intuitive, and far more powerful, unlocking the true value hidden within your documents.</p>`
     },
     {
         slug: "case-study-logistics",
         title: "Case Study: How a Logistics Company Cut Query Time by 90%",
-        excerpt: "A real-world example of how SOP Assistant transformed operations for a busy logistics firm.",
-        content: `<p>A mid-sized logistics company was struggling with operational delays. Their dispatchers and warehouse staff spent up to 20 minutes per query searching through multiple complex spreadsheets to find route details, handling procedures for specific goods, and emergency contacts.</p><p>After implementing SOP Assistant and uploading their operational manuals, the average query time dropped to under 2 minutes. Dispatchers could simply ask, "What are the handling instructions for hazardous material on Route 12?" and get an instant, accurate answer. This simple change resulted in faster dispatch times, fewer errors, and a significant boost in overall efficiency.</p>`
+        excerpt: "A real-world example of how FileSense transformed operations for a busy logistics firm.",
+        content: `<p>A mid-sized logistics company was struggling with operational delays. Their dispatchers and warehouse staff spent up to 20 minutes per query searching through multiple complex spreadsheets to find route details, handling procedures for specific goods, and emergency contacts.</p><p>After implementing FileSense and uploading their operational manuals, the average query time dropped to under 2 minutes. Dispatchers could simply ask, "What are the handling instructions for hazardous material on Route 12?" and get an instant, accurate answer. This simple change resulted in faster dispatch times, fewer errors, and a significant boost in overall efficiency.</p>`
     },
     {
         slug: "roi-on-ai",
         title: "Measuring ROI on AI Implementation in Your Business",
-        excerpt: "How to quantify the benefits of tools like SOP Assistant.",
+        excerpt: "How to quantify the benefits of tools like FileSense.",
         content: `<p>Investing in AI can seem abstract. Here's how to measure its return on investment (ROI):</p><ul><li><strong>Time Saved:</strong> Calculate the average time employees spend searching for information. Multiply this by their hourly rate to find the cost of manual searches. Compare this to the near-instant answers from the AI.</li><li><strong>Error Reduction:</strong> Track the rate of procedural errors before and after implementation. Assign a cost to each error (e.g., cost of a returned shipment) to quantify the savings.</li><li><strong>Onboarding Speed:</strong> Measure the time it takes for a new hire to become fully productive. A reduction in this time is a direct cost saving.</li></ul>`
     },
     {
         slug: "data-security-ai",
-        title: "Data Security in the Age of AI: Protecting Your SOPs",
+        title: "Data Security in the Age of AI: Protecting Your Documents",
         excerpt: "Understand the security measures that keep your sensitive operational data safe.",
-        content: `<p>Uploading your internal documents to a cloud service requires trust. At SOP Assistant, security is our top priority. We leverage the robust, enterprise-grade security of Google's Firebase platform. This includes:</p><ul><li><strong>Secure Authentication:</strong> Only verified users from your organization can access your knowledge base.</li><li><strong>Data Encryption:</strong> Your data is encrypted both in transit and at rest.</li><li><strong>Isolated Environments:</strong> Your data is logically separated from other customers' data, ensuring there is no cross-contamination.</li></ul>`
+        content: `<p>Uploading your internal documents to a cloud service requires trust. At FileSense, security is our top priority. We leverage the robust, enterprise-grade security of Google's Firebase platform. This includes:</p><ul><li><strong>Secure Authentication:</strong> Only verified users from your organization can access your knowledge base.</li><li><strong>Data Encryption:</strong> Your data is encrypted both in transit and at rest.</li><li><strong>Isolated Environments:</strong> Your data is logically separated from other customers' data, ensuring there is no cross-contamination.</li></ul>`
     },
     {
         slug: "beyond-vlookup",
-        title: "Beyond VLOOKUP: AI as Your New Excel Power Tool",
+        title: "Beyond VLOOKUP: AI as Your New Spreadsheet Power Tool",
         excerpt: "Excel is powerful, but AI takes data interaction to a whole new level.",
         content: `<p>Many businesses run on Excel, relying on functions like VLOOKUP and INDEX/MATCH to connect data. While powerful, these functions require expertise and rigid data structures. AI offers a more flexible and intuitive way to query your data.</p><p>Instead of building complex formulas, you can simply ask the question you want answered. The AI understands the context and relationships within your data, acting as a super-powered VLOOKUP that works with natural language, saving you from the headache of formula debugging.</p>`
     },
     {
         slug: "sop-for-startups",
-        title: "From Chaos to Clarity: How SOPs Transform Startups",
-        excerpt: "Why even early-stage startups need to prioritize Standard Operating Procedures.",
+        title: "From Chaos to Clarity: How Documenting Processes Transforms Startups",
+        excerpt: "Why even early-stage startups need to prioritize documenting their procedures.",
         content: `<p>It's a common myth that SOPs are only for large, bureaucratic corporations. In reality, they are a startup's best friend. Documenting processes early, even simple ones, provides a foundation for scalable growth. It ensures that as you hire new team members, they can get up to speed quickly and perform tasks consistently, freeing up the founders to focus on strategy and growth instead of repetitive training.</p>`
     },
     {
@@ -371,7 +371,7 @@ const blogPostsData = [
     },
     {
         slug: "top-industries-ai-sops",
-        title: "Top 5 Industries Benefiting from AI-Powered SOPs",
+        title: "Top 5 Industries Benefiting from AI-Powered Document Analysis",
         excerpt: "See which sectors are gaining the biggest competitive advantage from conversational AI.",
         content: `<p>While any business with procedures can benefit, some industries see a massive impact:</p><ol><li><strong>Logistics & Supply Chain:</strong> For managing complex shipping, receiving, and inventory procedures.</li><li><strong>Manufacturing:</strong> For quality control, machine operation, and safety protocols.</li><li><strong>Healthcare:</strong> For administrative tasks, billing codes, and patient processing workflows (non-PHI).</li><li><strong>Franchises:</strong> For ensuring brand consistency and operational uniformity across all locations.</li><li><strong>Customer Support:</strong> For providing quick, standardized answers to common customer issues.</li></ol>`
     }
@@ -641,7 +641,7 @@ const ProfilePageContent = () => {
                 <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
                     <h3 className="text-xl font-bold mb-4 text-slate-800">Danger Zone</h3>
                     <div className="border-t pt-4">
-                        <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md font-semibold">Clear All SOP Data</button>
+                        <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md font-semibold">Clear All Document Data</button>
                         <p className="text-sm text-slate-500 mt-2">This will permanently delete all uploaded documents and learned knowledge for your account. This action cannot be undone.</p>
                     </div>
                 </div>
@@ -941,7 +941,7 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const NavLink = ({ page, children }) => (
-        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2">
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className="font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2 md:w-auto md:text-center md:py-0">
             {children}
         </button>
     );
@@ -951,7 +951,7 @@ const Header = () => {
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('home')}>
                     <Logo />
-                    <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
+                    <h1 className="text-2xl font-bold text-slate-800">FileSense</h1>
                 </div>
                 <nav className="hidden md:flex items-center space-x-6">
                     <NavLink page="home">Home</NavLink>
@@ -1005,7 +1005,7 @@ const LoggedInHeader = () => {
     };
     
     const NavLink = ({ page, children, className = '' }) => (
-        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className={`font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2 ${className}`}>
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className={`font-semibold text-slate-600 hover:text-indigo-600 transition-colors w-full text-left py-2 md:w-auto md:text-center md:py-0 ${className}`}>
             {children}
         </button>
     );
@@ -1015,7 +1015,7 @@ const LoggedInHeader = () => {
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                  <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('chat')}>
                     <Logo />
-                    <h1 className="text-2xl font-bold text-slate-800">SOP Assistant</h1>
+                    <h1 className="text-2xl font-bold text-slate-800">FileSense</h1>
                 </div>
                 <nav className="hidden md:flex items-center space-x-6">
                     <NavLink page="home">Home</NavLink>
@@ -1070,7 +1070,7 @@ const Footer = () => {
     return (
         <footer className="bg-white border-t">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-                <p>&copy; {new Date().getFullYear()} SOP Assistant. All rights reserved.</p>
+                <p>&copy; {new Date().getFullYear()} FileSense. All rights reserved.</p>
                 <nav className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-0">
                     <button onClick={() => setPage('about')} className="hover:text-indigo-600">About</button>
                     <button onClick={() => setPage('contact')} className="hover:text-indigo-600">Contact</button>
