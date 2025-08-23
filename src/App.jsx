@@ -1150,26 +1150,21 @@ const AdUnit = ({ adSlot }) => {
 
 const LeftAdPanel = () => (
     <aside className="w-48 bg-slate-50 border-r border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
-        {/* Replace YOUR_AD_SLOT_ID_1 with the actual slot ID from your AdSense account */}
-        <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_1" /></div>
-        {/* Replace YOUR_AD_SLOT_ID_2 with the actual slot ID from your AdSense account */}
-        <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_2" /></div>
+        <div className="flex-1"><AdUnit adSlot="3235271419" /></div>
+        <div className="flex-1"><AdUnit adSlot="3235271419" /></div>
     </aside>
 );
 
 const RightAdPanel = () => (
     <aside className="w-48 bg-slate-50 border-l border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
-         {/* Replace YOUR_AD_SLOT_ID_3 with the actual slot ID from your AdSense account */}
-         <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_3" /></div>
-         {/* Replace YOUR_AD_SLOT_ID_4 with the actual slot ID from your AdSense account */}
-         <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_4" /></div>
+         <div className="flex-1"><AdUnit adSlot="3235271419" /></div>
+         <div className="flex-1"><AdUnit adSlot="3235271419" /></div>
     </aside>
 );
 
 const TopAdBanner = () => (
      <div className="w-full h-24 mb-4 flex-shrink-0">
-        {/* Replace YOUR_AD_SLOT_ID_5 with the actual slot ID from your AdSense account */}
-        <AdUnit adSlot="3235271419"/>
+        <AdUnit adSlot="3235271419" />
      </div>
 );
 
