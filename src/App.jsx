@@ -35,6 +35,25 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
 
+// --- AdSense Verification Component ---
+const AdSenseScript = () => {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478653994670887"; // <-- Your Publisher ID is now included
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+
+    return () => {
+      // Clean up the script when the component unmounts
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  return null; // This component doesn't render anything
+};
+
+
 // --- SVG Icons ---
 const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
 const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
@@ -91,6 +110,7 @@ const useApp = () => {
 export default function App() {
     return (
         <AppProvider>
+            <AdSenseScript />
             <AppRouter />
         </AppProvider>
     );
@@ -289,7 +309,7 @@ const blogPostsData = [
         slug: "analyze-sops-with-ai",
         title: "How to Analyze Documents Easily with AI", 
         excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds...",
-        content: `<p>Business documents are the backbone of any organized company, but they often end up as dense, lengthy files that are difficult to navigate. Finding a specific piece of information can feel like searching for a needle in a haystack. This is where AI changes the game.</p><p>FileSense uses advanced Natural Language Processing (NLP) to read and understand the content of your documents. Instead of manually scanning pages or spreadsheets, you can simply ask a question in plain language.</p><h3>How It Works:</h3><ol><li><strong>Upload:</strong> You upload your files (PDFs, Excel, PowerPoints).</li><li><strong>Process:</strong> Our AI creates a secure, indexed knowledge base from your documents.</li><li><strong>Query:</strong> You ask questions like, "What is the procedure for handling a customer refund?" or "Who is on the primary contact list for Route 5?"</li><li><strong>Answer:</strong> The assistant instantly retrieves and presents the relevant information, saving you valuable time and reducing the chance of human error.</li></ol><p>By transforming your static documents into an interactive knowledge base, you empower your team to find answers immediately, ensuring compliance and boosting productivity.</p>`
+        content: `<p>Business documents are the backbone of any organized company, but they often end up as dense, lengthy files that are difficult to navigate. Finding a specific piece of information can feel like searching for a needle in a haystack. This is where AI changes the game.</p><p>FileSense uses advanced Natural Language Processing (NLP) to read and understand the content of your documents. Instead of manually scanning pages, you can simply ask a question in plain language.</p><h3>How It Works:</h3><ol><li><strong>Upload:</strong> You upload your files (PDFs, Excel, PowerPoints).</li><li><strong>Process:</strong> Our AI creates a secure, indexed knowledge base from your documents.</li><li><strong>Query:</strong> You ask questions like, "What is the procedure for handling a customer refund?" or "Who is on the primary contact list for Route 5?"</li><li><strong>Answer:</strong> The assistant instantly retrieves and presents the relevant information, saving you valuable time and reducing the chance of human error.</li></ol><p>By transforming your static documents into an interactive knowledge base, you empower your team to find answers immediately, ensuring compliance and boosting productivity.</p>`
     },
     { 
         slug: "ai-reads-excel",
@@ -1099,11 +1119,34 @@ const Toast = ({ message, type, onDismiss }) => {
 };
 
 // --- Ad Components (Placeholders) ---
-const AdPlaceholder = ({ className = '' }) => (
-    <div className={`bg-gray-200 border border-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full ${className}`}>
-        Ad Placeholder
-    </div>
-);
+const AdPlaceholder = ({ className = '' }) => {
+    // This component is now ready to accept real AdSense code.
+    // For now, it shows a placeholder.
+    const adCode = `
+    <!--
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+           crossorigin="anonymous"></script>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+           data-ad-slot="YOUR_AD_SLOT_ID"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    -->
+    `;
+    
+    // In a real scenario, you would use dangerouslySetInnerHTML, but for safety and demonstration,
+    // we will show a placeholder. When you are ready, replace the div below.
+    // <div dangerouslySetInnerHTML={{ __html: adCode.replace(/<!--|-->/g, '') }} />
+    return (
+        <div className={`bg-gray-200 border border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full ${className}`}>
+            Ad Placeholder
+        </div>
+    );
+};
 
 const LeftAdPanel = () => (
     <aside className="w-48 bg-slate-50 border-r border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
