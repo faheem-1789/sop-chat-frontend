@@ -1169,7 +1169,7 @@ const RightAdPanel = () => (
 const TopAdBanner = () => (
      <div className="w-full h-24 mb-4 flex-shrink-0">
         {/* Replace YOUR_AD_SLOT_ID_5 with the actual slot ID from your AdSense account */}
-        <AdUnit adSlot="data-ad-slot="3235271419""/>
+        <AdUnit adSlot="3235271419"/>
      </div>
 );
 
