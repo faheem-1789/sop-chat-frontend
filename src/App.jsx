@@ -231,7 +231,7 @@ const GenericPage = ({ title, children }) => (
 );
 
 const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
-const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
+const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheem@file-sense.com" className="text-indigo-600 hover:underline">faheem@file-sense.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
 
 const PrivacyPolicyPage = () => (
     <GenericPage title="Privacy Policy">
@@ -822,7 +822,7 @@ const PricingPageContent = () => {
                          </ul>
                          <p className="mt-6 text-sm text-slate-700">
                             To purchase, please email your registered account ID to:<br/>
-                            <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                            <strong className="text-indigo-600">faheem@file-sense.com</strong>
                          </p>
                      </motion.div>
                 </div>
@@ -846,7 +846,7 @@ const PricingPageContent = () => {
                         ))}
                     </div>
                      <p className="mt-12 text-lg text-slate-700">
-                        For payment details, contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                        For payment details, contact: <strong className="text-indigo-600">faheem@file-sense.com</strong>
                     </p>
                 </div>
             </div>
