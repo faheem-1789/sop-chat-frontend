@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Core Pages -->
   <url>
     <loc>https://www.file-sense.com/</loc>
     <lastmod>2025-08-24</lastmod>
@@ -54,5 +55,82 @@
     <loc>https://www.file-sense.com/terms</loc>
     <lastmod>2025-08-24</lastmod>
     <priority>0.50</priority>
+  </url>
+
+  <!-- Blog Post Pages -->
+  <url>
+    <loc>https://www.file-sense.com/blog/analyze-sops-with-ai</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/ai-reads-excel</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/improve-efficiency</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/anatomy-of-sop</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/common-sop-mistakes</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/integrating-ai-workflow</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/ai-for-quality-control</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/future-of-document-management</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/case-study-logistics</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/roi-on-ai</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/data-security-ai</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/beyond-vlookup</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/sop-for-startups</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/ai-team-training</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.file-sense.com/blog/top-industries-ai-sops</loc>
+    <lastmod>2025-08-24</lastmod>
+    <priority>0.70</priority>
   </url>
 </urlset>
