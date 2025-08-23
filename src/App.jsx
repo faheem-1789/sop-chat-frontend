@@ -1334,7 +1334,33 @@ const ChatPageContent = () => {
                                  <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
                             ) : !sopExists ? (
                                 <div className="relative text-center p-8 bg-slate-100 rounded-lg">
-                                    {/* ... upload UI ... */}
+                                    {loadingUpload && (
+                                        <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center rounded-lg z-10">
+                                            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="mt-2 text-slate-600">Uploading...</p>
+                                        </div>
+                                    )}
+                                    <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
+                                    <p className="text-slate-600 mb-4">To get started, please upload one or more documents.</p>
+                                    <div className="max-w-md mx-auto">
+                                        <button onClick={() => fileInputRef.current.click()} className="w-full cursor-pointer bg-white text-slate-700 font-semibold py-2 px-4 rounded-lg border hover:bg-slate-50 transition-colors">
+                                          Choose files...
+                                        </button>
+                                        {files.length > 0 && (
+                                            <div className="mt-4 space-y-2 text-left">
+                                                {files.map((file, index) => (
+                                                    <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
+                                                        <FileIcon />
+                                                        <span className="flex-grow truncate">{file.name}</span>
+                                                        <button onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
+                                                    </div>
+                                                ))}
+                                                <button onClick={() => handleUpload(files)} disabled={files.length === 0 || loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                                                    Upload {files.length} File(s)
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ) : chat.length === 0 ? (
                                  <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin a new conversation.</div>
