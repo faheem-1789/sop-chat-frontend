@@ -39,18 +39,17 @@ const rtdb = getDatabase(app);
 const AdSenseScript = () => {
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478653994670887"; // <-- Your Publisher ID is now included
+    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478653994670887";
     script.async = true;
     script.crossOrigin = "anonymous";
     document.head.appendChild(script);
 
     return () => {
-      // Clean up the script when the component unmounts
       document.head.removeChild(script);
     };
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 };
 
 
@@ -1119,52 +1118,58 @@ const Toast = ({ message, type, onDismiss }) => {
 };
 
 // --- Ad Components (Placeholders) ---
-const AdPlaceholder = ({ className = '' }) => {
-    // This component is now ready to accept real AdSense code.
-    // For now, it shows a placeholder.
-    const adCode = `
-    <!--
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
-           crossorigin="anonymous"></script>
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
-           data-ad-slot="YOUR_AD_SLOT_ID"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>
-           (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    -->
-    `;
-    
-    // In a real scenario, you would use dangerouslySetInnerHTML, but for safety and demonstration,
-    // we will show a placeholder. When you are ready, replace the div below.
-    // <div dangerouslySetInnerHTML={{ __html: adCode.replace(/<!--|-->/g, '') }} />
+const AdUnit = ({ adSlot }) => {
+    useEffect(() => {
+        try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+            console.error("AdSense error:", e);
+        }
+    }, [adSlot]);
+
+    if (!adSlot) {
+        return (
+            <div className="bg-gray-200 border border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full">
+                Ad Placeholder
+            </div>
+        );
+    }
+
     return (
-        <div className={`bg-gray-200 border border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500 text-sm h-full w-full ${className}`}>
-            Ad Placeholder
+        <div className="ad-container" style={{ width: '100%', height: '100%' }}>
+            <ins className="adsbygoogle"
+                 style={{ display: 'block', width: '100%', height: '100%' }}
+                 data-ad-client="ca-pub-7478653994670887"
+                 data-ad-slot={adSlot}
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
         </div>
     );
 };
 
+
 const LeftAdPanel = () => (
     <aside className="w-48 bg-slate-50 border-r border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
-        <div className="flex-1"><AdPlaceholder /></div>
-        <div className="flex-1"><AdPlaceholder /></div>
+        {/* Replace YOUR_AD_SLOT_ID_1 with the actual slot ID from your AdSense account */}
+        <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_1" /></div>
+        {/* Replace YOUR_AD_SLOT_ID_2 with the actual slot ID from your AdSense account */}
+        <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_2" /></div>
     </aside>
 );
 
 const RightAdPanel = () => (
     <aside className="w-48 bg-slate-50 border-l border-slate-200 p-4 space-y-4 hidden lg:flex flex-col flex-shrink-0">
-         <div className="flex-1"><AdPlaceholder /></div>
-         <div className="flex-1"><AdPlaceholder /></div>
+         {/* Replace YOUR_AD_SLOT_ID_3 with the actual slot ID from your AdSense account */}
+         <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_3" /></div>
+         {/* Replace YOUR_AD_SLOT_ID_4 with the actual slot ID from your AdSense account */}
+         <div className="flex-1"><AdUnit adSlot="YOUR_AD_SLOT_ID_4" /></div>
     </aside>
 );
 
 const TopAdBanner = () => (
      <div className="w-full h-24 mb-4 flex-shrink-0">
-        <AdPlaceholder className="h-full"/>
+        {/* Replace YOUR_AD_SLOT_ID_5 with the actual slot ID from your AdSense account */}
+        <AdUnit adSlot="data-ad-slot="3235271419""/>
      </div>
 );
 
