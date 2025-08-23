@@ -157,6 +157,7 @@ const AppRouter = () => {
                 case 'profile': return user ? <ProfilePage /> : <LoginPage />;
                 case 'pricing': return user ? <PricingPage /> : <LoginPage />;
                 case 'admin': return user && userData?.role === 'admin' ? <AdminPage /> : <ChatPage />;
+                case 'ai-document-analysis-guide': return <PillarPage />;
                 default: return <HomePage />;
             }
         };
@@ -180,11 +181,26 @@ const AppRouter = () => {
 
 const HomePage = () => {
     const { setPage } = useApp();
+
+    // SEO Optimization for Homepage
+    useEffect(() => {
+        document.title = "FileSense | AI Document Chat Assistant for PDFs, Excel & SOPs";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute("content", "Stop searching, start knowing. FileSense is a powerful AI assistant that reads your business documents and provides instant, accurate answers. Perfect for SOPs, manuals, and data files.");
+        } else {
+            const newMeta = document.createElement('meta');
+            newMeta.name = "description";
+            newMeta.content = "Stop searching, start knowing. FileSense is a powerful AI assistant that reads your business documents and provides instant, accurate answers. Perfect for SOPs, manuals, and data files.";
+            document.head.appendChild(newMeta);
+        }
+    }, []);
+
     return (
         <div className="text-center py-20 px-4 sm:px-6 lg:px-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight">
-                    Unlock Insights from Your Documents Instantly
+                    AI Document Assistant: Chat with Your PDFs, Excel, and SOPs Instantly
                 </h1>
                 <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600">
                     FileSense reads and understands your business documents—PDFs, PowerPoints, Excel files, and more—providing immediate, accurate answers to your most complex questions.
@@ -419,6 +435,102 @@ const BlogPage = () => {
                     ))}
                 </div>
             )}
+        </GenericPage>
+    );
+};
+
+// --- NEW SEO PILLAR PAGE ---
+const PillarPage = () => {
+    const { setPage } = useApp();
+    useEffect(() => {
+        document.title = "The Ultimate Guide to AI-Powered Document Analysis | FileSense";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute("content", "Learn how AI document analysis works, from vector embeddings to natural language queries. A complete guide to using AI to chat with your PDFs, Excel files, and SOPs.");
+        }
+    }, []);
+
+    return (
+        <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis">
+            <p className="lead text-xl text-slate-600">
+                In today's data-driven world, the information that powers businesses is often locked away in static documents like PDFs, spreadsheets, and manuals. Finding a specific piece of information can feel like searching for a needle in a digital haystack. This guide explores the transformative technology that solves this problem: AI-powered document analysis.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-8 mb-4">What is AI Document Analysis?</h2>
+            <p>AI document analysis, also known as intelligent document processing, is the use of artificial intelligence to read, understand, and extract information from various file types. Unlike simple keyword searching, which only finds exact matches, modern AI understands context, semantics, and relationships within the text. This allows users to ask complex questions in natural language and receive precise, relevant answers, as if they were conversing with an expert who has memorized every document.</p>
+
+            <h2 className="text-2xl font-bold mt-8 mb-4">How Does the Technology Work?</h2>
+            <p>The magic behind tools like FileSense lies in a multi-step process orchestrated by technologies like LangChain and OpenAI. Here’s a simplified breakdown:</p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-2">Step 1: Document Ingestion and Parsing</h3>
+            <p>When you upload a file (e.g., a PDF, XLSX, or PPTX), the system first uses a parser to extract all the raw text and data. For a PDF, this means reading the text on each page. For an Excel file, it means understanding the relationship between rows and columns to preserve the data's structure.</p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-2">Step 2: Text Chunking</h3>
+            <p>Documents can be very long. To manage this, the extracted text is broken down into smaller, manageable "chunks." This is a critical step because AI models have a limit to how much text they can consider at one time. Chunking ensures that even very large documents can be processed efficiently.</p>
+
+            <h3 className="text-xl font-semibold mt-6 mb-2">Step 3: Vector Embeddings - The Core Concept</h3>
+            <p>This is where the AI's "understanding" begins. Each chunk of text is fed into an advanced AI model (an embedding model) which converts it into a numerical representation called a **vector**. This vector is a long list of numbers that captures the semantic meaning of the text. Chunks with similar meanings will have similar vectors, regardless of the exact words used.</p>
+
+            <h3 className="text-xl font-semibold mt-6 mb-2">Step 4: Creating a Vector Store</h3>
+            <p>All these vectors are stored in a specialized database called a **vector store** (like FAISS). This database is highly optimized for one task: finding the most similar vectors to a given query vector. This is the foundation of your new, searchable knowledge base.</p>
+
+            <h3 className="text-xl font-semibold mt-6 mb-2">Step 5: The Query Process</h3>
+            <p>When you ask a question like, "What are the safety procedures for operating the forklift?", the following happens:</p>
+            <ol className="list-decimal pl-5 space-y-2">
+                <li>Your question is also converted into a vector using the same embedding model.</li>
+                <li>The system searches the vector store for the text chunks whose vectors are most similar to your question's vector.</li>
+                <li>These relevant chunks are retrieved and provided to a powerful language model (like GPT-4o-mini) as context.</li>
+                <li>The language model then reads your original question and the provided context to formulate a clear, accurate, human-like answer.</li>
+            </ol>
+
+            <h2 className="text-2xl font-bold mt-8 mb-4">Why is This Better Than Traditional Search?</h2>
+            <table className="w-full mt-4 border">
+                <thead>
+                    <tr className="bg-slate-100">
+                        <th className="p-2 border text-left">Feature</th>
+                        <th className="p-2 border text-left">Traditional Search (Ctrl+F)</th>
+                        <th className="p-2 border text-left">AI Document Analysis (FileSense)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td className="p-2 border font-semibold">Understanding</td>
+                        <td className="p-2 border">Finds exact keyword matches only.</td>
+                        <td className="p-2 border">Understands context, synonyms, and intent.</td>
+                    </tr>
+                    <tr>
+                        <td className="p-2 border font-semibold">Query Type</td>
+                        <td className="p-2 border">Requires you to guess the right keywords.</td>
+                        <td className="p-2 border">Allows you to ask complex questions in plain language.</td>
+                    </tr>
+                     <tr>
+                        <td className="p-2 border font-semibold">Scope</td>
+                        <td className="p-2 border">Searches one document at a time.</td>
+                        <td className="p-2 border">Searches across your entire library of documents simultaneously.</td>
+                    </tr>
+                     <tr>
+                        <td className="p-2 border font-semibold">Answer Format</td>
+                        <td className="p-2 border">Shows you a highlighted word.</td>
+                        <td className="p-2 border">Synthesizes a direct, ready-to-use answer.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 className="text-2xl font-bold mt-8 mb-4">Key Business Applications</h2>
+            <ul className="list-disc pl-5 space-y-2">
+                <li><strong>Instant Onboarding:</strong> New hires can ask the AI questions instead of interrupting senior staff.</li>
+                <li><strong>Procedural Compliance:</strong> Teams in logistics or manufacturing can quickly verify SOPs, reducing errors.</li>
+                <li><strong>Customer Support:</strong> Support agents can find standardized answers to customer queries instantly.</li>
+                <li><strong>Data Extraction:</strong> Quickly pull names, dates, or figures from dense reports or spreadsheets without manual searching.</li>
+            </ul>
+
+            <div className="mt-12 p-6 bg-indigo-50 rounded-lg text-center">
+                <h3 className="text-2xl font-bold text-slate-800">Ready to Unlock Your Documents?</h3>
+                <p className="mt-2 text-slate-600">Stop searching and start knowing. Transform your static files into an interactive knowledge base today.</p>
+                <button onClick={() => setPage('signup')} className="mt-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700">
+                    Get Started with FileSense for Free
+                </button>
+            </div>
         </GenericPage>
     );
 };
@@ -1095,6 +1207,7 @@ const Footer = () => {
                     <button onClick={() => setPage('contact')} className="hover:text-indigo-600">Contact</button>
                     <button onClick={() => setPage('privacy')} className="hover:text-indigo-600">Privacy Policy</button>
                     <button onClick={() => setPage('terms')} className="hover:text-indigo-600">Terms of Service</button>
+                    <button onClick={() => setPage('ai-document-analysis-guide')} className="hover:text-indigo-600 font-semibold">AI Guide</button>
                 </nav>
             </div>
         </footer>
