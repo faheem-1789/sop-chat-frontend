@@ -1104,7 +1104,7 @@ const ChatPageContent = () => {
 
     // Fetch conversations list
     useEffect(() => {
-        if (user && !activeConversationId) {
+        if (user && activeConversationId === null) { // Only fetch when on the conversation list view
             const fetchConversations = async () => {
                 setLoadingConversations(true);
                 try {
@@ -1114,8 +1114,7 @@ const ChatPageContent = () => {
                     const convList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setConversations(convList);
                 } catch (error) {
-                    // **THIS IS THE NEW DEBUGGING CODE**
-                    console.error("Firestore Query Failed. This is likely an indexing issue.");
+                    console.error("Firestore Query Failed. This is likely an indexing issue or a permissions error.");
                     console.error("Full Error:", error);
                     if (error.message.includes("The query requires an index")) {
                         console.error("INDEXING LINK (copy and paste into browser):", error.message.substring(error.message.indexOf('https://')));
@@ -1191,6 +1190,7 @@ const ChatPageContent = () => {
             if(wasInitialUpload) {
                 const allFileNames = filesToUpload.map(f => f.name).join(', ');
                 setChat([{role: 'assistant', text: `Successfully processed ${allFileNames}. You can now ask questions about them.`}]);
+                setActiveConversationId('new'); // Automatically move to chat view after first upload
             }
 
         } catch (error) {
@@ -1229,6 +1229,10 @@ const ChatPageContent = () => {
         setLoadingSend(true);
         
         let currentConvId = activeConversationId;
+        if (currentConvId === 'new') { // Check for the sentinel value
+            currentConvId = null;
+        }
+
         if (!currentConvId) {
             // Create a new conversation in Firestore
             const convRef = await addDoc(collection(db, "users", user.uid, "conversations"), {
@@ -1273,6 +1277,11 @@ const ChatPageContent = () => {
     };
 
     const startNewConversation = () => {
+        setActiveConversationId('new'); // Use a sentinel value to indicate a new chat
+        setChat([]);
+    };
+
+    const backToConversations = () => {
         setActiveConversationId(null);
         setChat([]);
     };
@@ -1288,7 +1297,7 @@ const ChatPageContent = () => {
     }
     
     // RENDER LOGIC
-    if (!activeConversationId && sopExists) {
+    if (activeConversationId === null && sopExists) {
         return (
             <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
                 <div className="w-full max-w-4xl">
@@ -1337,7 +1346,7 @@ const ChatPageContent = () => {
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
                        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                             {activeConversationId && (
-                                <button onClick={startNewConversation} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
+                                <button onClick={backToConversations} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
                             )}
                             {isBasicVersion && activeConversationId && <TopAdBanner />}
                             {loadingStatus ? (
