@@ -1107,12 +1107,22 @@ const ChatPageContent = () => {
         if (user && !activeConversationId) {
             const fetchConversations = async () => {
                 setLoadingConversations(true);
-                const convRef = collection(db, "users", user.uid, "conversations");
-                const q = query(convRef, orderBy("lastUpdated", "desc"));
-                const querySnapshot = await getDocs(q);
-                const convList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setConversations(convList);
-                setLoadingConversations(false);
+                try {
+                    const convRef = collection(db, "users", user.uid, "conversations");
+                    const q = query(convRef, orderBy("lastUpdated", "desc"));
+                    const querySnapshot = await getDocs(q);
+                    const convList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setConversations(convList);
+                } catch (error) {
+                    // **THIS IS THE NEW DEBUGGING CODE**
+                    console.error("Firestore Query Failed. This is likely an indexing issue.");
+                    console.error("Full Error:", error);
+                    if (error.message.includes("The query requires an index")) {
+                        console.error("INDEXING LINK (copy and paste into browser):", error.message.substring(error.message.indexOf('https://')));
+                    }
+                } finally {
+                    setLoadingConversations(false);
+                }
             };
             fetchConversations();
         }
