@@ -1322,14 +1322,14 @@ const ChatPageContent = () => {
 
     return (
         <div className="flex flex-1 overflow-hidden bg-slate-100">
-            {isBasicVersion && <LeftAdPanel />}
+            {isBasicVersion && activeConversationId && <LeftAdPanel />}
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
                        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                             {activeConversationId && (
                                 <button onClick={startNewConversation} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
                             )}
-                            {isBasicVersion && <TopAdBanner />}
+                            {isBasicVersion && activeConversationId && <TopAdBanner />}
                             {loadingStatus ? (
                                  <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
                             ) : !sopExists ? (
@@ -1427,7 +1427,7 @@ const ChatPageContent = () => {
                          </div>
                 </div>
             </main>
-            {isBasicVersion && <RightAdPanel />}
+            {isBasicVersion && activeConversationId && <RightAdPanel />}
         </div>
     );
 };
