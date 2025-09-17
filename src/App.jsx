@@ -466,10 +466,16 @@ const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState('');
     const [showConfirm, setShowConfirm] = useState(false);
+    const [companyName, setCompanyName] = useState('');
+    const [department, setDepartment] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
 
     useEffect(() => {
         if (userData) {
             setFullName(userData.fullName || '');
+            setCompanyName(userData.companyName || '');
+            setDepartment(userData.department || '');
+            setContactNumber(userData.contactNumber || '');
         }
     }, [userData]);
 
@@ -478,8 +484,9 @@ const ProfilePage = () => {
         if (!user) return;
         try {
             const userRef = doc(db, "users", user.uid);
-            await updateDoc(userRef, { fullName });
-            setUserData(prev => ({...prev, fullName }));
+            const updatedData = { fullName, companyName, department, contactNumber };
+            await updateDoc(userRef, updatedData);
+            setUserData(prev => ({...prev, ...updatedData }));
             setMessage('Profile updated successfully!');
             setIsEditing(false);
         } catch (err) {
@@ -515,7 +522,7 @@ const ProfilePage = () => {
                 {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
                 <div className="bg-white p-8 rounded-2xl shadow-lg">
                     <div className="flex items-center space-x-6 mb-8">
-                        <UserAvatar userData={userData} />
+                        <img src={`https://placehold.co/100x100/e0e7ff/6366f1?text=${(userData?.fullName || 'U').charAt(0)}`} alt="Profile" className="w-24 h-24 rounded-full" />
                         <div>
                             <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
                             <p className="text-slate-500">{userData?.email}</p>
@@ -527,8 +534,20 @@ const ProfilePage = () => {
                             <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border rounded-md disabled:bg-slate-50" />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Department</label>
+                            <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Company</label>
+                            <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium">Email</label>
                             <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border rounded-md bg-slate-50" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                            <input type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
                         </div>
                         {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md">Save Changes</button>}
                     </form>
