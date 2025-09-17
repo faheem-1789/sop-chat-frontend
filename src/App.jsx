@@ -254,21 +254,143 @@ const GenericPage = ({ title, children, className }) => (
     </div>
 );
 
-const AboutPage = () => <GenericPage title="About Us">{/* ... */}</GenericPage>;
-const ContactPage = () => <GenericPage title="Contact Us">{/* ... */}</GenericPage>;
-const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy">{/* ... */}</GenericPage>;
-const TermsOfServicePage = () => <GenericPage title="Terms of Service">{/* ... */}</GenericPage>;
-const FAQPage = () => <GenericPage title="Frequently Asked Questions">{/* ... */}</GenericPage>;
+const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense...</p></GenericPage>;
+const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? Reach out...</p></GenericPage>;
+const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p>Your privacy is important...</p></GenericPage>;
+const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p>By using FileSense...</p></GenericPage>;
+const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
 
-const blogPostsData = [ /* ... blog posts ... */ ];
+const blogPostsData = [ { slug: "analyze-sops-with-ai", title: "How to Analyze Documents Easily with AI", excerpt: "Discover how AI can streamline...", content: `<p>Business documents are the backbone...</p>` } ];
 
-const BlogPage = () => { /* ... blog page logic ... */ };
+const BlogPage = () => {
+    const [selectedPost, setSelectedPost] = useState(null);
+    const postToShow = selectedPost ? blogPostsData.find(p => p.slug === selectedPost) : null;
+    return (
+        <GenericPage title={postToShow ? postToShow.title : "Our Blog"}>
+            {postToShow ? (
+                <div>
+                    <button onClick={() => setSelectedPost(null)} className="text-indigo-600 font-semibold mb-6">&larr; Back to Blog List</button>
+                    <div dangerouslySetInnerHTML={{ __html: postToShow.content }} />
+                </div>
+            ) : (
+                <div className="space-y-8">
+                    {blogPostsData.map(post => (
+                        <div key={post.slug} className="p-6 border rounded-lg hover:shadow-lg transition-shadow">
+                            <h3 className="text-xl font-semibold text-slate-800">{post.title}</h3>
+                            <p className="mt-2 text-slate-600">{post.excerpt}</p>
+                            <button onClick={() => setSelectedPost(post.slug)} className="text-indigo-600 font-semibold mt-4 inline-block">Read More &rarr;</button>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </GenericPage>
+    );
+};
 
-const LoginPage = () => { /* ... login page logic ... */ };
-const SignUpPage = () => { /* ... sign up page logic ... */ };
-const VerifyEmailPage = () => { /* ... verify email page logic ... */ };
-const PricingPage = () => { /* ... pricing page logic ... */ };
-const ProfilePage = () => { /* ... profile page logic ... */ };
+const LoginPage = () => {
+    const { setPage } = useApp();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            setError(err.message.replace('Firebase: ', ''));
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="flex items-center justify-center flex-1 bg-slate-100">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Welcome Back!</h2>
+                </div>
+                {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border rounded-md" />
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </form>
+                <p className="text-center text-sm">
+                    Don't have an account? <button onClick={() => setPage('signup')} className="font-semibold text-indigo-600 hover:underline">Sign Up</button>
+                </p>
+            </div>
+        </div>
+    );
+};
+const SignUpPage = () => {
+    const { setPage } = useApp();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(userCredential.user);
+            await setDoc(doc(db, "users", userCredential.user.uid), {
+                uid: userCredential.user.uid,
+                fullName,
+                email,
+                credits: 10,
+                version: 'basic',
+                createdAt: serverTimestamp(),
+            });
+        } catch (err) {
+            setError(err.message.replace('Firebase: ', ''));
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="flex items-center justify-center flex-1 bg-slate-100">
+             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Create an Account</h2>
+                </div>
+                {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
+                <form onSubmit={handleSignUp} className="space-y-4">
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border rounded-md" />
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        {loading ? 'Creating Account...' : 'Sign Up'}
+                    </button>
+                </form>
+                <p className="text-center text-sm">
+                    Already have an account? <button onClick={() => setPage('login')} className="font-semibold text-indigo-600 hover:underline">Login</button>
+                </p>
+            </div>
+        </div>
+    );
+};
+const VerifyEmailPage = () => (
+    <div className="flex flex-col items-center justify-center flex-1 text-center p-4 bg-slate-100">
+        <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg">
+            <h2 className="text-3xl font-bold mb-4 text-slate-800">Verify Your Email</h2>
+            <p className="text-slate-600 mb-6">A verification link has been sent to <strong>{auth.currentUser?.email}</strong>. Please check your inbox and click the link to activate your account.</p>
+            <button onClick={() => signOut(auth)} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                Go to Login
+            </button>
+        </div>
+    </div>
+);
+const PricingPage = () => <GenericPage title="Pricing"><div>Pricing content...</div></GenericPage>;
+const ProfilePage = () => <GenericPage title="Profile"><div>Profile content...</div></GenericPage>;
 
 const AdminPage = () => {
     const { user } = useApp();
@@ -276,13 +398,11 @@ const AdminPage = () => {
     const [onlineStatus, setOnlineStatus] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
             if (!user) return;
             setLoading(true);
-            setError('');
             try {
                 const token = await getIdToken(user);
                 const res = await axios.get("https://sop-chat-backend.onrender.com/admin/users", {
@@ -291,9 +411,8 @@ const AdminPage = () => {
                 setUsers(res.data);
             } catch (err) {
                 setError("Could not load user data.");
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         };
         fetchUsers();
     }, [user]);
@@ -301,38 +420,44 @@ const AdminPage = () => {
     useEffect(() => {
         const statusRef = ref(rtdb, 'status/');
         const unsubscribe = onValue(statusRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            setOnlineStatus(data);
+            setOnlineStatus(snapshot.val() || {});
         });
         return () => unsubscribe();
     }, []);
 
-    // ... admin page handlers ...
-
     return (
         <div className="flex-1 p-8 bg-slate-100">
-            <h2 className="text-3xl font-bold">Admin Dashboard</h2>
-            {/* ... rest of admin page JSX ... */}
-             <table className="w-full text-left">
-                <thead>
-                    <tr className="border-b">
-                        <th className="p-2">Status</th>
-                        {/* ... other headers ... */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(u => (
-                        <tr key={u.uid} className="border-b hover:bg-slate-50">
-                            <td className="p-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${onlineStatus[u.uid]?.state === 'online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
-                                    {onlineStatus[u.uid]?.state === 'online' ? 'Online' : 'Offline'}
-                                </span>
-                            </td>
-                            {/* ... other user data cells ... */}
+            <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+            {loading ? <p>Loading users...</p> : error ? <p className="text-red-500">{error}</p> : (
+            <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b">
+                            <th className="p-2">Status</th>
+                            <th className="p-2">Name</th>
+                            <th className="p-2">Email</th>
+                            <th className="p-2">Version</th>
+                            <th className="p-2">Credits</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {users.map(u => (
+                            <tr key={u.uid} className="border-b hover:bg-slate-50">
+                                <td className="p-2">
+                                    <span className={`px-2 py-1 text-xs rounded-full ${onlineStatus[u.uid]?.state === 'online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
+                                        {onlineStatus[u.uid]?.state === 'online' ? 'Online' : 'Offline'}
+                                    </span>
+                                </td>
+                                <td className="p-2">{u.fullName}</td>
+                                <td className="p-2">{u.email}</td>
+                                <td className="p-2">{u.version}</td>
+                                <td className="p-2">{u.credits}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            )}
         </div>
     );
 };
@@ -353,7 +478,7 @@ const ChatPage = () => {
                     const convList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setConversations(convList);
                 } catch (error) {
-                    console.error("Firestore Query Failed. This is likely an indexing issue.", error);
+                    console.error("Firestore Query Failed.", error);
                 }
                 setLoadingConversations(false);
             };
@@ -414,10 +539,120 @@ const ChatPage = () => {
 };
 
 const ChatPageContent = () => {
-    // ... all chat logic and JSX as before
     const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, setIsStartingNewChat } = useApp();
+    const [files, setFiles] = useState([]);
+    const [message, setMessage] = useState("");
+    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [loadingSend, setLoadingSend] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState(true);
+    const chatEndRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        const checkSopStatus = async () => {
+            if (!user) return;
+            setLoadingStatus(true);
+            try {
+                const token = await getIdToken(user);
+                const res = await axios.get("https://sop-chat-backend.onrender.com/status", { headers: { Authorization: `Bearer ${token}` } });
+                setSopExists(res.data.sop_exists);
+            } catch (error) {
+                console.error("Could not check SOP status", error);
+                setSopExists(false);
+            }
+            setLoadingStatus(false);
+        };
+        checkSopStatus();
+    }, [user, setSopExists]);
     
-    // ... the rest of the existing ChatPageContent component
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chat]);
+    
+    const handleFileChange = (e) => setFiles(Array.from(e.target.files));
+
+    const handleUpload = async () => {
+        if (files.length === 0 || !user) return;
+        setLoadingUpload(true);
+        try {
+            const token = await getIdToken(user);
+            const formData = new FormData();
+            files.forEach(file => formData.append('file', file));
+            await axios.post("https://sop-chat-backend.onrender.com/upload/", formData, {
+                headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+            });
+            setSopExists(true);
+            setFiles([]);
+        } catch (error) {
+            console.error("File upload failed", error);
+        }
+        setLoadingUpload(false);
+    };
+
+    const saveConversation = async (updatedChat, conversationId) => {
+        if (!user) return;
+        const firstUserMessage = updatedChat.find(m => m.role === 'user')?.text || 'New Conversation';
+        const title = firstUserMessage.substring(0, 50);
+        
+        const convRef = doc(db, "users", user.uid, "conversations", conversationId);
+        await setDoc(convRef, {
+            title: title,
+            messages: updatedChat,
+            lastUpdated: serverTimestamp()
+        }, { merge: true });
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!message.trim() || !user) return;
+
+        const userMsg = { role: "user", text: message };
+        const newChat = [...chat, userMsg];
+        setChat(newChat);
+        const currentMessage = message;
+        setMessage('');
+        setLoadingSend(true);
+        
+        let currentConvId = activeConversationId;
+        if (!currentConvId) {
+            const convRef = await addDoc(collection(db, "users", user.uid, "conversations"), {
+                title: currentMessage.substring(0, 50),
+                messages: newChat,
+                createdAt: serverTimestamp(),
+                lastUpdated: serverTimestamp()
+            });
+            currentConvId = convRef.id;
+            setActiveConversationId(currentConvId);
+        }
+
+        try {
+            const token = await getIdToken(user);
+            const history = newChat.slice(0, -1).reduce((acc, curr, i, arr) => {
+                if (curr.role === 'user' && arr[i + 1]?.role === 'assistant') {
+                    acc.push([curr.text, arr[i + 1].text]);
+                }
+                return acc;
+            }, []);
+
+            const res = await axios.post("https://sop-chat-backend.onrender.com/chat/", { prompt: currentMessage, history }, { headers: { Authorization: `Bearer ${token}` } });
+            const assistantMsg = { role: "assistant", text: res.data.response };
+            const finalChat = [...newChat, assistantMsg];
+            setChat(finalChat);
+            await saveConversation(finalChat, currentConvId);
+
+            const newCredits = (userData.credits || 0) - 1;
+            await updateDoc(doc(db, "users", user.uid), { credits: newCredits });
+            setUserData(prev => ({...prev, credits: newCredits}));
+
+        } catch (err) {
+            const errorMsg = err.response?.data?.detail || "Failed to get response.";
+            const errorChat = [...newChat, { role: 'assistant', text: `Error: ${errorMsg}` }];
+            setChat(errorChat);
+            await saveConversation(errorChat, currentConvId);
+        }
+        setLoadingSend(false);
+    };
+    
     return (
         <div className="flex flex-1 overflow-hidden bg-slate-100">
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
@@ -426,9 +661,80 @@ const ChatPageContent = () => {
                             {(activeConversationId || isStartingNewChat) && (
                                 <button onClick={() => { setActiveConversationId(null); setIsStartingNewChat(false); }} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
                             )}
-                            {/* ... rest of chat UI */}
-                        </div>
-                        {/* ... chat input form */}
+                            
+                            {loadingStatus ? (
+                                 <div className="text-center p-8"><p className="animate-pulse">Checking for documents...</p></div>
+                            ) : !sopExists ? (
+                                <div className="text-center p-8 bg-slate-100 rounded-lg">
+                                    <h3 className="font-semibold text-lg mb-2">Welcome, {userData?.fullName}!</h3>
+                                    <p className="text-slate-600 mb-4">To get started, please upload one or more documents.</p>
+                                    <div className="max-w-md mx-auto">
+                                        <button onClick={() => fileInputRef.current.click()} className="w-full bg-white text-slate-700 py-2 px-4 rounded-lg border hover:bg-slate-50">
+                                          Choose files...
+                                        </button>
+                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple accept=".pdf,.pptx,.docx,.xlsx,.xls" />
+                                        {files.length > 0 && (
+                                            <div className="mt-4 space-y-2 text-left">
+                                                {files.map((file, index) => (
+                                                    <div key={index} className="flex items-center p-2 bg-slate-200 rounded-md text-sm">
+                                                        <FileIcon />
+                                                        <span className="flex-grow truncate">{file.name}</span>
+                                                        <button onClick={() => setFiles(files.filter((_, i) => i !== index))}><CloseIcon /></button>
+                                                    </div>
+                                                ))}
+                                                <button onClick={handleUpload} disabled={loadingUpload} className="w-full mt-2 bg-indigo-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-700">
+                                                    {loadingUpload ? 'Uploading...' : `Upload ${files.length} File(s)`}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : chat.length === 0 ? (
+                                 <div className="text-center p-8 text-slate-500">Your documents are ready. Ask a question to begin.</div>
+                            ) : null}
+
+                            {chat.map((c, i) => (
+                                <div key={i} className={`flex items-start gap-4 ${c.role === "user" ? "justify-end" : "justify-start"}`}>
+                                    {c.role === 'assistant' && <AssistantAvatar />}
+                                    <div className={`p-4 rounded-2xl max-w-2xl shadow-md ${c.role === "user" ? "bg-indigo-500 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`}>
+                                        <ReactMarkdown className="prose prose-sm max-w-none">{c.text}</ReactMarkdown>
+                                    </div>
+                                    {c.role === 'user' && <UserAvatar userData={userData} />}
+                                </div>
+                            ))}
+                             {loadingSend && (
+                                <div className="flex items-start gap-4">
+                                    <AssistantAvatar />
+                                    <div className="p-4 rounded-2xl bg-slate-100 text-slate-800">
+                                        <div className="flex items-center space-x-1">
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></span>
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></span>
+                                            <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-300"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={chatEndRef} />
+                         </div>
+                       <div className="p-4 bg-white/80 border-t">
+                            <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                                <button type="button" title="Upload More Files" onClick={() => fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200">
+                                    <UploadIcon />
+                                </button>
+                                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple accept=".pdf,.pptx,.docx,.xlsx,.xls" />
+                                <input
+                                  value={message}
+                                  onChange={(e) => setMessage(e.target.value)}
+                                  className="border border-slate-300 p-4 w-full rounded-full"
+                                  placeholder={sopExists ? "Ask a question..." : "Please upload a document to begin"}
+                                  disabled={!sopExists || loadingSend}
+                                />
+                                <button type="submit" disabled={!sopExists || loadingSend || !message.trim()} className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50">
+                                    <SendIcon />
+                                </button>
+                            </form>
+                             <p className="text-right mt-2 text-sm text-indigo-600">Credits Remaining: {userData?.credits}</p>
+                         </div>
                 </div>
             </main>
         </div>
@@ -436,6 +742,119 @@ const ChatPageContent = () => {
 };
 
 // --- Headers & Footers ---
-const Header = () => { /* ... */ };
-const LoggedInHeader = () => { /* ... */ };
-const Footer = () => { /* ... */ };
+const Header = () => {
+    const { setPage } = useApp();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const NavLink = ({ page, children }) => (
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className="font-semibold text-slate-600 hover:text-indigo-600 w-full text-left py-2 md:w-auto md:text-center md:py-0">
+            {children}
+        </button>
+    );
+
+    return (
+        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('home')}>
+                    <Logo />
+                    <h1 className="text-2xl font-bold text-slate-800">FileSense</h1>
+                </div>
+                <nav className="hidden md:flex items-center space-x-6">
+                    <NavLink page="home">Home</NavLink>
+                    <NavLink page="blog">Blog</NavLink>
+                    <NavLink page="faq">FAQ</NavLink>
+                    <NavLink page="contact">Contact</NavLink>
+                </nav>
+                <div className="hidden md:flex items-center gap-4">
+                     <button onClick={() => setPage('login')} className="font-semibold text-slate-600 hover:text-indigo-600">Login</button>
+                     <button onClick={() => setPage('signup')} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold">Sign Up</button>
+                </div>
+                <div className="md:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}><MenuIcon /></button>
+                </div>
+            </div>
+            {isMenuOpen && (
+                <div className="md:hidden mt-4 p-4 bg-white rounded-lg shadow-lg">
+                    <nav className="flex flex-col space-y-2">
+                        <NavLink page="home">Home</NavLink>
+                        <NavLink page="blog">Blog</NavLink>
+                        <NavLink page="faq">FAQ</NavLink>
+                        <NavLink page="contact">Contact</NavLink>
+                        <div className="border-t my-2"></div>
+                        <button onClick={() => { setPage('login'); setIsMenuOpen(false); }} className="w-full text-left font-semibold text-slate-600 py-2">Login</button>
+                        <button onClick={() => { setPage('signup'); setIsMenuOpen(false); }} className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-semibold">Sign Up</button>
+                    </nav>
+                </div>
+            )}
+        </header>
+    );
+};
+
+const LoggedInHeader = () => {
+    const { setPage, userData } = useApp();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const handleLogout = () => {
+        signOut(auth);
+        setPage('home');
+    };
+    const NavLink = ({ page, children, className = '' }) => (
+        <button onClick={() => { setPage(page); setIsMenuOpen(false); }} className={`font-semibold text-slate-600 hover:text-indigo-600 w-full text-left py-2 md:w-auto md:text-center md:py-0 ${className}`}>
+            {children}
+        </button>
+    );
+
+    return (
+        <header className="bg-white/80 backdrop-blur-lg shadow-sm p-4 z-40 sticky top-0">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('home')}>
+                    <Logo />
+                    <h1 className="text-2xl font-bold text-slate-800">FileSense</h1>
+                </div>
+                <nav className="hidden md:flex items-center space-x-6">
+                    <NavLink page="home">Home</NavLink>
+                    <NavLink page="blog">Blog</NavLink>
+                    <div className="h-6 w-px bg-slate-200"></div>
+                    {userData?.role === 'admin' && (
+                        <NavLink page="admin" className="!text-red-600">Admin</NavLink>
+                    )}
+                    <NavLink page="chat">Chat</NavLink>
+                    <NavLink page="profile">Profile</NavLink>
+                    <NavLink page="pricing">Pricing</NavLink>
+                    <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold">Logout</button>
+                </nav>
+                 <div className="md:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}><MenuIcon /></button>
+                </div>
+            </div>
+            {isMenuOpen && (
+                <div className="md:hidden mt-4 p-4 bg-white rounded-lg shadow-lg">
+                    <nav className="flex flex-col space-y-2">
+                        <NavLink page="chat">Chat</NavLink>
+                        <NavLink page="profile">Profile</NavLink>
+                        <NavLink page="pricing">Pricing</NavLink>
+                        {userData?.role === 'admin' && <NavLink page="admin" className="!text-red-600">Admin</NavLink>}
+                        <div className="border-t my-2"></div>
+                        <NavLink page="home">Home</NavLink>
+                        <NavLink page="blog">Blog</NavLink>
+                        <div className="border-t my-2"></div>
+                        <button onClick={handleLogout} className="w-full mt-2 px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold">Logout</button>
+                    </nav>
+                </div>
+            )}
+        </header>
+    );
+};
+
+const Footer = () => {
+    const { setPage } = useApp();
+    return (
+        <footer className="bg-white border-t">
+            <div className="max-w-7xl mx-auto py-8 px-4 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
+                <p>&copy; {new Date().getFullYear()} FileSense. All rights reserved.</p>
+                <nav className="flex gap-6 mt-4 md:mt-0">
+                    <button onClick={() => setPage('privacy')} className="hover:text-indigo-600">Privacy Policy</button>
+                    <button onClick={() => setPage('terms')} className="hover:text-indigo-600">Terms of Service</button>
+                </nav>
+            </div>
+        </footer>
+    );
+};
