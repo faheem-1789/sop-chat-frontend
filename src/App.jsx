@@ -254,13 +254,32 @@ const GenericPage = ({ title, children, className }) => (
     </div>
 );
 
-const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense...</p></GenericPage>;
-const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? Reach out...</p></GenericPage>;
-const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p>Your privacy is important...</p></GenericPage>;
-const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p>By using FileSense...</p></GenericPage>;
+const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
+const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
+const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
+const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
 
-const blogPostsData = [ { slug: "analyze-sops-with-ai", title: "How to Analyze Documents Easily with AI", excerpt: "Discover how AI can streamline...", content: `<p>Business documents are the backbone...</p>` } ];
+const blogPostsData = [
+    {
+        slug: "filesense-vs-manual-search",
+        title: "FileSense vs. Manual Searching: A Time-Saving Comparison",
+        excerpt: "We break down the real cost of searching for information manually and show how an AI assistant can reclaim hours of your team's valuable time...",
+        content: `<p>In any business, time is the most valuable resource...</p>`
+    },
+    { 
+        slug: "analyze-sops-with-ai",
+        title: "How to Analyze Documents Easily with AI", 
+        excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds...",
+        content: `<p>Business documents are the backbone of any organized company...</p>`
+    },
+    { 
+        slug: "ai-reads-excel",
+        title: "Can AI Really Read and Understand Your Documents?", 
+        excerpt: "We dive into the technology that allows our assistant to parse spreadsheets, PDFs, and more to provide accurate answers...",
+        content: `<p>It sounds like science fiction, but it's a reality...</p>`
+    },
+];
 
 const BlogPage = () => {
     const [selectedPost, setSelectedPost] = useState(null);
@@ -389,8 +408,155 @@ const VerifyEmailPage = () => (
         </div>
     </div>
 );
-const PricingPage = () => <GenericPage title="Pricing"><div>Pricing content...</div></GenericPage>;
-const ProfilePage = () => <GenericPage title="Profile"><div>Profile content...</div></GenericPage>;
+
+const PricingPage = () => {
+    const creditPlans = [
+        { name: 'Basic', credits: 20, price: '1,500 PKR' },
+        { name: 'Standard', credits: 50, price: '5,000 PKR' },
+        { name: 'Premium', credits: 100, price: '9,000 PKR', popular: true },
+        { name: 'Ultra', credits: 'Unlimited', price: '25,000 PKR/mo' },
+    ];
+
+    return (
+        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+            <div className="w-full max-w-6xl text-center">
+                <div className="mb-16">
+                     <h2 className="text-3xl font-bold mb-2">Upgrade to Pro</h2>
+                     <p className="text-gray-600 mb-8">Enjoy an ad-free experience with a one-time payment.</p>
+                     <div className="max-w-md mx-auto p-8 border-2 border-indigo-500 rounded-2xl shadow-2xl bg-white text-center">
+                         <h3 className="text-2xl font-bold">Pro Version</h3>
+                         <p className="text-5xl font-extrabold my-4">40,000 PKR</p>
+                         <p className="text-lg font-semibold text-slate-600">One-Time Payment</p>
+                         <ul className="text-left my-6 space-y-2">
+                            <li>✅ Ad-Free Interface</li>
+                            <li>✅ Priority Support</li>
+                            <li>✅ All Features Included</li>
+                         </ul>
+                         <p className="mt-6 text-sm text-slate-700">
+                            To purchase, please email your registered account ID to:<br/>
+                            <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                         </p>
+                     </div>
+                </div>
+                 <div>
+                    <h2 className="text-3xl font-bold mb-2">Purchase Credits (for Basic Users)</h2>
+                    <p className="text-gray-600 mb-8">Keep the ads and top up your credits to continue the conversation.</p>
+                    <div className="grid md:grid-cols-4 gap-8">
+                        {creditPlans.map((plan) => (
+                            <div key={plan.name} className={`p-6 border rounded-lg shadow-lg text-center ${plan.popular ? 'border-indigo-500 scale-105 bg-white' : 'bg-white/50'}`}>
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                <p className="text-4xl font-extrabold my-4">{plan.price}</p>
+                                <p className="text-lg font-semibold">{plan.credits} Credits</p>
+                                <button className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Purchase</button>
+                            </div>
+                        ))}
+                    </div>
+                     <p className="mt-12 text-lg text-slate-700">
+                        For payment details, contact: <strong className="text-indigo-600">faheemiqbal993@gmail.com</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ProfilePage = () => {
+    const { user, userData, setUserData, setSopExists, setChat, setPage } = useApp();
+    const [fullName, setFullName] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [message, setMessage] = useState('');
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    useEffect(() => {
+        if (userData) {
+            setFullName(userData.fullName || '');
+        }
+    }, [userData]);
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        if (!user) return;
+        try {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, { fullName });
+            setUserData(prev => ({...prev, fullName }));
+            setMessage('Profile updated successfully!');
+            setIsEditing(false);
+        } catch (err) {
+            setMessage('Error updating profile.');
+        }
+    };
+
+    const handleClearMemory = async () => {
+        if (!user) return;
+        setShowConfirm(false);
+        try {
+            const token = await getIdToken(user);
+            await axios.delete("https://sop-chat-backend.onrender.com/clear_memory", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSopExists(false);
+            setChat([]);
+            setPage('chat');
+        } catch (error) {
+            setMessage("Error clearing memory.");
+        }
+    };
+
+    return (
+        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+            <div className="w-full max-w-4xl">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-slate-800">Profile</h2>
+                    <button onClick={() => setIsEditing(!isEditing)} className="text-sm font-semibold text-indigo-600">
+                        {isEditing ? 'Cancel' : 'Edit Profile'}
+                    </button>
+                </div>
+                {message && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md">{message}</p>}
+                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                    <div className="flex items-center space-x-6 mb-8">
+                        <UserAvatar userData={userData} />
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
+                            <p className="text-slate-500">{userData?.email}</p>
+                        </div>
+                    </div>
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium">Name</label>
+                            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border rounded-md disabled:bg-slate-50" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Email</label>
+                            <input type="email" value={userData?.email || ''} disabled className="mt-1 block w-full px-3 py-2 border rounded-md bg-slate-50" />
+                        </div>
+                        {isEditing && <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-md">Save Changes</button>}
+                    </form>
+                </div>
+
+                <div className="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 className="text-xl font-bold mb-4">Danger Zone</h3>
+                    <div className="border-t pt-4">
+                        <button onClick={() => setShowConfirm(true)} className="px-5 py-2 bg-red-600 text-white rounded-md">Clear All Document Data</button>
+                        <p className="text-sm text-slate-500 mt-2">This will permanently delete all uploaded documents. This action cannot be undone.</p>
+                    </div>
+                </div>
+            </div>
+            {showConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-xl">
+                        <h3 className="text-lg font-bold">Are you sure?</h3>
+                        <p className="my-4">This will delete all your data permanently.</p>
+                        <div className="flex justify-end gap-4">
+                            <button onClick={() => setShowConfirm(false)} className="px-4 py-2 rounded-md">Cancel</button>
+                            <button onClick={handleClearMemory} className="px-4 py-2 bg-red-600 text-white rounded-md">Yes, Clear Data</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const AdminPage = () => {
     const { user } = useApp();
