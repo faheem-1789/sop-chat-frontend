@@ -125,6 +125,26 @@ const AppRouter = () => {
         }
     }, [user, loading, page, setPage]);
 
+    // SEO: Update title and meta description based on the current page
+    useEffect(() => {
+        let descriptionTag = document.querySelector('meta[name="description"]');
+        if (!descriptionTag) {
+            descriptionTag = document.createElement('meta');
+            descriptionTag.setAttribute('name', 'description');
+            document.head.appendChild(descriptionTag);
+        }
+
+        if (page === 'home') {
+            document.title = 'FileSense | AI Document Chat Assistant for PDFs, Excel & SOPs';
+            descriptionTag.setAttribute('content', 'Stop searching, start knowing. FileSense is a powerful AI assistant that reads your business documents and provides instant, accurate answers. Perfect for SOPs, manuals, and data files.');
+        } else {
+            const titlePage = page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' ');
+            document.title = `${titlePage} | FileSense`;
+            descriptionTag.setAttribute('content', `Learn more about ${page} at FileSense, your AI-powered document assistant.`);
+        }
+    }, [page]);
+
+
     if (loading) {
         return <div className="flex items-center justify-center h-screen bg-slate-100"><div className="animate-pulse">Loading Application...</div></div>;
     }
@@ -346,11 +366,14 @@ const LoginPage = () => {
         </div>
     );
 };
+
 const SignUpPage = () => {
     const { setPage } = useApp();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [department, setDepartment] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -364,6 +387,8 @@ const SignUpPage = () => {
                 uid: userCredential.user.uid,
                 fullName,
                 email,
+                companyName,
+                department,
                 credits: 10,
                 version: 'basic',
                 createdAt: serverTimestamp(),
@@ -386,6 +411,8 @@ const SignUpPage = () => {
                     <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" required className="w-full px-4 py-3 border rounded-md" />
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border rounded-md" />
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name (Optional)" className="w-full px-4 py-3 border rounded-md" />
+                    <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Department (Optional)" className="w-full px-4 py-3 border rounded-md" />
                     <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
@@ -397,6 +424,7 @@ const SignUpPage = () => {
         </div>
     );
 };
+
 const VerifyEmailPage = () => (
     <div className="flex flex-col items-center justify-center flex-1 text-center p-4 bg-slate-100">
         <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg">
