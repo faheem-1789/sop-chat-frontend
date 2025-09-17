@@ -35,6 +35,14 @@ const ClipboardIcon = () => (
     </svg>
 );
 
+const VideoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2">
+        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+    </svg>
+);
+
+
 // --- Main App Component ---
 export default function App() {
     // --- State Management ---
@@ -48,6 +56,7 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
+    const [showVideoModal, setShowVideoModal] = useState(false);
     
     const taskInputRef = useRef(null);
 
@@ -205,9 +214,18 @@ export default function App() {
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen p-4 sm:p-6 lg:p-8">
             <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-200/80">
-                <header className="p-6 border-b border-gray-200">
-                    <h1 className="text-3xl font-bold text-gray-900">Collaborative To-Do List</h1>
-                    <p className="mt-2 text-gray-500">Tasks are updated in real-time for all users.</p>
+                <header className="p-6 border-b border-gray-200 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Collaborative To-Do List</h1>
+                        <p className="mt-2 text-gray-500">Tasks are updated in real-time for all users.</p>
+                    </div>
+                     <button
+                        onClick={() => setShowVideoModal(true)}
+                        className="flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                    >
+                        <VideoIcon />
+                        <span>Watch Guide</span>
+                    </button>
                 </header>
 
                 {userId && (
@@ -289,6 +307,33 @@ export default function App() {
                     </ul>
                 </div>
             </div>
+
+            {showVideoModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex justify-center items-center p-4 transition-opacity">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h3 className="text-xl font-semibold">How to Use This App</h3>
+                            <button 
+                                onClick={() => setShowVideoModal(false)}
+                                className="p-2 rounded-full hover:bg-gray-200 focus:outline-none"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-gray-600"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="relative w-full bg-gray-900 rounded-lg" style={{ paddingTop: '56.25%' }}>
+                                <div className="absolute inset-0 flex items-center justify-center text-white p-4">
+                                    <div className="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-400"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                                        <p className="mt-4 font-medium">Video guide coming soon!</p>
+                                        <p className="text-sm text-gray-400">This will show you how to use collaborative features.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
