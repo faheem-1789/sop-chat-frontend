@@ -117,7 +117,7 @@ const AppRouter = () => {
                     setPage('home');
                 }
             } else {
-                const appPages = ['chat', 'profile', 'pricing', 'admin'];
+                const appPages = ['chat', 'profile', 'pricing', 'admin', 'ai-document-analysis-guide'];
                 if (appPages.includes(page)) {
                     setPage('login');
                 }
@@ -138,9 +138,9 @@ const AppRouter = () => {
             document.title = 'FileSense | AI Document Chat Assistant for PDFs, Excel & SOPs';
             descriptionTag.setAttribute('content', 'Stop searching, start knowing. FileSense is a powerful AI assistant that reads your business documents and provides instant, accurate answers. Perfect for SOPs, manuals, and data files.');
         } else {
-            const titlePage = page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' ');
+            const titlePage = page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' ');
             document.title = `${titlePage} | FileSense`;
-            descriptionTag.setAttribute('content', `Learn more about ${page} at FileSense, your AI-powered document assistant.`);
+            descriptionTag.setAttribute('content', `Learn more about ${titlePage} at FileSense, your AI-powered document assistant.`);
         }
     }, [page]);
 
@@ -162,6 +162,7 @@ const AppRouter = () => {
                 case 'terms': PageComponent = TermsOfServicePage; break;
                 case 'blog': PageComponent = BlogPage; break;
                 case 'faq': PageComponent = FAQPage; break;
+                case 'ai-document-analysis-guide': PageComponent = PillarPage; break;
                 case 'login': PageComponent = LoginPage; break;
                 case 'signup': PageComponent = SignUpPage; break;
                 case 'verify-email': PageComponent = VerifyEmailPage; break;
@@ -279,8 +280,28 @@ const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'
 const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
+const PillarPage = () => <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis"><div>...Pillar Page Content...</div></GenericPage>;
 
 const blogPostsData = [
+    {
+        slug: "ai-logistics-revolution",
+        title: "5 Ways AI is Revolutionizing Logistics Document Management",
+        excerpt: "Discover how AI assistants are transforming logistics by providing instant access to SOPs, bills of lading, and route data, cutting delays and reducing errors.",
+        content: `
+            <p>The logistics industry runs on a mountain of paperwork: bills of lading, packing lists, customs forms, and complex operational manuals. Finding a single piece of critical information quickly can be the difference between a shipment that's on time and one that's stuck in port. This is where AI document analysis is becoming a game-changer.</p>
+            <h3>1. Instant SOP and Procedure Lookup</h3>
+            <p>Instead of manually searching a 200-page safety manual, a warehouse operator can ask, "What are the handling procedures for hazardous material UN 1263?" An AI assistant like FileSense can provide the exact steps in seconds, ensuring compliance and safety.</p>
+            <h3>2. Accelerated Onboarding for New Staff</h3>
+            <p>Getting new dispatchers or warehouse staff up to speed is a time-consuming process. With an AI assistant trained on your company's documents, new hires can ask questions like, "How do I process an international shipment with a commercial invoice?" and get immediate, accurate guidance without interrupting senior team members.</p>
+            <h3>3. Faster Rate & Quote Retrieval</h3>
+            <p>Logistics providers deal with complex rate sheets from multiple carriers. By uploading these Excel files, a freight broker can ask, "What is the LTL rate for a 500lb pallet from Karachi to Lahore?" The AI can parse the relevant spreadsheet and provide the answer instantly, accelerating the quoting process.</p>
+            <h3>4. Improved Compliance and Auditing</h3>
+            <p>Audits require quick access to specific records. An AI assistant can instantly respond to queries like, "Show me all bills of lading associated with customer XYZ Corp in July" or "Find all references to customs tariff code 9980 in our SOPs." This turns a multi-hour task into a matter of seconds.</p>
+            <h3>5. Reducing Costly Human Errors</h3>
+            <p>Whether it's a wrong shipping address or an incorrect handling procedure, small mistakes in logistics lead to big costs. By providing a single, easily searchable source of truth, an AI assistant dramatically reduces the chance of human error, leading to fewer delays, less wasted product, and happier customers.</p>
+            <p>By transforming your static documents into an interactive, conversational knowledge base, FileSense empowers logistics teams to be faster, more accurate, and more efficient.</p>
+        `
+    },
     {
         slug: "filesense-vs-manual-search",
         title: "FileSense vs. Manual Searching: A Time-Saving Comparison",
@@ -302,6 +323,7 @@ const blogPostsData = [
 ];
 
 const BlogPage = () => {
+    const { setPage } = useApp();
     const [selectedPost, setSelectedPost] = useState(null);
     const postToShow = selectedPost ? blogPostsData.find(p => p.slug === selectedPost) : null;
     return (
@@ -320,6 +342,11 @@ const BlogPage = () => {
                             <button onClick={() => setSelectedPost(post.slug)} className="text-indigo-600 font-semibold mt-4 inline-block">Read More &rarr;</button>
                         </div>
                     ))}
+                    <div className="text-center pt-8">
+                        <button onClick={() => setPage('ai-document-analysis-guide')} className="text-lg font-bold text-indigo-700 hover:underline">
+                            Read Our Ultimate Guide to AI Document Analysis &rarr;
+                        </button>
+                    </div>
                 </div>
             )}
         </GenericPage>
@@ -1066,6 +1093,7 @@ const Footer = () => {
                 <nav className="flex gap-6 mt-4 md:mt-0">
                     <button onClick={() => setPage('privacy')} className="hover:text-indigo-600">Privacy Policy</button>
                     <button onClick={() => setPage('terms')} className="hover:text-indigo-600">Terms of Service</button>
+                    <button onClick={() => setPage('ai-document-analysis-guide')} className="hover:text-indigo-600">AI Guide</button>
                 </nav>
             </div>
         </footer>
