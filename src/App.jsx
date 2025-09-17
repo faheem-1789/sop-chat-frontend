@@ -50,6 +50,7 @@ const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColo
 const MenuIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>;
 const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
 const ChatBubbleIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>;
+const VideoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>;
 
 
 // --- Application State Context ---
@@ -280,7 +281,88 @@ const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'
 const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
-const PillarPage = () => <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis"><div>...Pillar Page Content...</div></GenericPage>;
+
+const PillarPage = () => {
+    const [showVideoModal, setShowVideoModal] = useState(false);
+
+    return (
+        <>
+            <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis">
+                <div className="relative">
+                    <button
+                        onClick={() => setShowVideoModal(true)}
+                        className="float-right ml-6 mb-4 flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                    >
+                        <VideoIcon />
+                        <span>Watch Video Guide</span>
+                    </button>
+                    
+                    <p className="lead text-xl text-slate-600">
+                        In today's data-driven world, the ability to quickly extract meaningful insights from vast amounts of documentation is no longer a luxury—it's a necessity. AI-powered document analysis is transforming how businesses operate, turning static files into dynamic, conversational knowledge bases. This guide will walk you through everything you need to know.
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-slate-800 mt-12 mb-4">What is AI-Powered Document Analysis?</h2>
+                    <p>AI document analysis, also known as intelligent document processing (IDP), is the use of artificial intelligence technologies—primarily Natural Language Processing (NLP) and Machine Learning (ML)—to read, understand, and interpret human language in documents. Unlike simple keyword searching, AI analysis comprehends context, semantics, and relationships within the text, allowing it to provide nuanced and accurate answers to complex questions.</p>
+
+                    <h2 className="text-2xl font-bold text-slate-800 mt-12 mb-4">The Core Technologies Driving the Revolution</h2>
+                    <ul className="space-y-4">
+                        <li><strong>Natural Language Processing (NLP):</strong> This is the science of teaching computers to understand human language. NLP enables the AI to parse sentence structure, identify entities (like people, places, and dates), and grasp the underlying meaning of a query.</li>
+                        <li><strong>Optical Character Recognition (OCR):</strong> For scanned documents and PDFs, OCR is the foundational technology that converts images of text into machine-readable text data. Modern OCR is incredibly accurate, forming the first step in the analysis pipeline.</li>
+                        <li><strong>Machine Learning (ML):</strong> ML models are trained on vast datasets to recognize patterns. In document analysis, they learn to classify information, extract specific data points (like invoice numbers or contract clauses), and continuously improve their accuracy based on user interactions.</li>
+                    </ul>
+
+                    <h2 className="text-2xl font-bold text-slate-800 mt-12 mb-4">Real-World Applications Across Industries</h2>
+                    <p>The applications are virtually limitless, but here are a few key examples:</p>
+                    <ul className="space-y-4">
+                        <li><strong>Logistics & Supply Chain:</strong> Instantly querying Bills of Lading, Standard Operating Procedures (SOPs), and shipping regulations to reduce delays and ensure compliance.</li>
+                        <li><strong>Legal:</strong> Rapidly searching through thousands of pages of case law, contracts, and depositions to find precedents and critical clauses in minutes instead of days.</li>
+                        <li><strong>Healthcare:</strong> Analyzing patient records, research papers, and billing codes to improve patient care and streamline administration.</li>
+                        <li><strong>Finance:</strong> Automating the extraction of data from financial reports, invoices, and compliance documents to accelerate decision-making and reduce manual error.</li>
+                    </ul>
+
+                    <h2 className="text-2xl font-bold text-slate-800 mt-12 mb-4">The Key Benefits for Your Business</h2>
+                    <ul className="space-y-4">
+                        <li><strong>Drastic Efficiency Gains:</strong> Reduce the time employees spend searching for information from hours to seconds.</li>
+                        <li><strong>Improved Accuracy:</strong> Eliminate human error associated with manual data extraction and interpretation.</li>
+                        <li><strong>Cost Savings:</strong> Free up valuable employee time to focus on high-level strategic tasks rather than document retrieval.</li>
+                        <li><strong>Enhanced Knowledge Sharing:</strong> Democratize access to information, ensuring everyone on the team can find what they need, when they need it.</li>
+                    </ul>
+                     <div className="text-center pt-8 mt-8 border-t">
+                        <h2 className="text-2xl font-bold text-indigo-700">Ready to Transform Your Documents?</h2>
+                        <p className="mt-2">Stop searching, start knowing. Try FileSense today.</p>
+                    </div>
+                </div>
+            </GenericPage>
+
+            {showVideoModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex justify-center items-center p-4 transition-opacity">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden transform transition-all scale-100">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h3 className="text-xl font-semibold">Video Guide: AI Document Analysis</h3>
+                            <button 
+                                onClick={() => setShowVideoModal(false)}
+                                className="p-2 rounded-full hover:bg-slate-200 focus:outline-none"
+                            >
+                                <CloseIcon />
+                            </button>
+                        </div>
+                        <div className="p-1 sm:p-2 md:p-4">
+                             <div className="relative w-full bg-slate-900 rounded-lg overflow-hidden" style={{ paddingTop: '56.25%' }}>
+                                <div className="absolute inset-0 flex items-center justify-center text-white p-4">
+                                     <div className="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-slate-400"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                                        <p className="mt-4 font-medium">Video guide coming soon!</p>
+                                        <p className="text-sm text-slate-400">This video will walk you through the core concepts of AI document analysis.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
 
 const blogPostsData = [
     {
