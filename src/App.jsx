@@ -348,13 +348,14 @@ const PillarPage = () => {
                         </div>
                         <div className="p-1 sm:p-2 md:p-4">
                              <div className="relative w-full bg-slate-900 rounded-lg overflow-hidden" style={{ paddingTop: '56.25%' }}>
-                                <div className="absolute inset-0 flex items-center justify-center text-white p-4">
-                                     <div className="text-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-slate-400"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
-                                        <p className="mt-4 font-medium">Video guide coming soon!</p>
-                                        <p className="text-sm text-slate-400">This video will walk you through the core concepts of AI document analysis.</p>
-                                    </div>
-                                </div>
+                                <iframe 
+                                    className="absolute top-0 left-0 w-full h-full"
+                                    src="https://www.youtube.com/embed/vb1p0-T5IdY?autoplay=1&rel=0" 
+                                    title="AI Document Analysis Demo Video" 
+                                    frameBorder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen>
+                                </iframe>
                             </div>
                         </div>
                     </div>
