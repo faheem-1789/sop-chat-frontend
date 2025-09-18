@@ -70,7 +70,7 @@ const AppProvider = ({ children }) => {
     const [userRole, setUserRole] = useState('viewer'); // Default role
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             setUser(firebaseUser);
             if (firebaseUser) {
                 const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -98,7 +98,13 @@ const AppProvider = ({ children }) => {
                             setWorkspace(null);
                             setUserRole('viewer');
                         }
+                    } else {
+                        // User exists in Auth but not yet in Firestore (e.g., during signup)
+                        setUserData(null);
                     }
+                    setLoading(false); // Set loading to false after first snapshot read
+                }, (error) => {
+                    console.error("Error fetching user document:", error);
                     setLoading(false);
                 });
                 return () => unsubUser();
@@ -123,7 +129,7 @@ const AppProvider = ({ children }) => {
     const value = { user, userData, setUserData, loading, page, setPage, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, isStartingNewChat, setIsStartingNewChat, workspace, setWorkspace, userRole };
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
-// ... (The rest of the App.jsx file from the previous turn) ...
+
 // --- Main App Component (Router) ---
 export default function App() {
     return (
