@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +11,9 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
+import { getDatabase, ref, onValue } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js)";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,7 +26,7 @@ const firebaseConfig = {
     storageBucket: "sop-assistant-9dc2a.appspot.com",
     messagingSenderId: "672105722476",
     appId: "1:672105722476:web:1d88461fdf6631b168de49",
-    databaseURL: "https://sop-assistant-9dc2a-default-rtdb.firebaseio.com"
+    databaseURL: "[https://sop-assistant-9dc2a-default-rtdb.firebaseio.com](https://sop-assistant-9dc2a-default-rtdb.firebaseio.com)"
 };
 
 // Initialize Firebase
@@ -37,22 +37,22 @@ const rtdb = getDatabase(app);
 
 
 // --- SVG Icons ---
-const WorkspaceIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4a2 2 0 012-2h6a2 2 0 012 2v4m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5m0 16v-2m-6-14v-2m-6 14v-2"></path></svg>;
-const UsersIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.965 5.965 0 0112 13a5.965 5.965 0 013 1.803"></path></svg>;
-const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
-const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
+const WorkspaceIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4a2 2 0 012-2h6a2 2 0 012 2v4m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5m0 16v-2m-6-14v-2m-6 14v-2"></path></svg>;
+const UsersIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.965 5.965 0 0112 13a5.965 5.965 0 013 1.803"></path></svg>;
+const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>;
+const SendIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>;
 const UserAvatar = ({ userData }) => <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">{(userData?.fullName || 'U').charAt(0)}</div>;
-const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
-const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
-const DeleteIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
-const Logo = () => <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="128" height="128" rx="24" fill="#4338CA"/><path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/><path d="M56 48H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/><path d="M56 60H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/></svg>;
-const AddIcon = () => <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
-const FileIcon = () => <svg className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
-const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
-const MenuIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>;
-const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
-const ChatBubbleIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>;
-const VideoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>;
+const AssistantAvatar = () => <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0"><svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>;
+const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
+const DeleteIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
+const Logo = () => <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><rect width="128" height="128" rx="24" fill="#4338CA"/><path d="M48 32H80C84.4183 32 88 35.5817 88 40V72C88 76.4183 84.4183 80 80 80H72L64 88L56 80H48C43.5817 80 40 76.4183 40 72V40C40 35.5817 43.5817 32 48 32Z" fill="white"/><path d="M56 48H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/><path d="M56 60H72" stroke="#4338CA" strokeWidth="6" strokeLinecap="round"/></svg>;
+const AddIcon = () => <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
+const FileIcon = () => <svg className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
+const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>;
+const MenuIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>;
+const SpinnerIcon = () => <svg className="w-5 h-5 animate-spin" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>;
+const ChatBubbleIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>;
+const VideoIcon = () => <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>;
 
 // --- Application State Context ---
 const AppContext = createContext();
@@ -78,31 +78,32 @@ const AppProvider = ({ children }) => {
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         setUserData(data);
-                        if (data.workspaceId && (!workspace || workspace.id !== data.workspaceId)) {
+                        if (data.workspaceId) {
                              const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
-                             onSnapshot(workspaceDocRef, (workspaceDoc) => {
+                             const unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
                                  if (workspaceDoc.exists()) {
                                     setWorkspace({ id: workspaceDoc.id, ...workspaceDoc.data() });
                                     const memberRef = doc(db, "workspaces", workspaceDoc.id, "members", firebaseUser.uid);
-                                    onSnapshot(memberRef, (memberDoc) => {
+                                    const unsubMember = onSnapshot(memberRef, (memberDoc) => {
                                         if (memberDoc.exists()) {
                                             setUserRole(memberDoc.data().role);
                                         }
                                     });
+                                    return () => unsubMember();
                                  } else {
                                      setWorkspace(null);
                                      setUserRole('viewer');
                                  }
                              });
-                        } else if (!data.workspaceId) {
+                             return () => unsubWorkspace();
+                        } else {
                             setWorkspace(null);
                             setUserRole('viewer');
                         }
                     } else {
-                        // User exists in Auth but not yet in Firestore (e.g., during signup)
                         setUserData(null);
                     }
-                    setLoading(false); // Set loading to false after first snapshot read
+                    setLoading(false);
                 }, (error) => {
                     console.error("Error fetching user document:", error);
                     setLoading(false);
@@ -120,7 +121,7 @@ const AppProvider = ({ children }) => {
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, []); 
 
     useEffect(() => {
         localStorage.setItem('currentPage', page);
@@ -159,7 +160,6 @@ const AppRouter = () => {
         }
     }, [user, loading, page, setPage, userData]);
 
-    // SEO ...
     useEffect(() => {
         let descriptionTag = document.querySelector('meta[name="description"]');
         if (!descriptionTag) {
@@ -185,12 +185,9 @@ const AppRouter = () => {
 
     const renderPage = () => {
         let PageComponent;
-        if (user && !userData?.workspaceId && page !== 'workspace-setup') {
-             PageComponent = WorkspaceSetupPage;
-        } else if (user && page === 'home') {
-            PageComponent = LoggedInDashboard;
-        } else {
-            switch (page) {
+
+        if (!user) {
+             switch (page) {
                 case 'home': PageComponent = HomePage; break;
                 case 'blog': PageComponent = BlogPage; break;
                 case 'faq': PageComponent = FAQPage; break;
@@ -200,14 +197,30 @@ const AppRouter = () => {
                 case 'ai-document-analysis-guide': PageComponent = PillarPage; break;
                 case 'login': PageComponent = LoginPage; break;
                 case 'signup': PageComponent = SignUpPage; break;
-                case 'verify-email': PageComponent = VerifyEmailPage; break;
-                case 'workspace-setup': PageComponent = user ? WorkspaceSetupPage : LoginPage; break;
-                case 'workspace': PageComponent = user ? WorkspacePage : LoginPage; break;
-                case 'chat': PageComponent = user ? ChatPage : LoginPage; break;
-                case 'profile': PageComponent = user ? ProfilePage : LoginPage; break;
-                case 'pricing': PageComponent = user ? PricingPage : LoginPage; break;
-                case 'admin': PageComponent = user && userData?.role === 'admin' ? AdminPage : ChatPage; break;
-                default: PageComponent = HomePage;
+                default: PageComponent = LoginPage; 
+            }
+        } else {
+            if (!user.emailVerified) {
+                PageComponent = VerifyEmailPage;
+            } else if (!userData?.workspaceId) {
+                PageComponent = WorkspaceSetupPage;
+            } else {
+                 switch (page) {
+                    case 'home': PageComponent = LoggedInDashboard; break;
+                    case 'workspace-setup': PageComponent = LoggedInDashboard; break; 
+                    case 'workspace': PageComponent = WorkspacePage; break;
+                    case 'chat': PageComponent = ChatPage; break;
+                    case 'profile': PageComponent = ProfilePage; break;
+                    case 'pricing': PageComponent = PricingPage; break;
+                    case 'admin': PageComponent = userData?.role === 'admin' ? AdminPage : LoggedInDashboard; break;
+                    case 'blog': PageComponent = BlogPage; break;
+                    case 'faq': PageComponent = FAQPage; break;
+                    case 'contact': PageComponent = ContactPage; break;
+                    case 'privacy': PageComponent = PrivacyPolicyPage; break;
+                    case 'terms': PageComponent = TermsOfServicePage; break;
+                    case 'ai-document-analysis-guide': PageComponent = PillarPage; break;
+                    default: PageComponent = LoggedInDashboard;
+                }
             }
         }
 
@@ -224,7 +237,7 @@ const AppRouter = () => {
                             transition={{ duration: 0.2 }}
                             className="flex-grow flex flex-col"
                         >
-                            <PageComponent />
+                           {PageComponent ? <PageComponent /> : null}
                         </motion.div>
                     </AnimatePresence>
                 </main>
@@ -765,7 +778,7 @@ const ChatPageContent = () => {
                 return acc;
             }, []);
 
-            const res = await axios.post("https://sop-chat-backend.onrender.com/chat/", { 
+            const res = await axios.post("[https://sop-chat-backend.onrender.com/chat/](https://sop-chat-backend.onrender.com/chat/)", { 
                 prompt: currentMessage, 
                 history,
                 workspaceId: workspace.id
