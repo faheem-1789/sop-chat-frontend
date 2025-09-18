@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+// --- FIX START: Changed URL imports to package imports ---
+import { initializeApp } from "firebase/app";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +12,10 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
+// --- FIX END ---
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -57,6 +59,9 @@ const VideoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" heigh
 // --- Application State Context ---
 const AppContext = createContext();
 
+// Helper to avoid null checks
+const useApp = () => useContext(AppContext);
+
 const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
@@ -82,14 +87,14 @@ const AppProvider = ({ children }) => {
                              const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
                              const unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
                                  if (workspaceDoc.exists()) {
-                                    setWorkspace({ id: workspaceDoc.id, ...workspaceDoc.data() });
-                                    const memberRef = doc(db, "workspaces", workspaceDoc.id, "members", firebaseUser.uid);
-                                    const unsubMember = onSnapshot(memberRef, (memberDoc) => {
-                                        if (memberDoc.exists()) {
-                                            setUserRole(memberDoc.data().role);
-                                        }
-                                    });
-                                    return () => unsubMember();
+                                     setWorkspace({ id: workspaceDoc.id, ...workspaceDoc.data() });
+                                     const memberRef = doc(db, "workspaces", workspaceDoc.id, "members", firebaseUser.uid);
+                                     const unsubMember = onSnapshot(memberRef, (memberDoc) => {
+                                         if (memberDoc.exists()) {
+                                             setUserRole(memberDoc.data().role);
+                                         }
+                                     });
+                                     return () => unsubMember();
                                  } else {
                                      setWorkspace(null);
                                      setUserRole('viewer');
@@ -358,7 +363,7 @@ const WorkspacePage = () => {
                                 <div className="flex items-center gap-4">
                                      <span className="px-3 py-1 text-xs font-semibold text-slate-600 bg-slate-100 rounded-full capitalize">{member.role}</span>
                                      {userRole === 'admin' && member.uid !== user.uid && (
-                                        <button className="text-sm text-red-500 hover:underline">Remove</button>
+                                         <button className="text-sm text-red-500 hover:underline">Remove</button>
                                      )}
                                 </div>
                             </div>
@@ -623,7 +628,7 @@ const ChatPage = () => {
         setChat(conversation.messages || []);
         setIsStartingNewChat(false);
     };
-    
+   
     if (!activeConversationId && !isStartingNewChat) {
         return (
             <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
@@ -677,7 +682,7 @@ const ChatPageContent = () => {
 
 
     useEffect(() => {
-        if (user && workspace) {
+        if (user && workspace && activeConversationId) {
              const unsub = onSnapshot(doc(db, "workspaces", workspace.id, "conversations", activeConversationId), (doc) => {
                 if (doc.exists()) {
                     const newMessages = doc.data().messages || [];
@@ -688,7 +693,7 @@ const ChatPageContent = () => {
             });
             return () => unsub();
         }
-    }, [user, workspace, activeConversationId, chat]);
+    }, [user, workspace, activeConversationId, chat, setChat]);
 
 
     useEffect(() => {
@@ -706,7 +711,7 @@ const ChatPageContent = () => {
             setLoadingStatus(false);
         };
         checkSopStatus();
-    }, [user, workspace]);
+    }, [user, workspace, setSopExists]);
     
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -737,7 +742,7 @@ const ChatPageContent = () => {
         if (!user || !workspace) return;
         const firstUserMessage = updatedChat.find(m => m.role === 'user')?.text || 'New Conversation';
         const title = firstUserMessage.substring(0, 50);
-        
+       
         const convRef = doc(db, "workspaces", workspace.id, "conversations", conversationId);
         await setDoc(convRef, {
             title: title,
@@ -756,7 +761,7 @@ const ChatPageContent = () => {
         const currentMessage = message;
         setMessage('');
         setLoadingSend(true);
-        
+       
         let currentConvId = activeConversationId;
         if (!currentConvId) {
             const convRef = await addDoc(collection(db, "workspaces", workspace.id, "conversations"), {
@@ -767,6 +772,7 @@ const ChatPageContent = () => {
             });
             currentConvId = convRef.id;
             setActiveConversationId(currentConvId);
+            setIsStartingNewChat(false); // We have an ID now, so it's not a "new" chat anymore
         }
 
         try {
@@ -778,7 +784,7 @@ const ChatPageContent = () => {
                 return acc;
             }, []);
 
-            const res = await axios.post("[https://sop-chat-backend.onrender.com/chat/](https://sop-chat-backend.onrender.com/chat/)", { 
+            const res = await axios.post("https://sop-chat-backend.onrender.com/chat/", { 
                 prompt: currentMessage, 
                 history,
                 workspaceId: workspace.id
@@ -789,9 +795,11 @@ const ChatPageContent = () => {
             // No need to setChat here, onSnapshot will handle it.
             await saveConversation(finalChat, currentConvId);
 
-            const newCredits = (userData.credits || 0) - 1;
-            await updateDoc(doc(db, "users", user.uid), { credits: newCredits });
-            
+            if(userData.version !== 'pro') {
+                const newCredits = (userData.credits || 0) - 1;
+                await updateDoc(doc(db, "users", user.uid), { credits: newCredits });
+            }
+           
         } catch (err) {
             const errorMsg = err.response?.data?.detail || "Failed to get response.";
             const errorChat = [...newChat, { role: 'assistant', text: `Error: ${errorMsg}` }];
@@ -799,18 +807,18 @@ const ChatPageContent = () => {
         }
         setLoadingSend(false);
     };
-    
+   
     const canUpload = userRole === 'admin' || userRole === 'editor';
-    
+   
     return (
         <div className="flex flex-1 overflow-hidden bg-slate-100">
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
                        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                             {(activeConversationId || isStartingNewChat) && (
-                                <button onClick={() => { setActiveConversationId(null); setIsStartingNewChat(false); }} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
+                                <button onClick={() => { setActiveConversationId(null); setIsStartingNewChat(false); setChat([]); }} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
                             )}
-                            
+                           
                             {loadingStatus ? (
                                  <div className="text-center p-8"><p className="animate-pulse">Checking workspace documents...</p></div>
                             ) : !sopExists ? (
@@ -890,7 +898,7 @@ const ChatPageContent = () => {
                                     <SendIcon />
                                 </button>
                             </form>
-                             <p className="text-right mt-2 text-sm text-indigo-600">Credits Remaining: {userData?.credits}</p>
+                             <p className="text-right mt-2 text-sm text-indigo-600">Credits Remaining: {userData?.version === 'pro' ? 'Unlimited' : userData?.credits}</p>
                          </div>
                 </div>
             </main>
@@ -1017,9 +1025,3 @@ const Footer = () => {
         </footer>
     );
 };
-"
-Now, there is an issue where the frontend is stuck in an infinite loop due to an error in the useEffect hook within the AppProvider component. The workspace state is included in the dependency array, causing a continuous re-fetch cycle whenever the workspace data is updated. To fix this, the workspace must be removed from the dependency array to ensure the effect only runs once on the initial component mount. This will stabilize the component and prevent the infinite loop, allowing the application to render correctly.
-
-Correct this please
-
-"
