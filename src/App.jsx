@@ -67,7 +67,7 @@ const AppProvider = ({ children }) => {
     const [sopExists, setSopExists] = useState(false);
     const [isStartingNewChat, setIsStartingNewChat] = useState(false);
     const [workspace, setWorkspace] = useState(null);
-    const [userRole, setUserRole] = useState('viewer'); // Default role
+    const [userRole, setUserRole] = useState('viewer');
 
     useEffect(() => {
         let unsubUser = () => {};
@@ -75,7 +75,6 @@ const AppProvider = ({ children }) => {
         let unsubMember = () => {};
 
         const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
-            // Clean up previous listeners before setting new ones
             unsubUser();
             unsubWorkspace();
             unsubMember();
@@ -142,6 +141,8 @@ const AppProvider = ({ children }) => {
     const value = { user, userData, setUserData, loading, page, setPage, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, isStartingNewChat, setIsStartingNewChat, workspace, setWorkspace, userRole };
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
+
+const useApp = () => useContext(AppContext);
 
 // --- Main App Component (Router) ---
 export default function App() {
@@ -262,7 +263,7 @@ const AppRouter = () => {
 };
 
 const WorkspaceSetupPage = () => {
-    const { user, userData, setUserData, setWorkspace, setPage } = useApp();
+    const { user, userData } = useApp();
     const [workspaceName, setWorkspaceName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -286,7 +287,7 @@ const WorkspaceSetupPage = () => {
             const userRef = doc(db, "users", user.uid);
             batch.update(userRef, { workspaceId: workspaceRef.id });
             await batch.commit();
-            setPage('home');
+            // No need to setPage, the listener will pick up the change and re-route
         } catch (err) {
             console.error(err);
             setError('Failed to create workspace. Please try again.');
@@ -457,18 +458,124 @@ const GenericPage = ({ title, children, className }) => (
     </div>
 );
 
-// ... (Rest of the static pages: About, Contact, etc. remain the same) ...
-
 const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
 const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
 const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
 const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
-const PillarPage = () => { return(<div>...</div>)}; // Content redacted for brevity
-const BlogPage = () => { return(<div>...</div>)}; // Content redacted for brevity
-const LoginPage = () => { return(<div>...</div>)}; // Content redacted for brevity
-const SignUpPage = () => { return(<div>...</div>)}; // Content redacted for brevity
-const VerifyEmailPage = () => { return(<div>...</div>)}; // Content redacted for brevity
+const PillarPage = () => <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis"><div>...</div></GenericPage>;
+const BlogPage = () => <GenericPage title="Our Blog"><div>...</div></GenericPage>;
+
+const LoginPage = () => {
+    const { setPage } = useApp();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            setError(err.message.replace('Firebase: ', ''));
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="flex items-center justify-center flex-1 bg-slate-100">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Welcome Back!</h2>
+                </div>
+                {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border rounded-md" />
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </form>
+                <p className="text-center text-sm">
+                    Don't have an account? <button onClick={() => setPage('signup')} className="font-semibold text-indigo-600 hover:underline">Sign Up</button>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+const SignUpPage = () => {
+    const { setPage } = useApp();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [department, setDepartment] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(userCredential.user);
+            await setDoc(doc(db, "users", userCredential.user.uid), {
+                uid: userCredential.user.uid,
+                fullName,
+                email,
+                companyName,
+                department,
+                credits: 10,
+                version: 'basic',
+                createdAt: serverTimestamp(),
+            });
+        } catch (err) {
+            setError(err.message.replace('Firebase: ', ''));
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="flex items-center justify-center flex-1 bg-slate-100">
+             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-center">
+                    <button onClick={() => setPage('home')} className="text-sm text-indigo-600 hover:underline mb-4">&larr; Back to Home</button>
+                    <h2 className="text-3xl font-bold text-slate-800">Create an Account</h2>
+                </div>
+                {error && <p className="text-red-500 text-center text-sm bg-red-100 p-3 rounded-md">{error}</p>}
+                <form onSubmit={handleSignUp} className="space-y-4">
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-3 border rounded-md" />
+                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name (Optional)" className="w-full px-4 py-3 border rounded-md" />
+                    <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Department (Optional)" className="w-full px-4 py-3 border rounded-md" />
+                    <button type="submit" disabled={loading} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                        {loading ? 'Creating Account...' : 'Sign Up'}
+                    </button>
+                </form>
+                <p className="text-center text-sm">
+                    Already have an account? <button onClick={() => setPage('login')} className="font-semibold text-indigo-600 hover:underline">Login</button>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+const VerifyEmailPage = () => (
+    <div className="flex flex-col items-center justify-center flex-1 text-center p-4 bg-slate-100">
+        <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg">
+            <h2 className="text-3xl font-bold mb-4 text-slate-800">Verify Your Email</h2>
+            <p className="text-slate-600 mb-6">A verification link has been sent to <strong>{auth.currentUser?.email}</strong>. Please check your inbox and click the link to activate your account.</p>
+            <button onClick={() => signOut(auth)} className="w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                Go to Login
+            </button>
+        </div>
+    </div>
+);
 const PricingPage = () => { return(<div>...</div>)}; // Content redacted for brevity
 const AdminPage = () => { return(<div>...</div>)}; // Content redacted for brevity
 
@@ -1029,4 +1136,3 @@ const Footer = () => {
         </footer>
     );
 };
-
