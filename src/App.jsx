@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +11,9 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy } from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -607,6 +607,7 @@ const ProfilePage = () => {
     const [companyName, setCompanyName] = useState('');
     const [department, setDepartment] = useState('');
     const [contactNumber, setContactNumber] = useState('');
+    const [roleInCompany, setRoleInCompany] = useState('');
 
     useEffect(() => {
         if (userData) {
@@ -614,6 +615,7 @@ const ProfilePage = () => {
             setCompanyName(userData.companyName || '');
             setDepartment(userData.department || '');
             setContactNumber(userData.contactNumber || '');
+            setRoleInCompany(userData.roleInCompany || '');
         }
     }, [userData]);
 
@@ -622,7 +624,7 @@ const ProfilePage = () => {
         if (!user) return;
         try {
             const userRef = doc(db, "users", user.uid);
-            const updatedData = { fullName, companyName, department, contactNumber };
+            const updatedData = { fullName, companyName, department, contactNumber, roleInCompany };
             await updateDoc(userRef, updatedData);
             setUserData(prev => ({...prev, ...updatedData }));
             setMessage('Profile updated successfully!');
@@ -664,6 +666,7 @@ const ProfilePage = () => {
                         <div>
                             <h3 className="text-2xl font-bold text-slate-800">{userData?.fullName}</h3>
                             <p className="text-slate-500">{userData?.email}</p>
+                            {userData?.roleInCompany && <p className="text-indigo-600 font-semibold mt-1">{userData.roleInCompany}</p>}
                         </div>
                     </div>
                     <form onSubmit={handleUpdate} className="space-y-4">
@@ -678,6 +681,10 @@ const ProfilePage = () => {
                          <div>
                             <label className="block text-sm font-medium text-gray-700">Company</label>
                             <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Role / Designation</label>
+                            <input type="text" value={roleInCompany} onChange={(e) => setRoleInCompany(e.target.value)} disabled={!isEditing} placeholder="e.g., Marketing Manager" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-slate-50" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Email</label>
