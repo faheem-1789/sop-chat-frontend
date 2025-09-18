@@ -70,32 +70,39 @@ const AppProvider = ({ children }) => {
     const [userRole, setUserRole] = useState('viewer'); // Default role
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        let unsubUser = () => {};
+        let unsubWorkspace = () => {};
+        let unsubMember = () => {};
+
+        const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+            // Clean up previous listeners before setting new ones
+            unsubUser();
+            unsubWorkspace();
+            unsubMember();
+            
             setUser(firebaseUser);
             if (firebaseUser) {
                 const userDocRef = doc(db, "users", firebaseUser.uid);
-                const unsubUser = onSnapshot(userDocRef, (userDoc) => {
+                unsubUser = onSnapshot(userDocRef, (userDoc) => {
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         setUserData(data);
                         if (data.workspaceId) {
                              const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
-                             const unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
+                             unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
                                  if (workspaceDoc.exists()) {
                                     setWorkspace({ id: workspaceDoc.id, ...workspaceDoc.data() });
                                     const memberRef = doc(db, "workspaces", workspaceDoc.id, "members", firebaseUser.uid);
-                                    const unsubMember = onSnapshot(memberRef, (memberDoc) => {
+                                    unsubMember = onSnapshot(memberRef, (memberDoc) => {
                                         if (memberDoc.exists()) {
                                             setUserRole(memberDoc.data().role);
                                         }
                                     });
-                                    return () => unsubMember();
                                  } else {
                                      setWorkspace(null);
                                      setUserRole('viewer');
                                  }
                              });
-                             return () => unsubWorkspace();
                         } else {
                             setWorkspace(null);
                             setUserRole('viewer');
@@ -108,7 +115,6 @@ const AppProvider = ({ children }) => {
                     console.error("Error fetching user document:", error);
                     setLoading(false);
                 });
-                return () => unsubUser();
             } else {
                 setUserData(null);
                 setChat([]);
@@ -120,7 +126,13 @@ const AppProvider = ({ children }) => {
                 setLoading(false);
             }
         });
-        return () => unsubscribe();
+
+        return () => {
+            unsubscribeAuth();
+            unsubUser();
+            unsubWorkspace();
+            unsubMember();
+        };
     }, []); 
 
     useEffect(() => {
@@ -1017,3 +1029,4 @@ const Footer = () => {
         </footer>
     );
 };
+
