@@ -34,7 +34,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
-    apiKey: "AIzaSyAA6U-oPKefpOdyIsS6wXVmjgCTj3Jlow",
+    apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
     authDomain: "sop-assistant-9dc2a.firebaseapp.com",
     projectId: "sop-assistant-9dc2a",
     storageBucket: "sop-assistant-9dc2a.appspot.com",
