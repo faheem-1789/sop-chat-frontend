@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-// FIX: Corrected Firebase imports for a React environment
+// Corrected Firebase imports for a React environment
 import { initializeApp } from "firebase/app";
 import {
     getAuth,
@@ -33,9 +33,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 // --- Firebase Configuration ---
-// Reverted to hardcoded config as the issue is related to app logic, not the key itself.
 const firebaseConfig = {
-    apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
+    apiKey: "AIzaSyAA6U-oPKefpOdyIsS6wXVmjgCTj3Jlow",
     authDomain: "sop-assistant-9dc2a.firebaseapp.com",
     projectId: "sop-assistant-9dc2a",
     storageBucket: "sop-assistant-9dc2a.appspot.com",
@@ -90,7 +89,6 @@ const AppProvider = ({ children }) => {
         let unsubMember = () => {};
 
         const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
-            // Clean up previous listeners to prevent memory leaks
             unsubUser();
             unsubWorkspace();
             unsubMember();
@@ -114,24 +112,20 @@ const AppProvider = ({ children }) => {
                                         if (memberDoc.exists()) {
                                             setUserRole(memberDoc.data().role);
                                         }
-                                        // FIX: Set loading to false only after the deepest data fetch is complete
                                         setLoading(false);
                                     });
                                 } else {
-                                    // User has a stale workspace ID.
                                     setWorkspace(null);
                                     setUserRole('viewer');
                                     setLoading(false);
                                 }
                             });
                         } else {
-                            // User exists but has no workspace ID. This is a final state.
                             setWorkspace(null);
                             setUserRole('viewer');
                             setLoading(false);
                         }
                     } else {
-                        // Auth is ready, but user document doesn't exist (e.g., mid-signup). Final state.
                         setUserData(null);
                         setLoading(false);
                     }
@@ -140,7 +134,6 @@ const AppProvider = ({ children }) => {
                     setLoading(false);
                 });
             } else {
-                // User is not logged in. This is a final state.
                 setUserData(null);
                 setChat([]);
                 setActiveConversationId(null);
@@ -183,8 +176,6 @@ const AppRouter = () => {
     const { user, loading, page, setPage, userData } = useApp();
 
     useEffect(() => {
-        // FIX: This entire block is now gated by the loading state.
-        // It will NOT run until the AppProvider has finished all its async data fetching.
         if (loading) return; 
 
         if (!user) {
@@ -297,8 +288,7 @@ const AppRouter = () => {
 };
 
 const WorkspaceSetupPage = () => {
-    // FIX: Destructure state setters to manually update context after creation
-    const { user, userData, setUserData, setWorkspace, setPage } = useApp();
+    const { user, userData } = useApp();
     const [workspaceName, setWorkspaceName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -328,16 +318,19 @@ const WorkspaceSetupPage = () => {
             
             await batch.commit();
             
-            // This manual update is kept for immediate UI feedback but the onSnapshot listener is the source of truth
-            setUserData(prev => ({ ...prev, workspaceId: workspaceRef.id }));
-            setWorkspace({ id: workspaceRef.id, ...newWorkspaceData });
-            setPage('home');
-
+            // FIX: Removed all manual state updates (setUserData, setWorkspace, setPage).
+            // The onSnapshot listener in AppProvider is now the single source of truth.
+            // It will detect the database change and update the app state correctly,
+            // which then triggers the AppRouter to navigate automatically.
+            
         } catch (err) {
             console.error(err);
             setError('Failed to create workspace. Please try again.');
+            // Stop the local loading indicator on error.
+            setLoading(false);
         }
-        setLoading(false);
+        // On success, we keep the loading indicator on. The component will be
+        // unmounted automatically when the global state updates and AppRouter redirects.
     };
 
     return (
@@ -357,8 +350,6 @@ const WorkspaceSetupPage = () => {
     );
 };
 
-// ... Rest of the components remain unchanged ...
-// --- OMITTED FOR BREVITY ---
 const WorkspacePage = () => {
     const { workspace, user, userRole } = useApp();
     const [members, setMembers] = useState([]);
@@ -429,6 +420,8 @@ const WorkspacePage = () => {
         </div>
     );
 };
+
+
 const HomePage = () => {
     const { setPage } = useApp();
     return (
@@ -450,6 +443,7 @@ const HomePage = () => {
         </div>
     );
 };
+
 const LoggedInDashboard = () => {
     const { userData, setPage, sopExists, workspace } = useApp();
     return (
@@ -492,6 +486,7 @@ const LoggedInDashboard = () => {
         </div>
     );
 };
+
 const GenericPage = ({ title, children, className }) => (
     <div className={`max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 ${className}`}>
         <h1 className="text-3xl font-bold text-slate-800 mb-8 border-b pb-4">{title}</h1>
@@ -500,6 +495,7 @@ const GenericPage = ({ title, children, className }) => (
         </div>
     </div>
 );
+
 const AboutPage = () => <GenericPage title="About Us"><p>Welcome to FileSense. Our mission is to revolutionize how businesses interact with their internal documentation, making knowledge accessible and actionable. We believe that by leveraging the power of AI, we can save teams countless hours, reduce errors, and improve operational efficiency. Our platform is built with security and simplicity in mind, ensuring that your sensitive data is protected while providing an intuitive user experience.</p></GenericPage>;
 const ContactPage = () => <GenericPage title="Contact Us"><p>Have questions? We'd love to hear from you. Please reach out to our team at <a href="mailto:faheemiqbal993@gmail.com" className="text-indigo-600 hover:underline">faheemiqbal993@gmail.com</a> and we will get back to you as soon as possible.</p></GenericPage>;
 const PrivacyPolicyPage = () => <GenericPage title="Privacy Policy"><p><strong>Last Updated: August 18, 2025</strong>...</p></GenericPage>;
@@ -507,6 +503,7 @@ const TermsOfServicePage = () => <GenericPage title="Terms of Service"><p><stron
 const FAQPage = () => <GenericPage title="Frequently Asked Questions"><div>...</div></GenericPage>;
 const PillarPage = () => <GenericPage title="The Ultimate Guide to AI-Powered Document Analysis"><div>...</div></GenericPage>;
 const BlogPage = () => <GenericPage title="Our Blog"><div>...</div></GenericPage>;
+
 const LoginPage = () => {
     const { setPage } = useApp();
     const [email, setEmail] = useState('');
@@ -547,6 +544,7 @@ const LoginPage = () => {
         </div>
     );
 };
+
 const SignUpPage = () => {
     const { setPage } = useApp();
     const [email, setEmail] = useState('');
@@ -604,6 +602,7 @@ const SignUpPage = () => {
         </div>
     );
 };
+
 const VerifyEmailPage = () => (
     <div className="flex flex-col items-center justify-center flex-1 text-center p-4 bg-slate-100">
         <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg">
@@ -615,8 +614,10 @@ const VerifyEmailPage = () => (
         </div>
     </div>
 );
-const PricingPage = () => { return(<div>...</div>)};
-const AdminPage = () => { return(<div>...</div>)};
+const PricingPage = () => { return(<div>...</div>)}; // Content redacted for brevity
+const AdminPage = () => { return(<div>...</div>)}; // Content redacted for brevity
+
+
 const ProfilePage = () => {
     const { user, userData, setUserData, setSopExists, setChat, setPage, workspace } = useApp();
     const [fullName, setFullName] = useState('');
@@ -740,6 +741,8 @@ const ProfilePage = () => {
         </div>
     );
 };
+
+
 const ChatPage = () => {
     const { user, workspace, isStartingNewChat, setIsStartingNewChat, activeConversationId, setActiveConversationId, setChat } = useApp();
     const [conversations, setConversations] = useState([]);
@@ -816,6 +819,7 @@ const ChatPage = () => {
 
     return <ChatPageContent />;
 };
+
 const ChatPageContent = () => {
     const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, setIsStartingNewChat, workspace, userRole } = useApp();
     const [files, setFiles] = useState([]);
@@ -900,7 +904,8 @@ const ChatPageContent = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!message.trim() || !user || !workspace) return;
+        // FIX: Added userData to the guard clause to prevent crashes.
+        if (!message.trim() || !user || !userData || !workspace) return;
 
         const userMsg = { role: "user", text: message, sender: { name: userData.fullName, uid: user.uid } };
         const newChat = [...chat, userMsg];
@@ -938,7 +943,6 @@ const ChatPageContent = () => {
 
             const assistantMsg = { role: "assistant", text: res.data.response };
             const finalChat = [...newChat, assistantMsg];
-            // No need to setChat here, onSnapshot will handle it.
             await saveConversation(finalChat, currentConvId);
 
             const newCredits = (userData.credits || 0) - 1;
@@ -1049,6 +1053,7 @@ const ChatPageContent = () => {
         </div>
     );
 };
+// --- Headers & Footers ---
 const Header = () => {
     const { setPage } = useApp();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1095,6 +1100,7 @@ const Header = () => {
         </header>
     );
 };
+
 const LoggedInHeader = () => {
     const { setPage, userData } = useApp();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1151,6 +1157,7 @@ const LoggedInHeader = () => {
         </header>
     );
 };
+
 const Footer = () => {
     const { setPage } = useApp();
     return (
