@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +11,9 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "firebase/firestore";
-import { getDatabase, ref, onValue } from "firebase/database";
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -157,20 +157,23 @@ const AppRouter = () => {
     const { user, loading, page, setPage, userData } = useApp();
 
     useEffect(() => {
-        if (!loading) {
-            if (user) {
-                if (!user.emailVerified) {
-                    if (page !== 'verify-email') setPage('verify-email');
-                } else if (!userData?.workspaceId) {
-                    if (page !== 'workspace-setup') setPage('workspace-setup');
-                } else if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
-                    setPage('home');
-                }
-            } else {
-                const appPages = ['chat', 'profile', 'pricing', 'admin', 'workspace', 'workspace-setup', 'ai-document-analysis-guide'];
-                if (appPages.includes(page)) {
-                    setPage('login');
-                }
+        if (loading) return; 
+
+        if (!user) {
+            const protectedPages = ['chat', 'profile', 'workspace', 'workspace-setup', 'admin'];
+            if (protectedPages.includes(page)) {
+                setPage('login');
+            }
+            return;
+        }
+
+        if (!user.emailVerified) {
+            if (page !== 'verify-email') setPage('verify-email');
+        } else if (!userData?.workspaceId) {
+            if (page !== 'workspace-setup') setPage('workspace-setup');
+        } else {
+            if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
+                setPage('home');
             }
         }
     }, [user, userData, loading, page, setPage]);
@@ -1139,4 +1142,3 @@ const Footer = () => {
         </footer>
     );
 };
-
