@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +11,9 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -796,7 +796,7 @@ const ChatPageContent = () => {
 
 
     useEffect(() => {
-        if (user && workspace) {
+        if (user && workspace && activeConversationId) {
              const unsub = onSnapshot(doc(db, "workspaces", workspace.id, "conversations", activeConversationId), (doc) => {
                 if (doc.exists()) {
                     const newMessages = doc.data().messages || [];
