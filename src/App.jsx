@@ -1,8 +1,7 @@
-// src/App.jsx
-
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+// FIX: Corrected Firebase imports for a React environment
+import { initializeApp } from "firebase/app";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,14 +10,30 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "firebase/auth";
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc, 
+    serverTimestamp, 
+    collection, 
+    addDoc, 
+    query, 
+    getDocs, 
+    orderBy, 
+    where, 
+    writeBatch, 
+    onSnapshot 
+} from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
 // --- Firebase Configuration ---
+// IMPORTANT: Keep your actual API keys in environment variables for security.
 const firebaseConfig = {
     apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
     authDomain: "sop-assistant-9dc2a.firebaseapp.com",
@@ -87,9 +102,9 @@ const AppProvider = ({ children }) => {
                         const data = userDoc.data();
                         setUserData(data);
                         if (data.workspaceId) {
-                             const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
-                             unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
-                                 if (workspaceDoc.exists()) {
+                            const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
+                            unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
+                                if (workspaceDoc.exists()) {
                                     setWorkspace({ id: workspaceDoc.id, ...workspaceDoc.data() });
                                     const memberRef = doc(db, "workspaces", workspaceDoc.id, "members", firebaseUser.uid);
                                     unsubMember = onSnapshot(memberRef, (memberDoc) => {
@@ -97,11 +112,11 @@ const AppProvider = ({ children }) => {
                                             setUserRole(memberDoc.data().role);
                                         }
                                     });
-                                 } else {
-                                     setWorkspace(null);
-                                     setUserRole('viewer');
-                                 }
-                             });
+                                } else {
+                                    setWorkspace(null);
+                                    setUserRole('viewer');
+                                }
+                            });
                         } else {
                             setWorkspace(null);
                             setUserRole('viewer');
@@ -269,7 +284,8 @@ const AppRouter = () => {
 };
 
 const WorkspaceSetupPage = () => {
-    const { user, userData } = useApp();
+    // FIX: Destructure state setters to manually update context after creation
+    const { user, userData, setUserData, setWorkspace, setPage } = useApp();
     const [workspaceName, setWorkspaceName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -282,18 +298,31 @@ const WorkspaceSetupPage = () => {
         try {
             const batch = writeBatch(db);
             const workspaceRef = doc(collection(db, "workspaces"));
-            batch.set(workspaceRef, {
+            
+            const newWorkspaceData = {
                 name: workspaceName,
                 companyName: userData.companyName || 'Default Company',
                 createdAt: serverTimestamp(),
                 createdBy: user.uid
-            });
+            };
+            batch.set(workspaceRef, newWorkspaceData);
+
             const memberRef = doc(db, "workspaces", workspaceRef.id, "members", user.uid);
             batch.set(memberRef, { role: 'admin', joinedAt: serverTimestamp() });
+            
             const userRef = doc(db, "users", user.uid);
             batch.update(userRef, { workspaceId: workspaceRef.id });
+            
             await batch.commit();
-            // No need to setPage, the listener will pick up the change and re-route
+            
+            // FIX: Manually update the global state to prevent the race condition.
+            // This immediately informs the AppRouter that the workspace exists.
+            setUserData(prev => ({ ...prev, workspaceId: workspaceRef.id }));
+            setWorkspace({ id: workspaceRef.id, ...newWorkspaceData });
+            
+            // Optional but good practice: explicitly navigate after state update.
+            setPage('home');
+
         } catch (err) {
             console.error(err);
             setError('Failed to create workspace. Please try again.');
@@ -931,7 +960,7 @@ const ChatPageContent = () => {
         <div className="flex flex-1 overflow-hidden bg-slate-100">
             <main className="flex-1 w-full mx-auto flex flex-col items-center overflow-hidden">
                 <div className="flex flex-col flex-1 bg-white/50 w-full max-w-5xl my-4 rounded-2xl shadow-lg overflow-hidden">
-                       <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                             {(activeConversationId || isStartingNewChat) && (
                                 <button onClick={() => { setActiveConversationId(null); setIsStartingNewChat(false); }} className="text-sm font-semibold text-indigo-600 hover:underline mb-4">&larr; Back to all conversations</button>
                             )}
@@ -995,8 +1024,8 @@ const ChatPageContent = () => {
                                 </div>
                             )}
                             <div ref={chatEndRef} />
-                         </div>
-                       <div className="p-4 bg-white/80 border-t">
+                           </div>
+                        <div className="p-4 bg-white/80 border-t">
                             <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                                 {canUpload &&
                                 <button type="button" title="Upload More Files" onClick={() => fileInputRef.current.click()} className="p-3 rounded-full hover:bg-slate-200">
@@ -1016,7 +1045,7 @@ const ChatPageContent = () => {
                                 </button>
                             </form>
                              <p className="text-right mt-2 text-sm text-indigo-600">Credits Remaining: {userData?.credits}</p>
-                         </div>
+                           </div>
                 </div>
             </main>
         </div>
