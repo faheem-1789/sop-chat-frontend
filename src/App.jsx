@@ -156,27 +156,25 @@ export default function App() {
 const AppRouter = () => {
     const { user, loading, page, setPage, userData } = useApp();
 
-     useEffect(() => {
-        if (loading) return; 
-
-        if (!user) {
-            const protectedPages = ['chat', 'profile', 'workspace', 'workspace-setup', 'admin'];
-            if (protectedPages.includes(page)) {
-                setPage('login');
-            }
-            return;
-        }
-
-        if (!user.emailVerified) {
-            if (page !== 'verify-email') setPage('verify-email');
-        } else if (!userData?.workspaceId) {
-            if (page !== 'workspace-setup') setPage('workspace-setup');
-        } else {
-            if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
-                setPage('home');
+    useEffect(() => {
+        if (!loading) {
+            if (user) {
+                if (!user.emailVerified) {
+                    if (page !== 'verify-email') setPage('verify-email');
+                } else if (!userData?.workspaceId) {
+                    if (page !== 'workspace-setup') setPage('workspace-setup');
+                } else if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
+                    setPage('home');
+                }
+            } else {
+                const appPages = ['chat', 'profile', 'pricing', 'admin', 'workspace', 'workspace-setup', 'ai-document-analysis-guide'];
+                if (appPages.includes(page)) {
+                    setPage('login');
+                }
             }
         }
     }, [user, userData, loading, page, setPage]);
+
 
     useEffect(() => {
         let descriptionTag = document.querySelector('meta[name="description"]');
@@ -1141,3 +1139,4 @@ const Footer = () => {
         </footer>
     );
 };
+
