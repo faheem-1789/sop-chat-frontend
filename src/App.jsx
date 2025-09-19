@@ -157,9 +157,8 @@ const AppRouter = () => {
     const { user, loading, page, setPage, userData } = useApp();
 
      useEffect(() => {
-        if (loading) return; // Wait until loading is false
+        if (loading) return; 
 
-        // User is not logged in
         if (!user) {
             const protectedPages = ['chat', 'profile', 'workspace', 'workspace-setup', 'admin'];
             if (protectedPages.includes(page)) {
@@ -168,12 +167,11 @@ const AppRouter = () => {
             return;
         }
 
-        // User is logged in
         if (!user.emailVerified) {
             if (page !== 'verify-email') setPage('verify-email');
         } else if (!userData?.workspaceId) {
             if (page !== 'workspace-setup') setPage('workspace-setup');
-        } else { // User is verified and has a workspace
+        } else {
             if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
                 setPage('home');
             }
