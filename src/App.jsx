@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // --- Firebase Configuration ---
 // IMPORTANT: Keep your actual API keys in environment variables for security.
 const firebaseConfig = {
-    apiKey: "AIzaSyAA6U-oPKefpOdy6IsS6wXVmjgCTj3Jlow",
+    apiKey: "AIzaSyAA6U-oPKefpOdyIsS6wXVmjgCTj3Jlow",
     authDomain: "sop-assistant-9dc2a.firebaseapp.com",
     projectId: "sop-assistant-9dc2a",
     storageBucket: "sop-assistant-9dc2a.appspot.com",
@@ -90,17 +90,20 @@ const AppProvider = ({ children }) => {
         let unsubMember = () => {};
 
         const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+            // Clean up previous listeners to prevent memory leaks
             unsubUser();
             unsubWorkspace();
             unsubMember();
             
             setUser(firebaseUser);
+
             if (firebaseUser) {
                 const userDocRef = doc(db, "users", firebaseUser.uid);
                 unsubUser = onSnapshot(userDocRef, (userDoc) => {
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         setUserData(data);
+
                         if (data.workspaceId) {
                             const workspaceDocRef = doc(db, "workspaces", data.workspaceId);
                             unsubWorkspace = onSnapshot(workspaceDocRef, (workspaceDoc) => {
@@ -111,25 +114,33 @@ const AppProvider = ({ children }) => {
                                         if (memberDoc.exists()) {
                                             setUserRole(memberDoc.data().role);
                                         }
+                                        // FIX: Set loading to false only after the deepest data fetch is complete
+                                        setLoading(false);
                                     });
                                 } else {
+                                    // User has a stale workspace ID.
                                     setWorkspace(null);
                                     setUserRole('viewer');
+                                    setLoading(false);
                                 }
                             });
                         } else {
+                            // User exists but has no workspace ID. This is a final state.
                             setWorkspace(null);
                             setUserRole('viewer');
+                            setLoading(false);
                         }
                     } else {
+                        // Auth is ready, but user document doesn't exist (e.g., mid-signup). Final state.
                         setUserData(null);
+                        setLoading(false);
                     }
-                    setLoading(false);
                 }, (error) => {
                     console.error("Error fetching user document:", error);
                     setLoading(false);
                 });
             } else {
+                // User is not logged in. This is a final state.
                 setUserData(null);
                 setChat([]);
                 setActiveConversationId(null);
@@ -315,12 +326,9 @@ const WorkspaceSetupPage = () => {
             
             await batch.commit();
             
-            // FIX: Manually update the global state to prevent the race condition.
-            // This immediately informs the AppRouter that the workspace exists.
+            // This manual update is kept for immediate UI feedback
             setUserData(prev => ({ ...prev, workspaceId: workspaceRef.id }));
             setWorkspace({ id: workspaceRef.id, ...newWorkspaceData });
-            
-            // Optional but good practice: explicitly navigate after state update.
             setPage('home');
 
         } catch (err) {
