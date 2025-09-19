@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -11,9 +11,9 @@ import {
     signOut,
     sendEmailVerification,
     getIdToken
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, addDoc, query, getDocs, orderBy, where, writeBatch, onSnapshot } from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -160,9 +160,11 @@ const AppRouter = () => {
         if (!loading) {
             if (user) {
                 if (!user.emailVerified) {
-                    setPage('verify-email');
-                } else if (['login', 'signup', 'verify-email'].includes(page)) {
-                    setPage(userData?.workspaceId ? 'home' : 'workspace-setup');
+                    if (page !== 'verify-email') setPage('verify-email');
+                } else if (!userData?.workspaceId) {
+                    if (page !== 'workspace-setup') setPage('workspace-setup');
+                } else if (['login', 'signup', 'verify-email', 'workspace-setup'].includes(page)) {
+                    setPage('home');
                 }
             } else {
                 const appPages = ['chat', 'profile', 'pricing', 'admin', 'workspace', 'workspace-setup', 'ai-document-analysis-guide'];
