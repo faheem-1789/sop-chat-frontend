@@ -822,7 +822,7 @@ const AdminPageContent = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
                         <h3 className="text-lg font-bold mb-4">Edit User: {editingUser.email}</h3>
-                  _QUOTED_CONTENT_13_
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
                              <input placeholder="Full Name" value={editingUser.fullName} onChange={e => setEditingUser({...editingUser, fullName: e.target.value})} className="w-full p-2 border rounded" />
                              <input placeholder="Company Name" value={editingUser.companyName} onChange={e => setEditingUser({...editingUser, companyName: e.target.value})} className="w-full p-2 border rounded" />
                              <input placeholder="Department" value={editingUser.department} onChange={e => setEditingUser({...editingUser, department: e.target.value})} className="w-full p-2 border rounded" />
