@@ -217,49 +217,49 @@ const HomePage = () => {
 };
 
 const LoggedInDashboard = () => {
-    const { userData, setPage, sopExists } = useApp();
+    const { userData, setPage, sopExists } = useApp();
 
-    return (
-        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
-            <div className="w-full max-w-4xl">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                    <h1 className="text-4xl font-bold text-slate-800">Welcome back, {userData?.fullName}!</h1>
-                    <p className="mt-2 text-lg text-slate-600">Your AI assistant is ready. What would you like to do?</p>
-                    
-                    <div className="mt-8 text-center">
-                        <button 
-                            onClick={() => setPage('chat')} 
-                            className="px-10 py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
-                            Go to Your Chat Assistant
-                        </button>
-                    </div>
+    return (
+        <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+            <div className="w-full max-w-4xl text-center">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                    <h1 className="text-5xl font-bold tracking-tight text-slate-900">Welcome back, {userData?.fullName}!</h1>
+                    <p className="mt-4 max-w-2xl mx-auto text-xl text-slate-700">Your AI assistant is ready. What would you like to do?</p>
+                    
+                    <div className="mt-10">
+                        <button 
+                            onClick={() => setPage('chat')} 
+                            className="px-10 py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                            Go to Your Chat Assistant
+                        </button>
+                    </div>
 
-                    <div className="mt-12 grid md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-2xl shadow-lg">
-                            <h3 className="font-bold text-slate-800 text-lg">Account Status</h3>
-                            <div className="mt-4 space-y-3 text-slate-600">
-                                <p><strong>Plan:</strong> <span className="capitalize font-medium text-indigo-600">{userData?.version}</span></p>
-                                <p><strong>Credits Remaining:</strong> <span className="font-medium text-indigo-600">{userData?.version === 'pro' ? 'Unlimited' : userData?.credits}</span></p>
-                            </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-lg">
-                            <h3 className="font-bold text-slate-800 text-lg">Knowledge Base</h3>
-                             <div className="mt-4 space-y-3 text-slate-600">
-                                <p><strong>Status:</strong> 
-                                    <span className={`font-medium ${sopExists ? 'text-green-600' : 'text-amber-600'}`}>
-                                        {sopExists ? ' Ready' : ' No Documents Uploaded'}
-                                    </span>
-                                </p>
-                                <button onClick={() => setPage('chat')} className="text-sm font-semibold text-indigo-600 hover:underline">
-                                    {sopExists ? 'Upload More Documents →' : 'Upload Your First Document →'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
-        </div>
-    );
+                    <div className="mt-16 grid md:grid-cols-2 gap-8 text-left">
+                        <div className="bg-white p-8 rounded-xl shadow-md">
+                            <h3 className="font-semibold text-slate-900 text-xl">Account Status</h3>
+                            <div className="mt-4 space-y-3 text-slate-600">
+                                <p><strong>Plan:</strong> <span className="capitalize font-medium text-indigo-600">{userData?.version}</span></p>
+                                <p><strong>Credits Remaining:</strong> <span className="font-medium text-indigo-600">{userData?.version === 'pro' ? 'Unlimited' : userData?.credits}</span></p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-8 rounded-xl shadow-md">
+                            <h3 className="font-semibold text-slate-900 text-xl">Knowledge Base</h3>
+                             <div className="mt-4 space-y-3 text-slate-600">
+                                <p><strong>Status:</strong> 
+                                    <span className={`font-medium ${sopExists ? 'text-green-600' : 'text-amber-600'}`}>
+                                        {sopExists ? ' Ready' : ' No Documents Uploaded'}
+                                    </span>
+                                </p>
+                                <button onClick={() => setPage('chat')} className="text-sm font-semibold text-indigo-600 hover:underline">
+                                    {sopExists ? 'Upload More Documents →' : 'Upload Your First Document →'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        </div>
+    );
 };
 
 
@@ -852,7 +852,7 @@ const AdminPageContent = () => {
                         <h3 className="text-lg font-bold mb-4">Create New User</h3>
                         <form onSubmit={handleCreateUser} className="space-y-4">
                              <input type="email" placeholder="Email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full p-2 border rounded" required />
-                             <input type="password" placeholder="Password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full p-2 border rounded" required />
+                      _QUOTED_CONTENT_3_
                              <input type="text" placeholder="Full Name" value={newUser.fullName} onChange={e => setNewUser({...newUser, fullName: e.target.value})} className="w-full p-2 border rounded" required />
                              <input type="number" placeholder="Credits" value={newUser.credits} onChange={e => setNewUser({...newUser, credits: parseInt(e.target.value, 10)})} className="w-full p-2 border rounded" required />
                             <div className="flex justify-end gap-4">
