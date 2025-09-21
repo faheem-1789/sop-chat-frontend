@@ -14,6 +14,7 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collecti
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Firebase configuration
 const firebaseConfig = {
   // Replace with your Firebase config object
   apiKey: "YOUR_API_KEY",
@@ -24,10 +25,12 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// App Context
 const AppContext = createContext();
 
 const AppProvider = ({ children }) => {
@@ -78,6 +81,7 @@ const AppProvider = ({ children }) => {
 
 const useApp = () => useContext(AppContext);
 
+// Blog Posts Data
 const blogPostsData = [
   { slug: "analyze-sops-with-ai", title: "How to Analyze Documents Easily with AI", excerpt: "Discover how AI can streamline your workflow by reading and interpreting complex documents in seconds...", content: `<p>Business documents are the backbone of any organized company...</p>` },
   { slug: "ai-reads-excel", title: "AI-Powered Excel Analysis", excerpt: "Learn how AI can extract insights from Excel spreadsheets effortlessly.", content: `<p>Excel files are critical for data-driven decisions. Our AI reads and interprets complex spreadsheets...</p>` },
@@ -96,6 +100,7 @@ const blogPostsData = [
   { slug: "top-industries-ai-sops", title: "Top Industries Using AI for SOPs", excerpt: "Explore industries leveraging AI for SOP management.", content: `<p>AI is transforming SOPs across industries. See which sectors benefit most...</p>` }
 ];
 
+// Icons
 const Logo = () => (
   <svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="128" height="128" rx="24" fill="#4338CA"/>
@@ -129,6 +134,7 @@ const DeleteIcon = () => (
   </svg>
 );
 
+// Ad Components
 const LeftAdPanel = () => (
   <div className="ad-container hidden lg:block w-64 bg-white p-4 shadow-md">
     <ins className="adsbygoogle"
@@ -155,6 +161,7 @@ const AdSenseScript = () => (
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478653994670887" crossOrigin="anonymous"></script>
 );
 
+// Header Components
 const Header = () => {
   const { setPage } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -277,6 +284,7 @@ const LoggedInHeader = () => {
   );
 };
 
+// Footer
 const Footer = () => {
   const { setPage } = useApp();
   return (
@@ -315,6 +323,7 @@ const Footer = () => {
   );
 };
 
+// Pages
 const HomePage = () => (
   <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
     <motion.div 
@@ -1040,6 +1049,166 @@ const AdminPage = () => (
   </div>
 );
 
+const WorkspacesPage = () => {
+  const { user, workspaces, setWorkspaces, setActiveWorkspaceId, setPage } = useApp();
+  const [name, setName] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('editor');
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateWorkspace = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      const token = await getIdToken(user);
+      const response = await axios.post(
+        'https://sop-chat-backend.onrender.com/workspaces',
+        { name, companyName },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const newWorkspace = { id: response.data.workspaceId, name, companyName, ownerId: user.uid, members: [{ uid: user.uid, role: 'admin' }] };
+      setWorkspaces([...workspaces, newWorkspace]);
+      setMessage('Workspace created successfully!');
+      setName('');
+      setCompanyName('');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Error creating workspace');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInvite = async (workspaceId) => {
+    if (!user || !inviteEmail) return;
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      const token = await getIdToken(user);
+      await axios.post(
+        `https://sop-chat-backend.onrender.com/workspaces/${workspaceId}/invite`,
+        { email: inviteEmail, role: inviteRole },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMessage('User invited successfully!');
+      setInviteEmail('');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Error inviting user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex-1 w-full mx-auto flex flex-col items-center p-8 bg-slate-100">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl w-full"
+      >
+        <h1 className="text-3xl font-bold text-slate-800 mb-6">Workspaces</h1>
+        {message && <p className="text-green-500 bg-green-100 p-3 rounded-md mb-4">{message}</p>}
+        {error && <p className="text-red-500 bg-red-100 p-3 rounded-md mb-4">{error}</p>}
+        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Create Workspace</h2>
+          <form onSubmit={handleCreateWorkspace} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Workspace Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                placeholder="Workspace Name"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Company Name</label>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                placeholder="Company Name"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400"
+            >
+              {loading ? 'Creating...' : 'Create Workspace'}
+            </button>
+          </form>
+        </div>
+        <h2 className="text-xl font-semibold text-slate-800 mb-4">Your Workspaces</h2>
+        {workspaces.length === 0 ? (
+          <p className="text-slate-600">No workspaces found. Create one to get started!</p>
+        ) : (
+          <div className="space-y-4">
+            {workspaces.map(workspace => (
+              <div key={workspace.id} className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800">{workspace.name}</h3>
+                    <p className="text-slate-600">{workspace.companyName}</p>
+                    <p className="text-sm text-slate-500">Role: {workspace.members.find(m => m.uid === user.uid)?.role}</p>
+                  </div>
+                  <button
+                    onClick={() => { setActiveWorkspaceId(workspace.id); setPage('chat'); }}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700"
+                  >
+                    Open Workspace
+                  </button>
+                </div>
+                {workspace.ownerId === user.uid && (
+                  <div className="mt-4 border-t pt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Invite Member</h4>
+                    <div className="flex space-x-4">
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                        placeholder="Invitee Email"
+                      />
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="editor">Editor</option>
+                        <option value="viewer">Viewer</option>
+                      </select>
+                      <button
+                        onClick={() => handleInvite(workspace.id)}
+                        disabled={loading || !inviteEmail}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400"
+                      >
+                        {loading ? 'Inviting...' : 'Invite'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 const ChatPageContent = () => {
   const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, activeWorkspaceId, setPage } = useApp();
   const isAdmin = userData?.role === 'admin';
@@ -1057,8 +1226,8 @@ const ChatPageContent = () => {
   const API_URL = "https://sop-chat-backend.onrender.com";
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
-
   const [workspaceRole, setWorkspaceRole] = useState(null);
+
   useEffect(() => {
     if (activeWorkspaceId && user) {
       const fetchRole = async () => {
@@ -1146,7 +1315,6 @@ const ChatPageContent = () => {
       setToast({ show: true, message: 'Viewers cannot upload files.', type: 'error' });
       return;
     }
-
     const loadingSetter = isMoreUpload ? setIsUploadingMore : setLoadingUpload;
     loadingSetter(true);
     const wasInitialUpload = !sopExists;
@@ -1158,6 +1326,593 @@ const ChatPageContent = () => {
       for (const file of filesToUpload) {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await axios.post(`${API_URL}/upload/`, formData, {
+        const res = await axios.post(`${API_URL}/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` },
-          params: activeWorkspace
+          params: activeWorkspaceId ? { workspaceId: activeWorkspaceId } : {}
+        });
+        summary = res.data.summary;
+      }
+      setSopExists(true);
+      if (wasInitialUpload) {
+        newMessages.push({ role: 'system', content: 'Document uploaded successfully! You can now ask questions about your document.' });
+      }
+      if (summary) {
+        newMessages.push({ role: 'system', content: summary });
+      }
+      setChat([...chat, ...newMessages]);
+      setFiles([]);
+      fileInputRef.current.value = null;
+      if (userData.credits > 0) {
+        const newCredits = userData.credits - filesToUpload.length;
+        setUserData({ ...userData, credits: newCredits });
+        await updateDoc(doc(db, 'users', user.uid), { credits: newCredits });
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      setToast({ show: true, message: `Error uploading files: ${error.response?.data?.detail || error.message}`, type: 'error' });
+    } finally {
+      loadingSetter(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim() || !user || loadingSend || (isBasicVersion && userData.credits <= 0)) return;
+    if (workspaceRole === 'viewer') {
+      setToast({ show: true, message: 'Viewers cannot send messages.', type: 'error' });
+      return;
+    }
+    setLoadingSend(true);
+    const newMessages = [...chat, { role: 'user', content: message }];
+    setChat(newMessages);
+
+    try {
+      const token = await getIdToken(user);
+      const history = newMessages.map(msg => ({
+        role: msg.role,
+        content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+      }));
+      const res = await axios.post(`${API_URL}/chat`, { prompt: message, history }, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: activeWorkspaceId ? { workspaceId: activeWorkspaceId } : {}
+      });
+      const botMessage = { role: 'assistant', content: res.data.response };
+      setChat([...newMessages, botMessage]);
+
+      const convRef = activeWorkspaceId 
+        ? collection(db, 'workspaces', activeWorkspaceId, 'conversations')
+        : collection(db, 'users', user.uid, 'conversations');
+      const conversationId = activeConversationId || (await addDoc(convRef, {
+        messages: [...newMessages, botMessage],
+        lastUpdated: serverTimestamp()
+      })).id;
+      if (!activeConversationId) {
+        setActiveConversationId(conversationId);
+      } else {
+        await updateDoc(doc(convRef, activeConversationId), {
+          messages: [...newMessages, botMessage],
+          lastUpdated: serverTimestamp()
+        });
+      }
+
+      if (isBasicVersion && userData.credits > 0) {
+        const newCredits = userData.credits - 1;
+        setUserData({ ...userData, credits: newCredits });
+        await updateDoc(doc(db, 'users', user.uid), { credits: newCredits });
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setToast({ show: true, message: `Error: ${error.response?.data?.detail || error.message}`, type: 'error' });
+    } finally {
+      setLoadingSend(false);
+      setMessage("");
+    }
+  };
+
+  const handleConversationSelect = async (conversationId) => {
+    setActiveConversationId(conversationId);
+    const convRef = activeWorkspaceId 
+      ? doc(db, 'workspaces', activeWorkspaceId, 'conversations', conversationId)
+      : doc(db, 'users', user.uid, 'conversations', conversationId);
+    const convDoc = await getDoc(convRef);
+    if (convDoc.exists()) {
+      setChat(convDoc.data().messages || []);
+    }
+  };
+
+  const handleNewConversation = () => {
+    setActiveConversationId(null);
+    setChat([]);
+  };
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
+  if (loadingStatus) {
+    return (
+      <div className="flex-1 w-full mx-auto flex flex-col items-center justify-center p-8 bg-slate-100">
+        <p className="text-slate-600">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 w-full mx-auto flex p-8 bg-slate-100">
+      <LeftAdPanel />
+      <div className="flex-1 max-w-4xl mx-4">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-slate-800">{activeWorkspaceId ? 'Workspace Chat' : 'Chat'}</h2>
+          <button onClick={handleNewConversation} className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700">New Conversation</button>
+        </div>
+        {!sopExists && (
+          <div className="bg-white p-8 rounded-2xl shadow-lg mb-6 text-center">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Upload a Document</h3>
+            <p className="text-slate-600 mb-4">Upload a PDF, PPTX, DOCX, XLSX, or XLS file (up to 10MB) to start analyzing.</p>
+            <input
+              type="file"
+              accept=".pdf,.pptx,.docx,.xlsx,.xls"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <button
+              onClick={() => fileInputRef.current.click()}
+              disabled={loadingUpload || workspaceRole === 'viewer'}
+             className="px-6 py-3 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105"
+
+const ChatPageContent = () => {
+  const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, activeWorkspaceId, setPage } = useApp();
+  const isAdmin = userData?.role === 'admin';
+  const isBasicVersion = userData?.version === 'basic';
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [files, setFiles] = useState([]);
+  const [message, setMessage] = useState("");
+  const [loadingUpload, setLoadingUpload] = useState(false);
+  const [loadingSend, setLoadingSend] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [isUploadingMore, setIsUploadingMore] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const API_URL = "https://sop-chat-backend.onrender.com";
+  const chatEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [workspaceRole, setWorkspaceRole] = useState(null);
+
+  useEffect(() => {
+    if (activeWorkspaceId && user) {
+      const fetchRole = async () => {
+        const workspaceDoc = await getDoc(doc(db, 'workspaces', activeWorkspaceId));
+        if (workspaceDoc.exists()) {
+          const members = workspaceDoc.data().members || [];
+          const member = members.find(m => m.uid === user.uid);
+          setWorkspaceRole(member?.role || 'viewer');
+        }
+      };
+      fetchRole();
+    } else {
+      setWorkspaceRole('admin');
+    }
+  }, [activeWorkspaceId, user]);
+
+  useEffect(() => {
+    if (user && activeConversationId === null) {
+      setLoadingConversations(true);
+      const convRef = activeWorkspaceId 
+        ? collection(db, 'workspaces', activeWorkspaceId, 'conversations')
+        : collection(db, 'users', user.uid, 'conversations');
+      const q = query(convRef, orderBy("lastUpdated", "desc"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const convList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setConversations(convList);
+        setLoadingConversations(false);
+      }, (error) => {
+        console.error("Firestore Real-Time Error:", error);
+        setLoadingConversations(false);
+      });
+      return () => unsubscribe();
+    }
+  }, [user, activeConversationId, activeWorkspaceId]);
+
+  useEffect(() => {
+    const checkSopStatus = async () => {
+      if (!user) return;
+      setLoadingStatus(true);
+      try {
+        const token = await getIdToken(user);
+        const res = await axios.get(`${API_URL}/status`, { 
+          headers: { Authorization: `Bearer ${token}` },
+          params: activeWorkspaceId ? { workspaceId: activeWorkspaceId } : {}
+        });
+        setSopExists(res.data.sop_exists);
+      } catch (error) {
+        console.error("Could not check SOP status", error);
+        setSopExists(false);
+      } finally {
+        setLoadingStatus(false);
+      }
+    };
+    checkSopStatus();
+  }, [user, setSopExists, activeWorkspaceId]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat]);
+
+  const handleFileChange = (e) => {
+    if (workspaceRole === 'viewer') {
+      setToast({ show: true, message: 'Viewers cannot upload files.', type: 'error' });
+      return;
+    }
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length === 0) return;
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const invalidFiles = selectedFiles.filter(file => !validTypes.includes(file.type) || file.size > maxSize);
+    if (invalidFiles.length > 0) {
+      setToast({ show: true, message: 'Invalid files detected. Only PDF, PPTX, DOCX, XLSX, XLS files up to 10MB are allowed.', type: 'error' });
+      return;
+    }
+    if (sopExists) {
+      handleUpload(selectedFiles, true);
+    } else {
+      setFiles(prev => [...prev, ...selectedFiles]);
+    }
+  };
+
+  const handleUpload = async (filesToUpload, isMoreUpload = false) => {
+    if (filesToUpload.length === 0 || !user) return;
+    if (workspaceRole === 'viewer') {
+      setToast({ show: true, message: 'Viewers cannot upload files.', type: 'error' });
+      return;
+    }
+    const loadingSetter = isMoreUpload ? setIsUploadingMore : setLoadingUpload;
+    loadingSetter(true);
+    const wasInitialUpload = !sopExists;
+    let newMessages = [];
+
+    try {
+      const token = await getIdToken(user);
+      let summary = null;
+      for (const file of filesToUpload) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await axios.post(`${API_URL}/upload`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` },
+          params: activeWorkspaceId ? { workspaceId: activeWorkspaceId } : {}
+        });
+        summary = res.data.summary;
+      }
+      setSopExists(true);
+      if (wasInitialUpload) {
+        newMessages.push({ role: 'system', content: 'Document uploaded successfully! You can now ask questions about your document.' });
+      }
+      if (summary) {
+        newMessages.push({ role: 'system', content: summary });
+      }
+      setChat([...chat, ...newMessages]);
+      setFiles([]);
+      fileInputRef.current.value = null;
+      if (userData.credits > 0) {
+        const newCredits = userData.credits - filesToUpload.length;
+        setUserData({ ...userData, credits: newCredits });
+        await updateDoc(doc(db, 'users', user.uid), { credits: newCredits });
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      setToast({ show: true, message: `Error uploading files: ${error.response?.data?.detail || error.message}`, type: 'error' });
+    } finally {
+      loadingSetter(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim() || !user || loadingSend || (isBasicVersion && userData.credits <= 0)) return;
+    if (workspaceRole === 'viewer') {
+      setToast({ show: true, message: 'Viewers cannot send messages.', type: 'error' });
+      return;
+    }
+    setLoadingSend(true);
+    const newMessages = [...chat, { role: 'user', content: message }];
+    setChat(newMessages);
+
+    try {
+      const token = await getIdToken(user);
+      const history = newMessages.map(msg => ({
+        role: msg.role,
+        content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+      }));
+      const res = await axios.post(`${API_URL}/chat`, { prompt: message, history }, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: activeWorkspaceId ? { workspaceId: activeWorkspaceId } : {}
+      });
+      const botMessage = { role: 'assistant', content: res.data.response };
+      setChat([...newMessages, botMessage]);
+
+      const convRef = activeWorkspaceId 
+        ? collection(db, 'workspaces', activeWorkspaceId, 'conversations')
+        : collection(db, 'users', user.uid, 'conversations');
+      const conversationId = activeConversationId || (await addDoc(convRef, {
+        messages: [...newMessages, botMessage],
+        lastUpdated: serverTimestamp()
+      })).id;
+      if (!activeConversationId) {
+        setActiveConversationId(conversationId);
+      } else {
+        await updateDoc(doc(convRef, activeConversationId), {
+          messages: [...newMessages, botMessage],
+          lastUpdated: serverTimestamp()
+        });
+      }
+
+      if (isBasicVersion && userData.credits > 0) {
+        const newCredits = userData.credits - 1;
+        setUserData({ ...userData, credits: newCredits });
+        await updateDoc(doc(db, 'users', user.uid), { credits: newCredits });
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setToast({ show: true, message: `Error: ${error.response?.data?.detail || error.message}`, type: 'error' });
+    } finally {
+      setLoadingSend(false);
+      setMessage("");
+    }
+  };
+
+  const handleConversationSelect = async (conversationId) => {
+    setActiveConversationId(conversationId);
+    const convRef = activeWorkspaceId 
+      ? doc(db, 'workspaces', activeWorkspaceId, 'conversations', conversationId)
+      : doc(db, 'users', user.uid, 'conversations', conversationId);
+    const convDoc = await getDoc(convRef);
+    if (convDoc.exists()) {
+      setChat(convDoc.data().messages || []);
+    }
+  };
+
+  const handleNewConversation = () => {
+    setActiveConversationId(null);
+    setChat([]);
+  };
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
+  if (loadingStatus) {
+    return (
+      <div className="flex-1 w-full mx-auto flex flex-col items-center justify-center p-8 bg-slate-100">
+        <p className="text-slate-600">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 w-full mx-auto flex p-8 bg-slate-100">
+      <LeftAdPanel />
+      <div className="flex-1 max-w-4xl mx-4">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-slate-800">{activeWorkspaceId ? 'Workspace Chat' : 'Chat'}</h2>
+          <button onClick={handleNewConversation} className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transform transition-transform hover:scale-105">
+            New Conversation
+          </button>
+        </div>
+        {!sopExists && (
+          <div className="bg-white p-8 rounded-2xl shadow-lg mb-6 text-center">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Upload a Document</h3>
+            <p className="text-slate-600 mb-4">Upload a PDF, PPTX, DOCX, XLSX, or XLS file (up to 10MB) to start analyzing.</p>
+            <input
+              type="file"
+              accept=".pdf,.pptx,.docx,.xlsx,.xls"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <button
+              onClick={() => fileInputRef.current.click()}
+              disabled={loadingUpload || workspaceRole === 'viewer'}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105"
+            >
+              {loadingUpload ? 'Uploading...' : 'Upload Document'}
+            </button>
+            {files.length > 0 && (
+              <div className="mt-4">
+                <p className="text-slate-600 mb-2">Selected Files:</p>
+                <ul className="text-sm text-slate-600">
+                  {files.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleUpload(files)}
+                  disabled={loadingUpload || workspaceRole === 'viewer'}
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 disabled:bg-green-400 transform transition-transform hover:scale-105"
+                >
+                  {loadingUpload ? 'Processing...' : 'Confirm Upload'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        {sopExists && (
+          <>
+            <div className="bg-white p-6 rounded-2xl shadow-lg mb-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-slate-800">Conversations</h3>
+                {isAdmin && (
+                  <button
+                    onClick={() => setPage('admin')}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transform transition-transform hover:scale-105"
+                  >
+                    Admin Dashboard
+                  </button>
+                )}
+              </div>
+              {loadingConversations ? (
+                <p className="text-slate-600 mt-4">Loading conversations...</p>
+              ) : conversations.length === 0 ? (
+                <p className="text-slate-600 mt-4">No conversations yet.</p>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  {conversations.map(conv => (
+                    <button
+                      key={conv.id}
+                      onClick={() => handleConversationSelect(conv.id)}
+                      className={`w-full text-left p-3 rounded-md ${activeConversationId === conv.id ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-600'} hover:bg-indigo-50 transition-colors`}
+                    >
+                      Conversation {conv.id.slice(0, 8)}... ({new Date(conv.lastUpdated?.seconds * 1000).toLocaleString()})
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg flex-1 flex flex-col">
+              <div className="flex-1 overflow-y-auto max-h-[60vh] mb-4">
+                {chat.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`inline-block p-4 rounded-lg max-w-[70%] ${
+                        msg.role === 'user'
+                          ? 'bg-indigo-600 text-white'
+                          : msg.role === 'system'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-slate-100 text-slate-800'
+                      }`}
+                    >
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+              {isBasicVersion && (
+                <p className="text-sm text-slate-600 mb-2">
+                  Credits remaining: {userData.credits} {userData.credits <= 0 && '(Upgrade to continue)'}
+                </p>
+              )}
+              <div className="flex space-x-2">
+                <input
+                  type="file"
+                  accept=".pdf,.pptx,.docx,.xlsx,.xls"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+                <button
+                  onClick={() => fileInputRef.current.click()}
+                  disabled={isUploadingMore || workspaceRole === 'viewer'}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105"
+                >
+                  {isUploadingMore ? 'Uploading...' : 'Upload More'}
+                </button>
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Ask about your document..."
+                  disabled={loadingSend || (isBasicVersion && userData.credits <= 0) || workspaceRole === 'viewer'}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-50"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={loadingSend || !message.trim() || (isBasicVersion && userData.credits <= 0) || workspaceRole === 'viewer'}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105"
+                >
+                  {loadingSend ? 'Sending...' : 'Send'}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+        {toast.show && (
+          <div className={`fixed bottom-4 right-4 p-4 rounded-md shadow-lg ${toast.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+            {toast.message}
+          </div>
+        )}
+      </div>
+      <RightAdPanel />
+    </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  const { user, userData, loading, page } = useApp();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen bg-slate-100">Loading...</div>;
+  }
+
+  const renderPage = () => {
+    if (user) {
+      switch (page) {
+        case 'chat':
+          return <ChatPageContent />;
+        case 'profile':
+          return <ProfilePageContent />;
+        case 'pricing':
+          return <PricingPage />;
+        case 'admin':
+          return userData?.role === 'admin' ? <AdminPage /> : <LoggedInDashboard />;
+        case 'workspaces':
+          return <WorkspacesPage />;
+        default:
+          return <LoggedInDashboard />;
+      }
+    } else {
+      if (page.startsWith('blog/')) {
+        return <BlogPostPage />;
+      }
+      switch (page) {
+        case 'home':
+          return <HomePage />;
+        case 'blog':
+          return <BlogPage />;
+        case 'faq':
+          return <FAQPage />;
+        case 'about':
+          return <AboutPage />;
+        case 'contact':
+          return <ContactPage />;
+        case 'privacy':
+          return <PrivacyPolicyPage />;
+        case 'terms':
+          return <TermsOfServicePage />;
+        case 'login':
+          return <LoginPage />;
+        case 'signup':
+          return <SignUpPage />;
+        case 'verify-email':
+          return <VerifyEmailPage />;
+        default:
+          return <HomePage />;
+      }
+    }
+  };
+
+  return (
+    <AppProvider>
+      <div className="flex flex-col min-h-screen">
+        <AdSenseScript />
+        {user ? <LoggedInHeader /> : <Header />}
+        {renderPage()}
+        <Footer />
+      </div>
+    </AppProvider>
+  );
+};
+
+export default App;
