@@ -37,7 +37,7 @@ const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(() => localStorage.getItem('currentPage') || 'home');
+  const [page, setPage] = useState(() => localStorage.getItem("currentPage") || "home");
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [chat, setChat] = useState([]);
   const [sopExists, setSopExists] = useState(false);
@@ -45,37 +45,77 @@ const AppProvider = ({ children }) => {
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserData(userDoc.data());
-          const workspaceIds = userDoc.data().workspaces || [];
-          const workspacePromises = workspaceIds.map(id => getDoc(doc(db, 'workspaces', id)));
-          const workspaceDocs = await Promise.all(workspacePromises);
-          setWorkspaces(workspaceDocs.map(doc => ({ id: doc.id, ...doc.data() })));
-        }
-      } else {
-        setUserData(null);
-        setChat([]);
-        setActiveConversationId(null);
-        setWorkspaces([]);
-        setActiveWorkspaceId(null);
-        localStorage.setItem('currentPage', 'home');
-        setPage('home');
-      }
+    console.log("Setting up auth listener, auth:", !!auth);
+    if (!auth || !db) {
+      console.error("Auth or DB not available, skipping auth listener");
       setLoading(false);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("Auth state changed:", firebaseUser);
+      try {
+        setUser(firebaseUser);
+        if (firebaseUser) {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            console.log("User data loaded:", userDoc.data());
+            setUserData(userDoc.data());
+            const workspaceIds = userDoc.data().workspaces || [];
+            const workspacePromises = workspaceIds.map((id) =>
+              getDoc(doc(db, "workspaces", id))
+            );
+            const workspaceDocs = await Promise.all(workspacePromises);
+            setWorkspaces(workspaceDocs.map((doc) => ({ id: doc.id, ...doc.data() })));
+          } else {
+            console.log("No user document found");
+          }
+        } else {
+          console.log("No user logged in");
+          setUserData(null);
+          setChat([]);
+          setActiveConversationId(null);
+          setWorkspaces([]);
+          setActiveWorkspaceId(null);
+          localStorage.setItem("currentPage", "home");
+          setPage("home");
+        }
+      } catch (error) {
+        console.error("Error in auth state change:", error);
+      } finally {
+        console.log("Setting loading to false");
+        setLoading(false);
+      }
     });
-    return () => unsubscribe();
+    return () => {
+      console.log("Cleaning up auth listener");
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('currentPage', page);
+    localStorage.setItem("currentPage", page);
   }, [page]);
 
-  const value = { user, userData, setUserData, loading, page, setPage, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, workspaces, setWorkspaces, activeWorkspaceId, setActiveWorkspaceId };
+  const value = {
+    user,
+    userData,
+    setUserData,
+    loading,
+    page,
+    setPage,
+    chat,
+    setChat,
+    sopExists,
+    setSopExists,
+    activeConversationId,
+    setActiveConversationId,
+    workspaces,
+    setWorkspaces,
+    activeWorkspaceId,
+    setActiveWorkspaceId,
+  };
+  console.log("AppProvider value:", value);
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
