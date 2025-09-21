@@ -1,12 +1,11 @@
-// index.js
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
-import { AppProvider } from './App'; // Adjust import path as needed
+import { AppProvider } from './App';
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <AppProvider>
     <App />
-  </AppProvider>,
-  document.getElementById('root')
+  </AppProvider>
 );
