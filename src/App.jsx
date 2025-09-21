@@ -318,18 +318,16 @@ const WorkspaceSetupPage = () => {
             
             await batch.commit();
             
-            // FIX: Removed all manual state updates (setUserData, setWorkspace, setPage).
-            // The onSnapshot listener in AppProvider is now the single source of truth.
-            // It will detect the database change and update the app state correctly,
-            // which then triggers the AppRouter to navigate automatically.
+            // FIX: Removed all manual state updates. The onSnapshot listener in AppProvider
+            // is now the single source of truth and will handle all UI updates and redirects.
             
         } catch (err) {
             console.error(err);
             setError('Failed to create workspace. Please try again.');
-            // Stop the local loading indicator on error.
+            // Stop the local loading indicator only on error.
             setLoading(false);
         }
-        // On success, we keep the loading indicator on. The component will be
+        // On success, the loading spinner remains active. The component will be
         // unmounted automatically when the global state updates and AppRouter redirects.
     };
 
@@ -408,7 +406,7 @@ const WorkspacePage = () => {
                                 </div>
                                 <div className="flex items-center gap-4">
                                      <span className="px-3 py-1 text-xs font-semibold text-slate-600 bg-slate-100 rounded-full capitalize">{member.role}</span>
-                                     {userRole === 'admin' && member.uid !== user.uid && (
+                                     {userRole === 'admin' && user && member.uid !== user.uid && (
                                         <button className="text-sm text-red-500 hover:underline">Remove</button>
                                      )}
                                 </div>
@@ -1173,3 +1171,4 @@ const Footer = () => {
         </footer>
     );
 };
+
