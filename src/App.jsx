@@ -1462,7 +1462,7 @@ const ChatPageContent = () => {
             <button
               onClick={() => fileInputRef.current.click()}
               disabled={loadingUpload || workspaceRole === 'viewer'}
-             className="px-6 py-3 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105"
+             className="px-6 py-3 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transform transition-transform hover:scale-105" />
 
 const ChatPageContent = () => {
   const { user, userData, setUserData, chat, setChat, sopExists, setSopExists, activeConversationId, setActiveConversationId, activeWorkspaceId, setPage } = useApp();
