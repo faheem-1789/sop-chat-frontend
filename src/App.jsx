@@ -1653,7 +1653,6 @@ const App = () => {
   return (
     <AppProvider>
       <div className="flex flex-col min-h-screen">
-        <AdSenseScript />
         {user ? <LoggedInHeader /> : <Header />}
         {renderPage()}
         <Footer />
